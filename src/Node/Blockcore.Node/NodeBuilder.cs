@@ -18,6 +18,7 @@ using Blockcore.Features.WalletWatchOnly;
 using Blockcore.Networks.X1.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Blockcore.Networks.ZEEV.Components;
 
 namespace Blockcore.Node
 {
@@ -58,6 +59,9 @@ namespace Blockcore.Node
                 case "SBC":
                 case "RSC":
                     nodeBuilder.UsePosConsensus().AddPowPosMining().UseColdStakingWallet();
+                    break;
+                case "ZEEV":
+                    nodeBuilder.UseZEEVConsensus().UseWallet();
                     break;
             }
 

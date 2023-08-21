@@ -379,7 +379,7 @@ namespace Blockcore.NBitcoin
             value = valueTemp;
         }
 
-        private void ReadWriteBytes(ref byte[] data, int offset = 0, int count = -1)
+        public void ReadWriteBytes(ref byte[] data, int offset = 0, int count = -1)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
