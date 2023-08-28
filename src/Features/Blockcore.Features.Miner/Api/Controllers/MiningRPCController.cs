@@ -242,7 +242,7 @@ namespace Blockcore.Features.Miner.Api.Controllers
             {
                 pblockTemplate = this.blockProvider.BuildPowBlock(chainTip, new Script());
                 var block = pblockTemplate.Block;
-                var powCoinviewRule = this.ConsensusManager.ConsensusRules.GetRule<CheckPowUtxosetPowRule>();
+                var powCoinviewRule = this.ConsensusManager.ConsensusRules.GetRule<CheckUtxosetRule>();
 
                 if (block != null)
                 {
