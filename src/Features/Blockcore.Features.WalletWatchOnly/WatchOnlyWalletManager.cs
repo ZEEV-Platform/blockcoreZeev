@@ -168,59 +168,57 @@ namespace Blockcore.Features.WalletWatchOnly
                 var prevTransaction = this.network.CreateTransaction(prevTransactionData.Hex);
 
                 // Check if the previous transaction's outputs contain one of our addresses.
-                foreach (TxOut prevOutput in prevTransaction.Outputs)
+                var txPrevOut = prevTransaction.Outputs[input.PrevOut.N];
+                this.Wallet.WatchedAddresses.TryGetValue(txPrevOut.ScriptPubKey.ToString(), out WatchedAddress addressInWallet);
+
+                if (addressInWallet != null)
                 {
-                    this.Wallet.WatchedAddresses.TryGetValue(prevOutput.ScriptPubKey.ToString(), out WatchedAddress addressInWallet);
+                    // Retrieve a transaction, if present.
+                    addressInWallet.Transactions.TryGetValue(transactionHash.ToString(), out WatchTransactionData existingTransaction);
 
-                    if (addressInWallet != null)
+                    if (existingTransaction == null)
                     {
-                        // Retrieve a transaction, if present.
-                        addressInWallet.Transactions.TryGetValue(transactionHash.ToString(), out WatchTransactionData existingTransaction);
-
-                        if (existingTransaction == null)
+                        var newTransaction = new WatchTransactionData
                         {
-                            var newTransaction = new WatchTransactionData
-                            {
-                                Id = transactionHash,
-                                Hex = transaction.ToHex(),
-                                BlockHash = block?.GetHash()
-                            };
+                            Id = transactionHash,
+                            Hex = transaction.ToHex(),
+                            BlockHash = block?.GetHash()
+                        };
 
-                            // Add the Merkle proof to the transaction.
-                            if (block != null)
-                            {
-                                newTransaction.MerkleProof = new MerkleBlock(block, new[] { transactionHash }).PartialMerkleTree;
-                            }
-
-                            addressInWallet.Transactions.TryAdd(transactionHash.ToString(), newTransaction);
-
-                            // Update the lookup cache with the new transaction information.
-                            // Since the WO record is new it probably isn't in the lookup cache.
-                            this.txLookup.TryAdd(newTransaction.Id, newTransaction);
-                        }
-                        else
+                        // Add the Merkle proof to the transaction.
+                        if (block != null)
                         {
-                            // If there was a transaction already present in the WO wallet,
-                            // it is most likely that it has now been confirmed in a block.
-                            // Therefore, update the transaction record with the hash of the
-                            // block containing the transaction.
-                            if (existingTransaction.BlockHash == null)
-                                existingTransaction.BlockHash = block?.GetHash();
-
-                            if (block != null && existingTransaction.MerkleProof == null)
-                            {
-                                // Add the Merkle proof now that the transaction is confirmed in a block.
-                                existingTransaction.MerkleProof = new MerkleBlock(block, new[] { transactionHash }).PartialMerkleTree;
-                            }
-
-                            // Update the lookup cache with the new transaction information.
-                            // Since the WO record was not new it probably is already in the lookup cache.
-                            // Therefore, unconditionally update it.
-                            this.txLookup.AddOrUpdate(existingTransaction.Id, existingTransaction, (key, oldValue) => existingTransaction);
+                            newTransaction.MerkleProof = new MerkleBlock(block, new[] { transactionHash }).PartialMerkleTree;
                         }
 
-                        this.SaveWatchOnlyWallet();
+                        addressInWallet.Transactions.TryAdd(transactionHash.ToString(), newTransaction);
+
+                        // Update the lookup cache with the new transaction information.
+                        // Since the WO record is new it probably isn't in the lookup cache.
+                        this.txLookup.TryAdd(newTransaction.Id, newTransaction);
                     }
+                    else
+                    {
+                        // If there was a transaction already present in the WO wallet,
+                        // it is most likely that it has now been confirmed in a block.
+                        // Therefore, update the transaction record with the hash of the
+                        // block containing the transaction.
+                        if (existingTransaction.BlockHash == null)
+                            existingTransaction.BlockHash = block?.GetHash();
+
+                        if (block != null && existingTransaction.MerkleProof == null)
+                        {
+                            // Add the Merkle proof now that the transaction is confirmed in a block.
+                            existingTransaction.MerkleProof = new MerkleBlock(block, new[] { transactionHash }).PartialMerkleTree;
+                        }
+
+                        // Update the lookup cache with the new transaction information.
+                        // Since the WO record was not new it probably is already in the lookup cache.
+                        // Therefore, unconditionally update it.
+                        this.txLookup.AddOrUpdate(existingTransaction.Id, existingTransaction, (key, oldValue) => existingTransaction);
+                    }
+
+                    this.SaveWatchOnlyWallet();
                 }
             }
 

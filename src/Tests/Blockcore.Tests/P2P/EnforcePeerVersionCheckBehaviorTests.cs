@@ -15,7 +15,7 @@ using Blockcore.Tests.Common;
 using Blockcore.Tests.Common.Logging;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NBitcoin;
+using Blockcore.NBitcoin;
 using Xunit;
 
 namespace Blockcore.Tests.P2P

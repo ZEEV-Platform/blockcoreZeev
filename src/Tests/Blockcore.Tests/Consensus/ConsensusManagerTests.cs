@@ -7,7 +7,7 @@ using Blockcore.Consensus.Chain;
 using Blockcore.Consensus.Validators;
 using Blockcore.NBitcoin;
 using Moq;
-using NBitcoin;
+using Blockcore.NBitcoin;
 using Xunit;
 
 namespace Blockcore.Tests.Consensus

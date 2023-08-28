@@ -8,7 +8,7 @@ using Blockcore.NBitcoin;
 using Blockcore.Utilities;
 using FluentAssertions;
 using Moq;
-using NBitcoin;
+using Blockcore.NBitcoin;
 using Xunit;
 
 namespace Blockcore.Tests.Consensus

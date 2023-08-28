@@ -28,6 +28,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
+
 namespace Blockcore.Features.Wallet.Tests
 {
     public class WalletControllerTest : LogsTestBase
@@ -725,7 +726,7 @@ namespace Blockcore.Features.Wallet.Tests
                 Name = "myWallet",
                 Network = NetworkHelpers.GetNetwork("mainnet"),
                 CreationTime = new DateTime(2017, 6, 19, 1, 1, 1),
-                AccountsRoot = new List<AccountRoot> {
+                AccountsRoot = new List<IAccountRoot> {
                     new AccountRoot()
                     {
                         CoinType = this.Network.Consensus.CoinType,
@@ -868,7 +869,7 @@ namespace Blockcore.Features.Wallet.Tests
             var account = new HdAccount { ExternalAddresses = addresses };
             wallet.AccountsRoot.Add(new AccountRoot()
             {
-                Accounts = new List<HdAccount> { account }
+                Accounts = new List<IHdAccount> { account }
             });
 
             List<FlatHistory> flat = addresses.SelectMany(s => store.GetForAddress(s.Address).Select(t => new FlatHistory { Address = s, Transaction = t })).ToList();
@@ -925,7 +926,7 @@ namespace Blockcore.Features.Wallet.Tests
             var account = new HdAccount { ExternalAddresses = addresses };
             wallet.AccountsRoot.Add(new AccountRoot()
             {
-                Accounts = new List<HdAccount> { account }
+                Accounts = new List<IHdAccount> { account }
             });
 
             List<FlatHistory> flat = addresses.SelectMany(s => store.GetForAddress(s.Address).Select(t => new FlatHistory { Address = s, Transaction = t })).ToList();
@@ -1001,7 +1002,7 @@ namespace Blockcore.Features.Wallet.Tests
             var account = new HdAccount { ExternalAddresses = addresses };
             wallet.AccountsRoot.Add(new AccountRoot()
             {
-                Accounts = new List<HdAccount> { account }
+                Accounts = new List<IHdAccount> { account }
             });
 
             List<FlatHistory> flat = addresses.SelectMany(s => store.GetForAddress(s.Address).Select(t => new FlatHistory { Address = s, Transaction = t })).ToList();
@@ -1102,7 +1103,7 @@ namespace Blockcore.Features.Wallet.Tests
             var account = new HdAccount { ExternalAddresses = addresses };
             wallet.AccountsRoot.Add(new AccountRoot()
             {
-                Accounts = new List<HdAccount> { account }
+                Accounts = new List<IHdAccount> { account }
             });
 
             List<FlatHistory> flat = addresses.SelectMany(s => store.GetForAddress(s.Address).Select(t => new FlatHistory { Address = s, Transaction = t })).ToList();
@@ -1212,7 +1213,7 @@ namespace Blockcore.Features.Wallet.Tests
             var account = new HdAccount { ExternalAddresses = addresses };
             wallet.AccountsRoot.Add(new AccountRoot()
             {
-                Accounts = new List<HdAccount> { account }
+                Accounts = new List<IHdAccount> { account }
             });
 
             List<FlatHistory> flat = addresses.SelectMany(s => store.GetForAddress(s.Address).Select(t => new FlatHistory { Address = s, Transaction = t })).ToList();
@@ -1615,7 +1616,7 @@ namespace Blockcore.Features.Wallet.Tests
             Types.Wallet wallet = WalletTestsHelpers.CreateWallet(walletName);
             wallet.AccountsRoot.Add(new AccountRoot()
             {
-                Accounts = new List<HdAccount> {
+                Accounts = new List<IHdAccount> {
                     new HdAccount
                     {
                         ExternalAddresses = receiveAddresses,
@@ -1661,7 +1662,7 @@ namespace Blockcore.Features.Wallet.Tests
             Types.Wallet wallet = WalletTestsHelpers.CreateWallet(walletName);
             wallet.AccountsRoot.Add(new AccountRoot()
             {
-                Accounts = new List<HdAccount> { new HdAccount
+                Accounts = new List<IHdAccount> { new HdAccount
                 {
                     ExternalAddresses = new List<HdAddress>(),
                     InternalAddresses = new List<HdAddress>(),
@@ -1993,7 +1994,7 @@ namespace Blockcore.Features.Wallet.Tests
 
             wallet.AccountsRoot.Add(new AccountRoot()
             {
-                Accounts = new List<HdAccount>()
+                Accounts = new List<IHdAccount>()
                 {
                     new HdAccount
                     {
@@ -2162,7 +2163,7 @@ namespace Blockcore.Features.Wallet.Tests
 
             wallet.AccountsRoot.Add(new AccountRoot()
             {
-                Accounts = new List<HdAccount> { new HdAccount
+                Accounts = new List<IHdAccount> { new HdAccount
                 {
                     ExternalAddresses = receiveAddresses,
                     InternalAddresses = changeAddresses,

@@ -19,10 +19,11 @@ namespace Blockcore.Features.Wallet.Helpers
         /// <param name="accountExtPubKey">The extended public key used to generate child keys.</param>
         /// <param name="index">The index of the child key to generate.</param>
         /// <param name="isChange">A value indicating whether the public key to generate corresponds to a change address.</param>
+        /// <param name="network">Network</param>
         /// <returns>
         /// An HD public key derived from an extended public key.
         /// </returns>
-        public static PubKey GeneratePublicKey(string accountExtPubKey, int index, bool isChange)
+        public static PubKey GeneratePublicKey(string accountExtPubKey, int index, bool isChange, Network network = null)
         {
             Guard.NotEmpty(accountExtPubKey, nameof(accountExtPubKey));
 

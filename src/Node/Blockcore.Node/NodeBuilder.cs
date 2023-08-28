@@ -61,7 +61,7 @@ namespace Blockcore.Node
                     nodeBuilder.UsePosConsensus().AddPowPosMining().UseColdStakingWallet();
                     break;
                 case "ZEEV":
-                    nodeBuilder.UseZEEVConsensus().UseWallet();
+                    nodeBuilder.UseZEEVConsensus().UseWallet().UseWatchOnlyWallet();
                     break;
             }
 

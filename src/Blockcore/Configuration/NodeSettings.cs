@@ -128,7 +128,7 @@ namespace Blockcore.Configuration
         /// - Alternatively, if the file name is not supplied then a network-specific file
         ///   name would be determined. In this case we first need to determine the network.
         /// </remarks>
-        public NodeSettings(Network network = null, string agent = "Blockcore",
+        public NodeSettings(Network network = null, string agent = "Blockcore ZEEV",
             string[] args = null, NetworksSelector networksSelector = null)
         {
             // Create the default logger factory and logger.

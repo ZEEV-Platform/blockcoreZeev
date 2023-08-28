@@ -288,9 +288,9 @@ namespace Blockcore.Features.MemoryPool
         }
 
         /// <inheritdoc />
-        public FeeRate EstimateSmartFee(int nBlocks, out int answerFoundAtBlocks)
+        public FeeRate EstimateSmartFee(int nBlocks, out int answerFoundAtBlocks, int? currentHeight = null, bool requireGreater = true)
         {
-            return this.MinerPolicyEstimator.EstimateSmartFee(nBlocks, this, out answerFoundAtBlocks);
+            return this.MinerPolicyEstimator.EstimateSmartFee(nBlocks, this, out answerFoundAtBlocks, currentHeight, requireGreater);
         }
 
         /// <inheritdoc />

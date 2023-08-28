@@ -436,7 +436,7 @@ namespace Blockcore.IntegrationTests.API
         {
             var commands = JsonDataSerializer.Instance.Deserialize<List<RpcCommandModel>>(this.responseText);
 
-            commands.Count.Should().Be(36);
+            commands.Count.Should().Be(42);
 
             commands.Should().Contain(x => x.Command == "stop");
             commands.Should().Contain(x => x.Command == "getrawtransaction <txid> [<verbose>] [<blockhash>]");
@@ -472,6 +472,12 @@ namespace Blockcore.IntegrationTests.API
             commands.Should().Contain(x => x.Command == "generatetoaddress <blockcount> <address>");
             commands.Should().Contain(x => x.Command == "startstaking <walletname> <walletpassword>");
             commands.Should().Contain(x => x.Command == "getstakinginfo [<isjsonformat>]");
+            commands.Should().Contain(x => x.Command == "gettxoutproof <txids> [<blockhash>]");
+            commands.Should().Contain(x => x.Command == "createrawtransaction <inputs> <outputs>");
+            commands.Should().Contain(x => x.Command == "createmutisigwallet <walletname> <threashold> <cosignerxpubs> <mnemonicseed> <password> <passphrase>");
+            commands.Should().Contain(x => x.Command == "combinemultisigsignatures <transactions>");
+            commands.Should().Contain(x => x.Command == "fundandsignmultisigtransaction <account> <hex> <password>");
+            commands.Should().Contain(x => x.Command == "stopstaking");
         }
 
         private void status_information_is_returned()

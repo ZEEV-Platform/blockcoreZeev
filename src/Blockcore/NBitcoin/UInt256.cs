@@ -229,6 +229,17 @@ namespace Blockcore.NBitcoin
             return new ulong[] { this.part1, this.part2, this.part3, this.part4, };
         }
 
+        public static uint256 operator -(uint256 a, uint256 b)
+        {
+            var target = a.ToArray();
+            var sub = b.ToArray();
+            for (int i = 0; i < Width; i++)
+                target[i] -= sub[i];
+
+
+            return new uint256(target);
+        }
+
         public static uint256 operator <<(uint256 a, int shift)
         {
             ulong[] source = a.ToArray();

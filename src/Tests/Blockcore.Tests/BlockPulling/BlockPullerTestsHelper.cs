@@ -24,7 +24,7 @@ using Blockcore.Tests.Common;
 using Blockcore.Utilities;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NBitcoin;
+using Blockcore.NBitcoin;
 
 namespace Blockcore.Tests.BlockPulling
 {

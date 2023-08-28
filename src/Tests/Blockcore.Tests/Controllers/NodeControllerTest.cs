@@ -27,7 +27,7 @@ using Blockcore.Utilities.JsonErrors;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using NBitcoin;
+using Blockcore.NBitcoin;
 using Xunit;
 
 namespace Blockcore.Tests.Controllers

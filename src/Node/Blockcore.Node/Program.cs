@@ -73,7 +73,7 @@ namespace Blockcore.Node
                 }
 
                 walletName = wallet.GetWalletsNames().FirstOrDefault();
-                HdAccount account = wallet.GetAccounts(walletName).FirstOrDefault();
+                IHdAccount account = wallet.GetAccounts(walletName).FirstOrDefault();
 
                 var accountReference = new WalletAccountReference(walletName, account.Name);
 

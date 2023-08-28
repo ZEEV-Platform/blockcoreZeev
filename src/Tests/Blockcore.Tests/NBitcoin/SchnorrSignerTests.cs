@@ -7,7 +7,7 @@ using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.DataEncoders;
 #if HAS_SPAN
-using NBitcoin.Secp256k1;
+using Blockcore.NBitcoin.Secp256k1;
 #endif
 using Xunit;
 

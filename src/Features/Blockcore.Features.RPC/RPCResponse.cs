@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Blockcore.Features.RPC
 {
-    //{"code":-32601,"message":"Method not found"}
     public class RPCError
     {
         internal RPCError(JObject error)
@@ -18,7 +17,6 @@ namespace Blockcore.Features.RPC
         public string Message { get; set; }
     }
 
-    //{"result":null,"error":{"code":-32601,"message":"Method not found"},"id":1}
     public class RPCResponse
     {
         public RPCResponse() { }

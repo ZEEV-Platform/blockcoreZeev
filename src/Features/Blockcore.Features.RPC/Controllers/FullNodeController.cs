@@ -462,7 +462,7 @@ namespace Blockcore.Features.RPC.Controllers
         {
             var blockchainInfo = new BlockchainInfoModel
             {
-                Chain = this.Network?.Name,
+                Chain = this.Network?.NetworkType == NetworkType.Mainnet ? "main" : "test",
                 Blocks = (uint)(this.ChainState?.ConsensusTip?.Height ?? 0),
                 Headers = (uint)(this.ChainIndexer?.Height ?? 0),
                 BestBlockHash = this.ChainState?.ConsensusTip?.HashBlock,

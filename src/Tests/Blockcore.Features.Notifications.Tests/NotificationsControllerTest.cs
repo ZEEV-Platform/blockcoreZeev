@@ -2,7 +2,7 @@
 //using Microsoft.AspNetCore.Mvc;
 //using Microsoft.Extensions.Logging;
 //using Moq;
-//using NBitcoin;
+//using Blockcore.NBitcoin;
 //using Blockcore.AsyncWork;
 //using Blockcore.Consensus;
 //using Blockcore.Features.Notifications.Controllers;
