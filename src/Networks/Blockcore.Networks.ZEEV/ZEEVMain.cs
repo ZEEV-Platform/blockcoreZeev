@@ -125,9 +125,9 @@ namespace Blockcore.Networks.ZEEV
             );
 
             this.Base58Prefixes = new byte[12][];
-            this.Base58Prefixes[(int)Base58Type.PUBKEY_ADDRESS] = new byte[] { (0x7a) };
-            this.Base58Prefixes[(int)Base58Type.SCRIPT_ADDRESS] = new byte[] { (0x76) };
-            this.Base58Prefixes[(int)Base58Type.SECRET_KEY] = new byte[] { (0x65) };
+            this.Base58Prefixes[(int)Base58Type.PUBKEY_ADDRESS] = new byte[] { (80) };
+            this.Base58Prefixes[(int)Base58Type.SCRIPT_ADDRESS] = new byte[] { (142) };
+            this.Base58Prefixes[(int)Base58Type.SECRET_KEY] = new byte[] { (125) };
             this.Base58Prefixes[(int)Base58Type.ENCRYPTED_SECRET_KEY_NO_EC] = new byte[] { 0x77, 0x66 };
             this.Base58Prefixes[(int)Base58Type.ENCRYPTED_SECRET_KEY_EC] = new byte[] { 0x66, 0x77 };
             this.Base58Prefixes[(int)Base58Type.EXT_PUBLIC_KEY] = new byte[] { (0x77), (0x6f), (0x6c), (0x66) };
