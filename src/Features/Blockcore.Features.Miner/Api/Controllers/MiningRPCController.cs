@@ -286,26 +286,21 @@ namespace Blockcore.Features.Miner.Api.Controllers
                     blockTemplate.Version = block.Header.Version;
 
                     blockTemplate.Coinbaseaux = new CoinbaseauxFlagsContractModel();
-                    blockTemplate.Coinbaseaux.Flags = "062f503253482f";
+                    blockTemplate.Coinbaseaux.Flags = "6d696e656420627920687364";
                     blockTemplate.CoinbaseValue = powCoinviewRule.GetProofOfWorkReward(blockTemplate.Height).Satoshi;
 
                     var mutable = new List<string>();
                     mutable.Add("nonces");
                     mutable.Add("time");
-                    mutable.Add("time/decrement");
-                    mutable.Add("time/increment");
                     mutable.Add("transactions");
                     mutable.Add("coinbase");
-                    mutable.Add("coinbase/create");
-                    mutable.Add("coinbase/append");
-                    mutable.Add("generation");
-                    mutable.Add("version/reduce");
                     mutable.Add("prevblock");
                     blockTemplate.Mutable = mutable;
-                    blockTemplate.NonceRange = "00000000ffffffff";
+                    blockTemplate.NonceRange = "000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffff";
 
                     var rules = new List<string>();
                     rules.Add("csv");
+                    rules.Add("segwit");
                     blockTemplate.Rules = rules;
 
                     var capabilities = new List<string>();
@@ -319,6 +314,10 @@ namespace Blockcore.Features.Miner.Api.Controllers
                     blockTemplate.Sizelimit = this.Network.Consensus.Options.MaxBlockSerializedSize;
 
                     blockTemplate.Mintime = chainTip.GetMedianTimePast().AddHours(2).ToUnixTimeSeconds();
+
+                    blockTemplate.Mask = new uint256().ToString();
+                    blockTemplate.TreeRoot = new uint256().ToString();
+                    blockTemplate.ReservedRoot = new uint256().ToString();
                 }
             }
 

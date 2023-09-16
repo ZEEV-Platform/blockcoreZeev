@@ -157,7 +157,6 @@ size:   data:
                 stream.ReadWriteBytes(ref this.timeBytes);
                 this.time = (uint)BitConverter.ToUInt64(this.timeBytes, 0);
             }
-
             
             stream.ReadWriteBytes(ref this.reservedBytes);
             stream.ReadWrite(ref this.hashPrevBlock);

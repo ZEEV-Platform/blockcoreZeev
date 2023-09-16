@@ -78,8 +78,15 @@ namespace Blockcore.Node
                 var accountReference = new WalletAccountReference(walletName, account.Name);
 
                 HdAddress address = wallet.GetUnusedAddress(accountReference);
+                var addresses = wallet.GetUnusedAddresses(accountReference, 10);
+                var addresses2 = wallet.GetUnusedChangeAddress(accountReference);
 
-                var res = mining.GenerateBlocks(new ReserveScript(address.Pubkey), 100, int.MaxValue);
+                foreach (var item in addresses)
+                {
+                    Console.WriteLine(item.Address);
+                }
+
+                // var res = mining.GenerateBlocks(new ReserveScript(address.Pubkey), 100, int.MaxValue);
 
             }
             catch (Exception e)

@@ -69,6 +69,15 @@ namespace Blockcore.Features.Miner.Api.Models
 
         [JsonProperty(PropertyName = "coinbasetxn")]
         public string Coinbasetxn { get; internal set; }
+
+        [JsonProperty(PropertyName = "treeroot")]
+        public string TreeRoot { get; set; }
+
+        [JsonProperty(PropertyName = "reservedroot")]
+        public string ReservedRoot { get; set; }
+
+        [JsonProperty(PropertyName = "mask")]
+        public string Mask { get; set; }
     }
 
     public class TransactionContractModel

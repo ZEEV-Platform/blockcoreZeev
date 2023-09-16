@@ -6,6 +6,7 @@ using Blockcore.Features.MemoryPool;
 using Blockcore.Features.MemoryPool.Interfaces;
 using Blockcore.Features.Miner;
 using Blockcore.Mining;
+using Blockcore.NBitcoin;
 using Blockcore.Networks;
 using Blockcore.Utilities;
 using Microsoft.Extensions.Logging;
@@ -55,6 +56,22 @@ namespace Blockcore.Networks.ZEEV.Consensus
             base.UpdateBaseHeaders();
 
             this.block.Header.Bits = ((ZEEVBlockHeader)this.block.Header).GetWorkRequired(this.Network, this.ChainTip);
+            ((ZEEVBlockHeader)this.block.Header).HashTreeRoot = GetHashBlockTreeRoot();
+        }
+
+        private uint256 GetHashBlockTreeRoot()
+        {
+            var height = this.ChainTip.Height;
+            var rootInterval = 36;
+
+            int interval = height / rootInterval;
+
+            if (interval == 0)
+                return new uint256();
+
+            var treeHashBlockTreeRoot = this.ChainTip.GetAncestor(interval * rootInterval);
+
+            return treeHashBlockTreeRoot.HashBlock;
         }
     }
 }
