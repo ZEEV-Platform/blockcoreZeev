@@ -29,6 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Rules\" />
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
   </ItemGroup>
 </Project>
