@@ -53,11 +53,6 @@ namespace Blockcore.Networks.ZEEV.Consensus
             if (hash != null)
                 return hash;
 
-            //using (var hs = new HashStream())
-            //{
-            //    this.ReadWriteHashingStream(new BitcoinStream(hs, true));
-            //    hash = hs.GetHash();
-            //}
             hash = this.GetPoWHash();
 
             innerHashes = this.hashes;

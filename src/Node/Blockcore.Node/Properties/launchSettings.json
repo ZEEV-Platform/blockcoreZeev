@@ -228,6 +228,10 @@
       "commandName": "Project",
       "commandLineArgs": "--chain=RSC -server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -datadir=nodedata -testnet"
     },
+    "ZEEV (MAIN)": {
+      "commandName": "Project",
+      "commandLineArgs": "--chain=ZEEV -server -iprangefiltering=0 -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser"
+    },
     "ZEEV (MAIN/LOCAL)": {
       "commandName": "Project",
       "commandLineArgs": "--chain=ZEEV -server -iprangefiltering=0 -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -datadir=nodedata"

@@ -13,5 +13,15 @@ namespace Blockcore.Networks.ZEEV.Consensus
         {
             return new ZEEVBlockHeader(this.Protocol);
         }
+
+        /// <summary>
+        /// Create a <see cref="Block"/> instance.
+        /// </summary>
+        public override Block CreateBlock()
+        {
+#pragma warning disable CS0618 // Type or member is obsolete
+            return new Block(this.CreateBlockHeader());
+#pragma warning restore CS0618 // Type or member is obsolete
+        }
     }
 }
