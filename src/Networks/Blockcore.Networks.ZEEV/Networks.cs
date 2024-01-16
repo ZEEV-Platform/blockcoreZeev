@@ -6,7 +6,7 @@
         {
             get
             {
-                return new NetworksSelector(() => new ZEEVMain(), () => new ZEEVMain(), () => new ZEEVMain());
+                return new NetworksSelector(() => new ZEEVMain(), () => new ZEEVTest(), () => new ZEEVTest());
             }
         }
     }

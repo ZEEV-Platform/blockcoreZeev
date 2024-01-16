@@ -235,6 +235,10 @@
     "ZEEV (MAIN/LOCAL)": {
       "commandName": "Project",
       "commandLineArgs": "--chain=ZEEV -server -iprangefiltering=0 -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -datadir=nodedata"
+    },
+    "ZEEV (TEST/LOCAL)": {
+      "commandName": "Project",
+      "commandLineArgs": "--chain=ZEEV -server -iprangefiltering=0 -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -datadir=nodedata -testnet"
     }
   }
 }
