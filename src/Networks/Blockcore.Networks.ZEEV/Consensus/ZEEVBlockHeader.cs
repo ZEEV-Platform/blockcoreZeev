@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Text;
 using Blockcore.Consensus;
 using Blockcore.Consensus.BlockInfo;
 using Blockcore.Consensus.Chain;
@@ -7,6 +11,13 @@ using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks.ZEEV.Components;
 using Blockcore.Networks.ZEEV.Crypto;
+using Blockcore.Networks.ZEEV.Crypto.Blake2b;
+using DBreeze.Utils;
+using HashLib;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Polly;
+using static System.Net.Mime.MediaTypeNames;
+using static Blockcore.Features.Consensus.CoinViews.Coindb.FasterCoindb;
 
 namespace Blockcore.Networks.ZEEV.Consensus
 {
@@ -21,25 +32,40 @@ namespace Blockcore.Networks.ZEEV.Consensus
             set { this.extraNonce = value; }
         }
 
+        private byte[] hashTreeRootBytes = new byte[32];
         private uint256 hashTreeRoot;
         public uint256 HashTreeRoot { get { return this.hashTreeRoot; } set { this.hashTreeRoot = value; } }
 
-        private uint256 hashCommitHash;
-        public uint256 HashCommitHash { get { return this.hashCommitHash; } set { this.hashCommitHash = value; } }
-
+        private byte[] hashReservedRootBytes = new byte[32];
         private uint256 hashReservedRoot;
         public uint256 HashReservedRoot { get { return this.hashReservedRoot; } set { this.hashReservedRoot = value; } }
 
+        private byte[] hashWitnessRootBytes = new byte[32];
         private uint256 hashWitnessRoot;
-        public uint256 HashWitnessRoot { get { return this.hashWitnessRoot; } set { this.hashWitnessRoot = value; } } 
+        public uint256 HashWitnessRoot { get { return this.hashWitnessRoot; } set { this.hashWitnessRoot = value; } }
 
+        private byte[] hashMerkleRootBytes = new byte[32];
+        private byte[] hashPrevBlockBytes = new byte[32];
+        private byte[] hashCommitBytes = new byte[32];
+
+        private byte[] hashMaskBytes = new byte[32];
+        private uint256 hashMask;
+        public uint256 HashMask { get { return this.hashMask; } set { this.hashMask = value; } }
+
+        private byte[] paddingBytes = new byte[20];
         public override long HeaderSize => 256;
-
+        public new int CurrentVersion = 0;
         public ConsensusProtocol Consensus { get; set; }
 
         public ZEEVBlockHeader(ConsensusProtocol consensus)
         {
+            this.version = 0;
+            this.CurrentVersion = 0;
             this.Consensus = consensus;
+            this.HashReservedRoot = new uint256();
+            this.HashWitnessRoot = new uint256();
+            this.HashTreeRoot = new uint256();
+            this.HashMask = new uint256();
         }
 
         public override uint256 GetHash()
@@ -70,8 +96,17 @@ namespace Blockcore.Networks.ZEEV.Consensus
             {
                 this.ReadWriteHashingStream(new BitcoinStream(ms, true));
 
-                string hex = BitConverter.ToString(this.ToBytes()).Replace("-", string.Empty);
-                return HandShake.Instance.Hash(this.ToBytes());
+                var shareHash = HandShake.Instance.Hash(this.ToMiner());
+                var shareHashBytes = shareHash.ToBytes();
+                var hashPowBytes = new byte[32];
+                for (int i = 0; i < hashPowBytes.Length; i++)
+                {
+                    hashPowBytes[i] = (byte)(shareHashBytes[i % 32] ^ this.hashMaskBytes[i % 32]);
+                }
+
+                var powHash = new uint256(hashPowBytes);
+
+                return new uint256(powHash);
             }
         }
 
@@ -115,23 +150,74 @@ size:   data:
                 var longTime = Convert.ToUInt64(this.time);
                 this.timeBytes = BitConverter.GetBytes(longTime);
                 stream.ReadWriteBytes(ref this.timeBytes);
+                stream.ReadWriteBytes(ref this.hashPrevBlockBytes);
+                stream.ReadWriteBytes(ref this.hashTreeRootBytes);
+                stream.ReadWriteBytes(ref this.extraNonce);
+                stream.ReadWriteBytes(ref this.hashReservedRootBytes);
+                stream.ReadWriteBytes(ref this.hashWitnessRootBytes);
+                stream.ReadWriteBytes(ref this.hashMerkleRootBytes);
+                stream.ReadWrite(ref this.version);
+
+               // stream.IsBigEndian = true;
+                stream.ReadWrite(ref this.bits);
+               // stream.IsBigEndian = false;
+
+                //var reversedBitBytes = new byte[4];
+                //this.bitsBytes.CopyTo(reversedBitBytes, 0);
+                //Array.Reverse(reversedBitBytes);
+                //stream.ReadWriteBytes(ref reversedBitBytes);
+
+                stream.ReadWriteBytes(ref this.hashMaskBytes);
             }
             else
             {
                 stream.ReadWriteBytes(ref this.timeBytes);
                 this.time = (uint)BitConverter.ToUInt64(this.timeBytes, 0);
-            }
 
-            stream.ReadWriteBytes(ref this.reservedBytes);
-            stream.ReadWrite(ref this.hashPrevBlock);
-            stream.ReadWrite(ref this.hashTreeRoot);
-            stream.ReadWrite(ref this.hashCommitHash);
-            stream.ReadWriteBytes(ref this.extraNonce);
-            stream.ReadWrite(ref this.hashReservedRoot);
-            stream.ReadWrite(ref this.hashWitnessRoot);
-            stream.ReadWrite(ref this.hashMerkleRoot);
-            stream.ReadWrite(ref this.version);
-            stream.ReadWrite(ref this.bits);
+                stream.ReadWriteBytes(ref this.hashPrevBlockBytes);
+                this.hashPrevBlock = Uint256String(ref this.hashPrevBlockBytes);
+
+                stream.ReadWriteBytes(ref this.hashTreeRootBytes);
+                this.hashTreeRoot = Uint256String(ref this.hashTreeRootBytes);
+
+                stream.ReadWriteBytes(ref this.extraNonce);
+
+                stream.ReadWriteBytes(ref this.hashReservedRootBytes);
+                this.hashReservedRoot = Uint256String(ref this.hashReservedRootBytes);
+
+                stream.ReadWriteBytes(ref this.hashWitnessRootBytes);
+                this.hashWitnessRoot = Uint256String(ref this.hashWitnessRootBytes);
+
+                stream.ReadWriteBytes(ref this.hashMerkleRootBytes);
+                this.hashMerkleRoot = Uint256String(ref this.hashMerkleRootBytes);
+
+                stream.ReadWrite(ref this.version);
+                this.CurrentVersion = this.version;
+
+           //     stream.IsBigEndian = true;
+                stream.ReadWrite(ref this.bits);
+            //    stream.IsBigEndian = false;
+
+               // var sss = this.Bits;
+               // var bitsBytes = new byte[4];
+               // stream.ReadWriteBytes(ref bitsBytes);
+               //// Array.Reverse(bitsBytes);
+               // this.bits = BitConverter.ToUInt32(bitsBytes, 0);
+               // StringBuilder hex2 = new StringBuilder(bitsBytes.Length * 2);
+               // foreach (byte b in bitsBytes)
+               //     hex2.AppendFormat("{0:x2}", b);
+               // var sfff2 = hex2.ToString();
+
+                //var s = new Target(this.bits);
+                stream.ReadWriteBytes(ref this.hashMaskBytes);
+                this.hashMask = Uint256String(ref this.hashMaskBytes);
+            }
+        }
+
+        private uint256 Uint256String(ref byte[] buffer)
+        {
+            string bufferString = BitConverter.ToString(buffer).Replace("-", string.Empty);
+            return new uint256(bufferString);
         }
 
         #endregion IBitcoinSerializable Members
@@ -146,23 +232,213 @@ size:   data:
                 var longTime = Convert.ToUInt64(this.time);
                 this.timeBytes = BitConverter.GetBytes(longTime);
                 stream.ReadWriteBytes(ref this.timeBytes);
+                stream.ReadWriteBytes(ref this.hashPrevBlockBytes);
+                stream.ReadWriteBytes(ref this.hashTreeRootBytes);
+                stream.ReadWriteBytes(ref this.extraNonce);
+                stream.ReadWriteBytes(ref this.hashReservedRootBytes);
+                stream.ReadWriteBytes(ref this.hashWitnessRootBytes);
+                stream.ReadWriteBytes(ref this.hashMerkleRootBytes);
+                stream.ReadWrite(ref this.version);
+
+            //    stream.IsBigEndian = true;
+                stream.ReadWrite(ref this.bits);
+            //    stream.IsBigEndian = false;
+
+                //var reversedBitBytes = new byte[4];
+                //this.bitsBytes.CopyTo(reversedBitBytes, 0);
+                //Array.Reverse(reversedBitBytes);
+                //stream.ReadWriteBytes(ref reversedBitBytes);
+
+                stream.ReadWriteBytes(ref this.hashMaskBytes);
             }
             else
             {
                 stream.ReadWriteBytes(ref this.timeBytes);
                 this.time = (uint)BitConverter.ToUInt64(this.timeBytes, 0);
+
+                stream.ReadWriteBytes(ref this.hashPrevBlockBytes);
+                this.hashPrevBlock = Uint256String(ref this.hashPrevBlockBytes);
+
+                stream.ReadWriteBytes(ref this.hashTreeRootBytes);
+                this.hashTreeRoot = Uint256String(ref this.hashTreeRootBytes);
+
+                stream.ReadWriteBytes(ref this.extraNonce);
+
+                stream.ReadWriteBytes(ref this.hashReservedRootBytes);
+                this.hashReservedRoot = Uint256String(ref this.hashReservedRootBytes);
+
+                stream.ReadWriteBytes(ref this.hashWitnessRootBytes);
+                this.hashWitnessRoot = Uint256String(ref this.hashWitnessRootBytes);
+
+                stream.ReadWriteBytes(ref this.hashMerkleRootBytes);
+                this.hashMerkleRoot = Uint256String(ref this.hashMerkleRootBytes);
+
+                stream.ReadWrite(ref this.version);
+                this.CurrentVersion = this.version;
+
+            //    stream.IsBigEndian = true;
+                stream.ReadWrite(ref this.bits);
+            //    stream.IsBigEndian = false;
+
+                //stream.ReadWriteBytes(ref this.bitsBytes);
+                //Array.Reverse(this.bitsBytes);
+                //this.bits = BitConverter.ToUInt32(this.bitsBytes, 0);
+                //StringBuilder hex2 = new StringBuilder(this.bitsBytes.Length * 2);
+                //foreach (byte b in this.bitsBytes)
+                //    hex2.AppendFormat("{0:x2}", b);
+                //var sfff2 = hex2.ToString();
+
+                //var s = new Target(this.bits);
+                stream.ReadWriteBytes(ref this.hashMaskBytes);
+                this.hashMask = Uint256String(ref this.hashMaskBytes);
             }
-            
-            stream.ReadWriteBytes(ref this.reservedBytes);
-            stream.ReadWrite(ref this.hashPrevBlock);
-            stream.ReadWrite(ref this.hashTreeRoot);
-            stream.ReadWrite(ref this.hashCommitHash);
-            stream.ReadWriteBytes(ref this.extraNonce);
-            stream.ReadWrite(ref this.hashReservedRoot);
-            stream.ReadWrite(ref this.hashWitnessRoot);
-            stream.ReadWrite(ref this.hashMerkleRoot);
-            stream.ReadWrite(ref this.version);
-            stream.ReadWrite(ref this.bits);
+        }
+
+        public byte[] ToMiner()
+        {
+            using (var ms = new MemoryStream())
+            {
+                var stream = new BitcoinStream(ms, true);
+
+                stream.ReadWrite(ref this.nonce);
+
+                var longTime = Convert.ToUInt64(this.time);
+                this.timeBytes = BitConverter.GetBytes(longTime);
+                stream.ReadWriteBytes(ref this.timeBytes);
+
+                this.paddingBytes = padding(20, this.hashPrevBlockBytes, this.hashTreeRootBytes);
+                stream.ReadWriteBytes(ref this.paddingBytes);
+                stream.ReadWriteBytes(ref this.hashPrevBlockBytes);
+                stream.ReadWriteBytes(ref this.hashTreeRootBytes);
+
+                this.hashCommitBytes = commitHash(this.hashPrevBlockBytes);
+                stream.ReadWriteBytes(ref this.hashCommitBytes);
+
+                //StringBuilder hex2 = new StringBuilder(this.hashCommitBytes.Length * 2);
+                //foreach (byte b in this.hashCommitBytes)
+                //    hex2.AppendFormat("{0:x2}", b);
+                //var sfff2 = hex2.ToString();
+
+                stream.ReadWriteBytes(ref this.extraNonce);
+                stream.ReadWriteBytes(ref this.hashReservedRootBytes);
+                stream.ReadWriteBytes(ref this.hashWitnessRootBytes);
+                stream.ReadWriteBytes(ref this.hashMerkleRootBytes);
+                stream.ReadWrite(ref this.version);
+
+             //   stream.IsBigEndian = true;
+                stream.ReadWrite(ref this.bits);
+             //   stream.IsBigEndian = false;
+
+                //var reversedBitBytes = new byte[4];
+                //this.bitsBytes.CopyTo(reversedBitBytes, 0);
+                //Array.Reverse(reversedBitBytes);
+                //stream.ReadWriteBytes(ref reversedBitBytes);
+
+                var bytes = ms.GetBuffer();
+                Array.Resize(ref bytes, (int)ms.Length);
+                return bytes;
+            }
+        }
+
+        private byte[] maskHash(byte[] prevBlockHash)
+        {
+            var blake2bConfig = new Blake2BConfig();
+            blake2bConfig.OutputSizeInBytes = 32;
+            return Blake2B.ComputeHash(prevBlockHash.Concat(new byte[32]).ToArray(), blake2bConfig);
+        }
+
+        private byte[] subHash()
+        {
+            using (var ms = new MemoryStream())
+            {
+                var stream = new BitcoinStream(ms, true);
+
+                stream.ReadWriteBytes(ref this.extraNonce);
+                stream.ReadWriteBytes(ref this.hashReservedRootBytes);
+                stream.ReadWriteBytes(ref this.hashWitnessRootBytes);
+                stream.ReadWriteBytes(ref this.hashMerkleRootBytes);
+                stream.ReadWrite(ref this.version);
+
+            //    stream.IsBigEndian = true;
+                stream.ReadWrite(ref this.bits);
+            //    stream.IsBigEndian = false;
+
+                //var reversedBitBytes = new byte[4];
+                //this.bitsBytes.CopyTo(reversedBitBytes, 0);
+                //Array.Reverse(reversedBitBytes);
+                //stream.ReadWriteBytes(ref reversedBitBytes);
+
+                var bytes = ms.GetBuffer();
+                Array.Resize(ref bytes, (int)ms.Length);
+
+                var blake2bConfig = new Blake2BConfig();
+                blake2bConfig.OutputSizeInBytes = 32;
+                return Blake2B.ComputeHash(bytes, blake2bConfig);
+            }
+        }
+
+        private byte[] commitHash(byte[] prevBlockHash)
+        {
+            var blake2bConfig = new Blake2BConfig();
+            blake2bConfig.OutputSizeInBytes = 32;
+            return Blake2B.ComputeHash(subHash().Concat(maskHash(prevBlockHash)), blake2bConfig);
+        }
+
+        private byte[] padding(int size, byte[] prevBlock, byte[] treeRoot)
+        {
+            var pad = new byte[size];
+
+            for (int i = 0; i < size; i++)
+            {
+                pad[i] = (byte)(prevBlock[i % 32] ^ treeRoot[i % 32]);
+            }
+
+            return pad;
+        }
+
+        public override bool CheckProofOfWork()
+        {
+            var target = this.Bits.ToUInt256();
+
+            if (target.CompareTo(uint256.Zero) <= 0) return false;
+            if (target.ToBytes(false).Length > 256) return false;
+
+            if (GetPoWHash() > target)
+                return false;
+
+            return true;
+        }
+
+       // public uint256 GetPowHash
+
+        public bool VerifyPOW(uint256 hash, Target bits)
+        {
+            //exports.verifyPOW = function verifyPOW(hash, bits) {
+            //    const target = exports.fromCompact(bits);
+
+            //    if (target.isNeg() || target.isZero())
+            //        return false;
+
+            //    if (target.bitLength() > 256)
+            //        return false;
+
+            //    const num = new BN(hash, 'be');
+
+            //    if (num.gt(target))
+            //        return false;
+
+            //    return true;
+            //};
+
+            var target = bits.ToUInt256();
+
+            if (target.CompareTo(uint256.Zero) <= 0) return false;
+            if (target.ToBytes(false).Length > 256) return false;
+
+            if (hash > target)
+                return false;
+
+            return true;
         }
     }
 }

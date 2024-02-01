@@ -15,7 +15,7 @@ namespace Blockcore.Networks.ZEEV.Rules
 
         public override void Run(RuleContext context)
         {
-            if (!CheckProofOfWork((ZEEVBlockHeader)context.ValidationContext.ChainedHeaderToValidate.Header))
+            if (!((ZEEVBlockHeader)context.ValidationContext.ChainedHeaderToValidate.Header).CheckProofOfWork())
                 ConsensusErrors.HighHash.Throw();
 
             Target nextWorkRequired = GetWorkRequired(
@@ -30,15 +30,6 @@ namespace Blockcore.Networks.ZEEV.Rules
                 this.Logger.LogTrace("(-)[BAD_DIFF_BITS]");
                 ConsensusErrors.BadDiffBits.Throw();
             }
-        }
-
-        private bool CheckProofOfWork(ZEEVBlockHeader header)
-        {
-            BigInteger bits = header.Bits.ToBigInteger();
-            if ((bits.CompareTo(BigInteger.Zero) <= 0) || (bits.CompareTo(pow256) >= 0))
-                return false;
-
-            return header.GetPoWHash() <= header.Bits.ToUInt256();
         }
 
         public Target GetWorkRequired(ChainedHeader chainedHeaderToValidate, ZEEVConsensus consensus)

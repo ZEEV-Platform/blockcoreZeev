@@ -50,8 +50,8 @@ namespace Blockcore.Networks.ZEEV
 
             this.GenesisTime = Utils.DateTimeToUnixTime(new DateTime(2023, 8, 18, 23, 56, 00, DateTimeKind.Utc));
             this.GenesisNonce = 4927;
-            this.GenesisBits = new Target(new uint256("7fffff0000000000000000000000000000000000000000000000000000000000"));
-            this.GenesisVersion = 1;
+            this.GenesisBits = new Target(0x1c00ffff);
+            this.GenesisVersion = 0;
 
             Block genesisBlock = CreateGenesisBlock(consensusFactory, this.GenesisTime, this.GenesisNonce, this.GenesisBits, this.GenesisVersion);
 
@@ -112,7 +112,7 @@ namespace Blockcore.Networks.ZEEV
                 powAllowMinDifficultyBlocks: false,
                 posNoRetargeting: false,
                 powNoRetargeting: false,
-                powLimit: new Target(new uint256("7fffff0000000000000000000000000000000000000000000000000000000000")),
+                powLimit: new Target(new uint256("0000000000ffff00000000000000000000000000000000000000000000000000")),
                 minimumChainWork: uint256.Zero,
                 isProofOfStake: false,
                 lastPowBlock: default(int),

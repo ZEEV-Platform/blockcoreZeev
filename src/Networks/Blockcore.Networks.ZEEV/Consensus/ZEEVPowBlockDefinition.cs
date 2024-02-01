@@ -57,6 +57,8 @@ namespace Blockcore.Networks.ZEEV.Consensus
 
             this.block.Header.Bits = ((ZEEVBlockHeader)this.block.Header).GetWorkRequired(this.Network, this.ChainTip);
             ((ZEEVBlockHeader)this.block.Header).HashTreeRoot = GetHashBlockTreeRoot();
+
+            this.block.Header.Version = ((ZEEVBlockHeader)this.block.Header).CurrentVersion;
         }
 
         private uint256 GetHashBlockTreeRoot()
