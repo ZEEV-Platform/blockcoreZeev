@@ -113,7 +113,7 @@ namespace Blockcore.Networks.ZEEV
                 posNoRetargeting: false,
                 powNoRetargeting: false,
                 powLimit: new Target(new uint256("0000000000ffff00000000000000000000000000000000000000000000000000")),
-                minimumChainWork: uint256.Zero,
+                minimumChainWork: new uint256("00000000000000000000000000000000000000000000000075b5a2b7bf522d45"),
                 isProofOfStake: false,
                 lastPowBlock: default(int),
                 proofOfStakeLimit: null,

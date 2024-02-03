@@ -50,7 +50,7 @@ namespace Blockcore.Networks.ZEEV
 
             this.GenesisTime = Utils.DateTimeToUnixTime(new DateTime(2023, 8, 18, 23, 56, 00, DateTimeKind.Utc));
             this.GenesisNonce = 4927;
-            this.GenesisBits = new Target(new uint256("7fffff0000000000000000000000000000000000000000000000000000000000"));
+            this.GenesisBits = new Target(0x1d00ffff);
             this.GenesisVersion = 0;
 
             Block genesisBlock = CreateGenesisBlock(consensusFactory, this.GenesisTime, this.GenesisNonce, this.GenesisBits, this.GenesisVersion);

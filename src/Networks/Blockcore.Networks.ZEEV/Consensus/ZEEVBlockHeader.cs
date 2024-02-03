@@ -106,7 +106,7 @@ namespace Blockcore.Networks.ZEEV.Consensus
 
                 var powHash = new uint256(hashPowBytes);
 
-                return new uint256(powHash);
+                return powHash;
             }
         }
 

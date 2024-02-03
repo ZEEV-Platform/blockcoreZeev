@@ -176,7 +176,7 @@ namespace Blockcore.Consensus.BlockInfo
                 this.hashes[0] = this.GetHash();
         }
 
-        public bool CheckProofOfWork()
+        public virtual bool CheckProofOfWork()
         {
             BigInteger bits = this.Bits.ToBigInteger();
             if ((bits.CompareTo(BigInteger.Zero) <= 0) || (bits.CompareTo(pow256) >= 0))
