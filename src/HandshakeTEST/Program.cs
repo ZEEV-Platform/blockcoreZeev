@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -41,6 +42,7 @@ namespace HandshakeTEST
         private static void HeaderTest()
         {
             var headerHex2 = "a6496be42fe1b065000000000000000000000005b4490d1678b73c066ed15b6cbe0e98f684612504ffa4f97e34059276d78aa47040ba328b408416b61c80ac212681e1948ac2622705af27f301fcaf2eb1143da20000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffd4f0144d43f2d8bb5d0da049911c392ea51e8463c5e74c2ae51b70d3016f6ae037061a67848020dee27740f93d8f9a937a1912be6068e77adb85eb43cd43d000000005a6407190000000000000000000000000000000000000000000000000000000000000000";
+            headerHex2 = "09000000F0984B670000000000000000FFFF000000000000000000000000000000000000000000000000000000000000FFFF000000000000000000000000000000000000000000000000000064FCAF2EB1143DA20000000000000000000000000000000000000000FFFF000000000000000000000000000000000000000000000000000000000000FFFF000000000000000000000000000000000000000000000000000000000000FFFF0000000000000000000000000000000000000000000000000000E8030000FFFF001D00000000FFFF0000000000000000000000000000000000000000000000000000";
             var header = Enumerable.Range(0, headerHex2.Length)
                  .Where(x => x % 2 == 0)
                  .Select(x => Convert.ToByte(headerHex2.Substring(x, 2), 16))
@@ -54,6 +56,24 @@ namespace HandshakeTEST
 
             var serialize = ss.ToBytes();
             var serializeHex = serialize.ToHexFromByteArray();
+
+            //test bigendian
+            ss.Bits = new Blockcore.NBitcoin.Target(new uint256("00000000ffff0000000000000000000000000000000000000000000000000000"));
+            ss.HashMask = new uint256("00000000ffff0000000000000000000000000000000000000000000000000000");
+            ss.HashTreeRoot = new uint256("00000000ffff0000000000000000000000000000000000000000000000000000");
+            ss.HashMerkleRoot = new uint256("00000000ffff0000000000000000000000000000000000000000000000000000");
+            ss.HashPrevBlock = new uint256("00000000ffff0000000000000000000000000000000000000000000000000000");
+            ss.HashReservedRoot = new uint256("00000000ffff0000000000000000000000000000000000000000000000000000");
+            ss.HashWitnessRoot = new uint256("00000000ffff0000000000000000000000000000000000000000000000000000");
+            ss.Version = 1000;
+            ss.Nonce = 9;
+            var unix = new DateTimeOffset(new DateTime(2024, 12, 1)).ToUnixTimeSeconds();
+            ss.BlockTime = new DateTimeOffset(new DateTime(2024, 12,1));
+            ss.ExtraNonce[0] = 100;
+
+            var serializeBE = ss.ToBytes();
+            var serializeHexBE = serializeBE.ToHexFromByteArray();
+
 
             var bytesss = ss.ToMiner();
             var back = bytesss.ToHexFromByteArray();
@@ -92,7 +112,7 @@ namespace HandshakeTEST
 
             hi = ToUInt32BigEndian(target, 0);
             lo = ToUInt32BigEndian(target, 4);
-            n += (hi * 0x100000000 + 7) * BigInteger.Parse("1000000000000000000000000000000000000000000000000", NumberStyles.HexNumber);
+            n += (hi * 0x100000000 + lo) * BigInteger.Parse("1000000000000000000000000000000000000000000000000", NumberStyles.HexNumber);
 
             hi = ToUInt32BigEndian(target, 8);
             lo = ToUInt32BigEndian(target, 12);
