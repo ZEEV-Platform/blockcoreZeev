@@ -26,7 +26,7 @@ namespace Blockcore.Consensus.BlockInfo
 
         protected uint256 hashPrevBlock;
 
-        public uint256 HashPrevBlock { get { return this.hashPrevBlock; } set { this.hashPrevBlock = value; } }
+        public virtual uint256 HashPrevBlock { get { return this.hashPrevBlock; } set { this.hashPrevBlock = value; } }
 
         protected uint time;
 
@@ -46,7 +46,7 @@ namespace Blockcore.Consensus.BlockInfo
 
         protected uint256 hashMerkleRoot;
 
-        public uint256 HashMerkleRoot { get { return this.hashMerkleRoot; } set { this.hashMerkleRoot = value; } }
+        public virtual uint256 HashMerkleRoot { get { return this.hashMerkleRoot; } set { this.hashMerkleRoot = value; } }
 
         public bool IsNull { get { return (this.bits == 0); } }
 

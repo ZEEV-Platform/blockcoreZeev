@@ -10,6 +10,7 @@ using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.DataEncoders;
+using DBreeze.Utils;
 
 namespace Blockcore.Networks.ZEEV.Consensus
 {
@@ -37,13 +38,20 @@ namespace Blockcore.Networks.ZEEV.Consensus
             });
 
             Block genesis = consensusFactory.CreateBlock();
-            genesis.Header.BlockTime = Utils.UnixTimeToDateTime(nTime);
-            genesis.Header.Bits = nBits;
-            genesis.Header.Nonce = nNonce;
-            genesis.Header.Version = nVersion;
+            ((ZEEVBlockHeader)genesis.Header).BlockTime = Utils.UnixTimeToDateTime(nTime);
+            ((ZEEVBlockHeader)genesis.Header).Bits = nBits;
+            ((ZEEVBlockHeader)genesis.Header).Nonce = nNonce;
+            ((ZEEVBlockHeader)genesis.Header).Version = nVersion;
             genesis.Transactions.Add(txNew);
-            genesis.Header.HashPrevBlock = uint256.Zero;
+            ((ZEEVBlockHeader)genesis.Header).HashPrevBlock = uint256.Zero;
+            ((ZEEVBlockHeader)genesis.Header).HashReservedRoot = uint256.Zero;
+            ((ZEEVBlockHeader)genesis.Header).HashMask = uint256.Zero;
+            ((ZEEVBlockHeader)genesis.Header).HashTreeRoot = uint256.Zero;
+            ((ZEEVBlockHeader)genesis.Header).HashWitnessRoot = uint256.Zero;
+            ((ZEEVBlockHeader)genesis.Header).HashWitnessRoot = uint256.Zero;
+
             genesis.UpdateMerkleRoot();
+            
             return genesis;
         }
 

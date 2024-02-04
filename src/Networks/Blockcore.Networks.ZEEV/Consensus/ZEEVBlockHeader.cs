@@ -23,34 +23,84 @@ namespace Blockcore.Networks.ZEEV.Consensus
 {
     public class ZEEVBlockHeader : BlockHeader
     {
-        protected byte[] reservedBytes = new byte[20];
         protected byte[] timeBytes = new byte[8];
-        private byte[] extraNonce = new byte[24];
+        private byte[] extraNonceBytes = new byte[24];
         public byte[] ExtraNonce
         {
-            get { return this.extraNonce; }
-            set { this.extraNonce = value; }
+            get { return this.extraNonceBytes; }
+            set { this.extraNonceBytes = value; }
         }
 
         private byte[] hashTreeRootBytes = new byte[32];
         private uint256 hashTreeRoot;
-        public uint256 HashTreeRoot { get { return this.hashTreeRoot; } set { this.hashTreeRoot = value; } }
+        public uint256 HashTreeRoot
+        {
+            get { return this.hashTreeRoot; }
+            set
+            {
+                this.hashTreeRoot = value;
+                this.hashTreeRootBytes = value.ToBytes(false);
+            }
+        }
 
         private byte[] hashReservedRootBytes = new byte[32];
         private uint256 hashReservedRoot;
-        public uint256 HashReservedRoot { get { return this.hashReservedRoot; } set { this.hashReservedRoot = value; } }
+        public uint256 HashReservedRoot
+        {
+            get { return this.hashReservedRoot; }
+            set
+            {
+                this.hashReservedRoot = value;
+                this.hashReservedRootBytes = value.ToBytes(false);
+            }
+        }
 
         private byte[] hashWitnessRootBytes = new byte[32];
         private uint256 hashWitnessRoot;
-        public uint256 HashWitnessRoot { get { return this.hashWitnessRoot; } set { this.hashWitnessRoot = value; } }
+        public uint256 HashWitnessRoot
+        {
+            get { return this.hashWitnessRoot; }
+            set
+            {
+                this.hashWitnessRoot = value;
+                this.hashWitnessRootBytes = value.ToBytes(false);
+            }
+        }
 
         private byte[] hashMerkleRootBytes = new byte[32];
+        public override uint256 HashMerkleRoot
+        {
+            get { return this.hashMerkleRoot; }
+            set
+            {
+                this.hashMerkleRoot = value;
+                this.hashMerkleRootBytes = value.ToBytes(false);
+            }
+        }
+
         private byte[] hashPrevBlockBytes = new byte[32];
+        public override uint256 HashPrevBlock
+        {
+            get { return this.hashPrevBlock; }
+            set
+            {
+                this.hashPrevBlock = value;
+                this.hashPrevBlockBytes = value.ToBytes(false);
+            }
+        }
+
         private byte[] hashCommitBytes = new byte[32];
 
         private byte[] hashMaskBytes = new byte[32];
         private uint256 hashMask;
-        public uint256 HashMask { get { return this.hashMask; } set { this.hashMask = value; } }
+        public uint256 HashMask
+        {
+            get { return this.hashMask; }
+            set { 
+                this.hashMask = value;
+                this.hashMaskBytes = value.ToBytes(false);
+            }
+        }
 
         private byte[] paddingBytes = new byte[20];
         public override long HeaderSize => 256;
@@ -66,6 +116,8 @@ namespace Blockcore.Networks.ZEEV.Consensus
             this.HashWitnessRoot = new uint256();
             this.HashTreeRoot = new uint256();
             this.HashMask = new uint256();
+            this.HashPrevBlock = new uint256();
+            this.HashMerkleRoot = new uint256();
         }
 
         public override uint256 GetHash()
@@ -152,10 +204,11 @@ size:   data:
                 stream.ReadWriteBytes(ref this.timeBytes);
                 stream.ReadWriteBytes(ref this.hashPrevBlockBytes);
                 stream.ReadWriteBytes(ref this.hashTreeRootBytes);
-                stream.ReadWriteBytes(ref this.extraNonce);
+                stream.ReadWriteBytes(ref this.extraNonceBytes);
                 stream.ReadWriteBytes(ref this.hashReservedRootBytes);
                 stream.ReadWriteBytes(ref this.hashWitnessRootBytes);
                 stream.ReadWriteBytes(ref this.hashMerkleRootBytes);
+
                 stream.ReadWrite(ref this.version);
 
                // stream.IsBigEndian = true;
@@ -180,7 +233,7 @@ size:   data:
                 stream.ReadWriteBytes(ref this.hashTreeRootBytes);
                 this.hashTreeRoot = Uint256String(ref this.hashTreeRootBytes);
 
-                stream.ReadWriteBytes(ref this.extraNonce);
+                stream.ReadWriteBytes(ref this.extraNonceBytes);
 
                 stream.ReadWriteBytes(ref this.hashReservedRootBytes);
                 this.hashReservedRoot = Uint256String(ref this.hashReservedRootBytes);
@@ -234,7 +287,7 @@ size:   data:
                 stream.ReadWriteBytes(ref this.timeBytes);
                 stream.ReadWriteBytes(ref this.hashPrevBlockBytes);
                 stream.ReadWriteBytes(ref this.hashTreeRootBytes);
-                stream.ReadWriteBytes(ref this.extraNonce);
+                stream.ReadWriteBytes(ref this.extraNonceBytes);
                 stream.ReadWriteBytes(ref this.hashReservedRootBytes);
                 stream.ReadWriteBytes(ref this.hashWitnessRootBytes);
                 stream.ReadWriteBytes(ref this.hashMerkleRootBytes);
@@ -262,7 +315,7 @@ size:   data:
                 stream.ReadWriteBytes(ref this.hashTreeRootBytes);
                 this.hashTreeRoot = Uint256String(ref this.hashTreeRootBytes);
 
-                stream.ReadWriteBytes(ref this.extraNonce);
+                stream.ReadWriteBytes(ref this.extraNonceBytes);
 
                 stream.ReadWriteBytes(ref this.hashReservedRootBytes);
                 this.hashReservedRoot = Uint256String(ref this.hashReservedRootBytes);
@@ -319,7 +372,7 @@ size:   data:
                 //    hex2.AppendFormat("{0:x2}", b);
                 //var sfff2 = hex2.ToString();
 
-                stream.ReadWriteBytes(ref this.extraNonce);
+                stream.ReadWriteBytes(ref this.extraNonceBytes);
                 stream.ReadWriteBytes(ref this.hashReservedRootBytes);
                 stream.ReadWriteBytes(ref this.hashWitnessRootBytes);
                 stream.ReadWriteBytes(ref this.hashMerkleRootBytes);
@@ -353,7 +406,7 @@ size:   data:
             {
                 var stream = new BitcoinStream(ms, true);
 
-                stream.ReadWriteBytes(ref this.extraNonce);
+                stream.ReadWriteBytes(ref this.extraNonceBytes);
                 stream.ReadWriteBytes(ref this.hashReservedRootBytes);
                 stream.ReadWriteBytes(ref this.hashWitnessRootBytes);
                 stream.ReadWriteBytes(ref this.hashMerkleRootBytes);

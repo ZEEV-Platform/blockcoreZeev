@@ -49,7 +49,7 @@ namespace Blockcore.Networks.ZEEV
             var consensusFactory = new ZEEVConsensusFactory();
 
             this.GenesisTime = Utils.DateTimeToUnixTime(new DateTime(2023, 8, 18, 23, 56, 00, DateTimeKind.Utc));
-            this.GenesisNonce = 4927;
+            this.GenesisNonce = 0;
             this.GenesisBits = new Target(0x1c00ffff);
             this.GenesisVersion = 0;
 
