@@ -28,21 +28,123 @@ namespace HandshakeTEST
 
         public static async Task Main(string[] args)
         {
-
-      //      var s = new Blockcore.NBitcoin.Target(new uint256("0x00000000ffff0000000000000000000000000000000000000000000000000000"));
-      //      var jjjj = new uint256("0x00000000ffff0000000000000000000000000000000000000000000000000000").ToBytes();
-           // var sy = new Blockcore.NBitcoin.Target(new uint256("0x00ffff0000000000000000000000000000000000000000000000000000"));
-      //      BigInteger Diff1 = BigInteger.Parse("00ffff0000000000000000000000000000000000000000000000000000", NumberStyles.HexNumber);
-      //      var sss = Diff1.ToByteArray();
-          //  var ddd = Diff1
             HeaderTest();
-  
+
+            var s = new Blockcore.NBitcoin.Target(new uint256("0x00000000ffff0000000000000000000000000000000000000000000000000000"));
+            var s2561 = new uint256("0x00000000ffff0000000000000000000000000000000000000000000000000000");
+            var s2561cmp = s.ToCompact();
+            var s2561Bytes = s.ToBytes();
+            
+//        BN: 6901746346790563787434755862277025452451108972170386555162524223799295 >
+//503382015
+//503382015
+
+            // var jjjj = new uint256("0x00000000ffff0000000000000000000000000000000000000000000000000000").ToBytes();
+            //var sy = new Blockcore.NBitcoin.Target(new uint256("0x00ffff0000000000000000000000000000000000000000000000000000"));
+            //BigInteger Diff1 = BigInteger.Parse("00ffff0000000000000000000000000000000000000000000000000000", NumberStyles.HexNumber);
+            //var sss = Diff1.ToByteArray();
+            //  var ddd = Diff1
+
+            //var diff = GetDifficulty(new Blockcore.NBitcoin.Target(new uint256("0000000000000004a264dbc997cb352502149096e31177c00d9e6d7fc7d2da37")));
+
+            //HeaderTest();
+
+            var s222 = GetBitsFromDifficult(1);
+            //var reverseBytes = s.ToByteArrayFromHex().Reverse();
+            //var num = FromCompact(s222.ToByteArrayFromHex());
+            //var tar = new Blockcore.NBitcoin.Target(num);
+            //var targets = new Blockcore.NBitcoin.Target(s222.ToByteArrayFromHex());
+            //    var targetsRev = new Blockcore.NBitcoin.Target(reverseBytes);
+
+            uint x = 503382015; // Replace with your desired uint32_t value
+           // OutputBinary(x);
+
+        }
+
+        public static BigInteger Div(BigInteger x, double y)
+        {
+            var yb = new BigInteger(y);
+
+            if (Math.Abs(y) < double.Epsilon)
+            {
+                throw new ArgumentException("Division by zero is not allowed.");
+            }
+
+            BigInteger q = (BigInteger)(x / yb);
+
+            if (x >= 0)
+            {
+                return q;
+            }
+
+            BigInteger r = x - (BigInteger)(q * yb);
+
+            if (r < 0)
+            {
+                if (yb < 0)
+                    q += 1;
+                else
+                    q -= 1;
+            }
+
+            return q;
+        }
+
+        static byte[] ToCompactByteArray(BigInteger num)
+        {
+            if (num.IsZero)
+                return new byte[] { 0 };
+
+            int exponent = num.ToByteArray().Length;
+            int mantissa;
+
+            if (exponent <= 3)
+            {
+                mantissa = (int)num;
+                mantissa <<= 8 * (3 - exponent);
+            }
+            else
+            {
+                mantissa = (int)(num >> 8 * (exponent - 3));
+            }
+
+            if ((mantissa & 0x800000) != 0)
+            {
+                mantissa >>= 8;
+                exponent += 1;
+            }
+
+            int compact = (exponent << 24) | mantissa;
+
+            if (num.Sign < 0)
+                compact |= 0x800000;
+
+            compact = (int)((uint)compact);
+
+            // Convert compact to a byte array
+            List<byte> byteArray = new List<byte>();
+            for (int i = 0; i < 4; i++)
+            {
+                byteArray.Insert(0, (byte)((compact & (0xFF << (i * 8))) >> (i * 8)));
+            }
+            return byteArray.ToArray();
+        }
+
+        public static byte[] GetBitsFromDifficult(double difficulty)
+        {
+            BigInteger max = BigInteger.Parse("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", NumberStyles.HexNumber);
+
+            var s = Div(max, difficulty);
+            var cmpct = ToCompactByteArray(s);
+
+            return cmpct;
         }
 
         private static void HeaderTest()
         {
             var headerHex2 = "a6496be42fe1b065000000000000000000000005b4490d1678b73c066ed15b6cbe0e98f684612504ffa4f97e34059276d78aa47040ba328b408416b61c80ac212681e1948ac2622705af27f301fcaf2eb1143da20000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffd4f0144d43f2d8bb5d0da049911c392ea51e8463c5e74c2ae51b70d3016f6ae037061a67848020dee27740f93d8f9a937a1912be6068e77adb85eb43cd43d000000005a6407190000000000000000000000000000000000000000000000000000000000000000";
             headerHex2 = "09000000F0984B670000000000000000FFFF000000000000000000000000000000000000000000000000000000000000FFFF000000000000000000000000000000000000000000000000000064FCAF2EB1143DA20000000000000000000000000000000000000000FFFF000000000000000000000000000000000000000000000000000000000000FFFF000000000000000000000000000000000000000000000000000000000000FFFF0000000000000000000000000000000000000000000000000000E8030000FFFF001D00000000FFFF0000000000000000000000000000000000000000000000000000";
+            headerHex2 = "32bb5134a541385e000000005b6ef2d3c1f3cdcadfd9a030ba1811efdd17740f14e166489760741d075992e00000000000000000000000000000000000000000000000000000000000000000000000150000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000059919422c20530ece2b328adf63ec3f35a10e79375731687a81dfa7cd83a24e728b17095216d5e211ba1f61031416a51efca54eacb8c9059440c4671b0625bbe00000000ffff001c0000000000000000000000000000000000000000000000000000000000000000";
             var header = Enumerable.Range(0, headerHex2.Length)
                  .Where(x => x % 2 == 0)
                  .Select(x => Convert.ToByte(headerHex2.Substring(x, 2), 16))

@@ -103,7 +103,7 @@ namespace Blockcore.Networks.ZEEV
                 maxReorgLength: 0,
                 defaultAssumeValid: uint256.Zero,
                 maxMoney: 1000000000 * Money.COIN,
-                coinbaseMaturity: 100,
+                coinbaseMaturity: 25,
                 premineHeight: 0,
                 premineReward: Money.Zero,
                 proofOfWorkReward: Money.Coins((decimal)950.5),

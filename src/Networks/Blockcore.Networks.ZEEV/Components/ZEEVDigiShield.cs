@@ -25,7 +25,7 @@ namespace Blockcore.Networks.ZEEV.Components
             var height = chainedHeaderToValidate.Height;
             Target proofOfWorkLimit = consensus.PowLimit;
             ChainedHeader lastBlock = chainedHeaderToValidate.Previous;
-            if (nAveragingInterval > height) nAveragingInterval = height;
+            if (nAveragingInterval > height) return lastBlock.Header.Bits;
             ChainedHeader firstBlock = chainedHeaderToValidate.GetAncestor(height - nAveragingInterval);
 
             // Limit adjustment step
