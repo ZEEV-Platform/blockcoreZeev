@@ -96,27 +96,14 @@ namespace Blockcore.Networks.ZEEV.Rules
 
                     txClone.Inputs[0].ScriptSig = new Script(bytesNewScript);
 
-                    var ccc = txClone.Inputs[0].ScriptSig.ToHex();
+                    var hashClone = new uint256(txClone.GetHash().ToBytes());
+                    leaves.Add(hashClone);
+                } 
+                else
+                {
+                    var hash = new uint256(tx.GetHash().ToBytes());
+                    leaves.Add(hash);
                 }
-
-                var txCloneHEX = txClone.ToHex();
-                var hex = tx.ToHex();
-
-                var testTx = tx;
-                var sss = testTx.Inputs[0].ScriptSig;
-                var payment = sss.PaymentScript.ToHex();
-                
-                var sssHex = sss.ToHex();
-                var sssOps = sss.ToOps();
-                var testTxHex = testTx.ToHex();
-                // Mark the transaction to cache the hash next time its calculated
-                tx.PrecomputeHash(true, true);
-
-                //{ ef6d7887fc42bf924e5627cf07fc5c83a5b4c2504436d59d8c0efa0e2aefcea0}
-                var hashClone = new uint256(txClone.GetHash().ToBytes(false));
-                var hash = tx.GetHash();
-                // leaves.Add(tx.GetHash());
-                leaves.Add(hashClone);
             }
 
             return ComputeMerkleRoot(leaves, out mutated);
