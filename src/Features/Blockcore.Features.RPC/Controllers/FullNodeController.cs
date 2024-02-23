@@ -497,19 +497,24 @@ namespace Blockcore.Features.RPC.Controllers
             // softforkbip9 deployments
             blockchainInfo.SoftForksBip9 = new Dictionary<string, SoftForksBip9>();
 
-            ConsensusRuleEngine ruleEngine = (ConsensusRuleEngine)this.ConsensusManager.ConsensusRules;
-            ThresholdState[] thresholdStates = ruleEngine.NodeDeployments.BIP9.GetStates(this.ChainIndexer.Tip.Previous);
-            List<ThresholdStateModel> metrics = ruleEngine.NodeDeployments.BIP9.GetThresholdStateMetrics(this.ChainIndexer.Tip.Previous, thresholdStates);
-
-            foreach (ThresholdStateModel metric in metrics.Where(m => !m.DeploymentName.ToLower().Contains("test"))) // to remove the test dummy
+            var previousHeader = this.ChainIndexer.Tip.Previous;
+            if (previousHeader != null)
             {
-                // TODO: Deployment timeout may not be implemented yet
 
-                // Deployments with timeout value of 0 are hidden.
-                // A timeout value of 0 guarantees a softfork will never be activated.
-                // This is used when softfork codes are merged without specifying the deployment schedule.
-                if (metric.TimeTimeOut?.Ticks > 0)
-                    blockchainInfo.SoftForksBip9.Add(metric.DeploymentName, this.CreateSoftForksBip9(metric, thresholdStates[metric.DeploymentIndex]));
+                ConsensusRuleEngine ruleEngine = (ConsensusRuleEngine)this.ConsensusManager.ConsensusRules;
+                ThresholdState[] thresholdStates = ruleEngine.NodeDeployments.BIP9.GetStates(previousHeader);
+                List<ThresholdStateModel> metrics = ruleEngine.NodeDeployments.BIP9.GetThresholdStateMetrics(previousHeader, thresholdStates);
+
+                foreach (ThresholdStateModel metric in metrics.Where(m => !m.DeploymentName.ToLower().Contains("test"))) // to remove the test dummy
+                {
+                    // TODO: Deployment timeout may not be implemented yet
+
+                    // Deployments with timeout value of 0 are hidden.
+                    // A timeout value of 0 guarantees a softfork will never be activated.
+                    // This is used when softfork codes are merged without specifying the deployment schedule.
+                    if (metric.TimeTimeOut?.Ticks > 0)
+                        blockchainInfo.SoftForksBip9.Add(metric.DeploymentName, this.CreateSoftForksBip9(metric, thresholdStates[metric.DeploymentIndex]));
+                }
             }
 
             // TODO: Implement blockchainInfo.warnings
