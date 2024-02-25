@@ -395,9 +395,7 @@ size:   data:
 
         private byte[] maskHash(byte[] prevBlockHash)
         {
-            var blake2bConfig = new Blake2BConfig();
-            blake2bConfig.OutputSizeInBytes = 32;
-            return Blake2B.ComputeHash(prevBlockHash.Concat(new byte[32]).ToArray(), blake2bConfig);
+            return Blake2B.ComputeHash(prevBlockHash.Concat(new byte[32]).ToArray(), new Blake2BConfig() { OutputSizeInBytes = 32 });
         }
 
         private byte[] subHash()
@@ -424,17 +422,13 @@ size:   data:
                 var bytes = ms.GetBuffer();
                 Array.Resize(ref bytes, (int)ms.Length);
 
-                var blake2bConfig = new Blake2BConfig();
-                blake2bConfig.OutputSizeInBytes = 32;
-                return Blake2B.ComputeHash(bytes, blake2bConfig);
+                return Blake2B.ComputeHash(bytes, new Blake2BConfig() { OutputSizeInBytes = 32 });
             }
         }
 
         private byte[] commitHash(byte[] prevBlockHash)
         {
-            var blake2bConfig = new Blake2BConfig();
-            blake2bConfig.OutputSizeInBytes = 32;
-            return Blake2B.ComputeHash(subHash().Concat(maskHash(prevBlockHash)), blake2bConfig);
+            return Blake2B.ComputeHash(subHash().Concat(maskHash(prevBlockHash)), new Blake2BConfig() { OutputSizeInBytes = 32 });
         }
 
         private byte[] padding(int size, byte[] prevBlock, byte[] treeRoot)

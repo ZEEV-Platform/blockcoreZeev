@@ -1328,7 +1328,7 @@ namespace Blockcore.Consensus.TransactionInfo
 
         #endregion IBitcoinSerializable Members
 
-        public uint256 GetHash()
+        public virtual uint256 GetHash()
         {
             uint256 h = null;
             uint256[] hashes = this.hashes;
@@ -1378,9 +1378,9 @@ namespace Blockcore.Consensus.TransactionInfo
                 this.hashes[1] = this.GetWitHash();
         }
 
-        private uint256[] hashes = null;
+        public uint256[] hashes = null;
 
-        public uint256 GetWitHash()
+        public virtual uint256 GetWitHash()
         {
             if (!this.HasWitness)
                 return GetHash();

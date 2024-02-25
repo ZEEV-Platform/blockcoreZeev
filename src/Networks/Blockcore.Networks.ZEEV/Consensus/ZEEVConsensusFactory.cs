@@ -1,5 +1,9 @@
-﻿using Blockcore.Consensus;
+﻿using System;
+using Blockcore.Consensus;
 using Blockcore.Consensus.BlockInfo;
+using Blockcore.Consensus.TransactionInfo;
+using Blockcore.NBitcoin.DataEncoders;
+using Blockcore.NBitcoin;
 
 namespace Blockcore.Networks.ZEEV.Consensus
 {
@@ -22,6 +26,29 @@ namespace Blockcore.Networks.ZEEV.Consensus
 #pragma warning disable CS0618 // Type or member is obsolete
             return new Block(this.CreateBlockHeader());
 #pragma warning restore CS0618 // Type or member is obsolete
+        }
+
+        public override Transaction CreateTransaction()
+        {
+            return new ZEEVTransaction();
+        }
+
+        public override Transaction CreateTransaction(byte[] bytes)
+        {
+            if (bytes == null)
+                throw new ArgumentNullException(nameof(bytes));
+
+            var transaction = new ZEEVTransaction();
+            transaction.ReadWrite(bytes, this);
+            return transaction;
+        }
+
+        public override Transaction CreateTransaction(string hex)
+        {
+            if (hex == null)
+                throw new ArgumentNullException(nameof(hex));
+
+            return CreateTransaction(Encoders.Hex.DecodeData(hex));
         }
     }
 }

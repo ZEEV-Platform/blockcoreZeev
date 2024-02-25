@@ -21,7 +21,7 @@ namespace Blockcore.Networks.ZEEV.Consensus
             string pszTimestamp = "Benjamin is a ravenous wolf; in the morning he devours the prey, in the evening he divides the plunder.";
             var genesisOutputScript = new Script(Op.GetPushOp(Encoders.Hex.DecodeData("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f")), OpcodeType.OP_CHECKSIG);
 
-            Transaction txNew = consensusFactory.CreateTransaction();
+            var txNew = consensusFactory.CreateTransaction();
             txNew.Version = 1;
             txNew.AddInput(new TxIn()
             {
@@ -70,7 +70,7 @@ namespace Blockcore.Networks.ZEEV.Consensus
 
                 .Register<TransactionLocktimeActivationRule>() // implements BIP113
                 .Register<CoinbaseHeightActivationRule>() // implements BIP34
-                .Register<WitnessCommitmentsRule>() // BIP141, BIP144
+                .Register<ZEEVWitnessCommitmentsRule>() // BIP141, BIP144
                 .Register<BlockSizeRule>()
 
                 // rules that are inside the method CheckBlock

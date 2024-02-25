@@ -251,7 +251,7 @@ namespace Blockcore.Features.Miner
         /// </summary>
         /// <param name="block">The new block that is being mined.</param>
         /// <seealso cref="https://github.com/bitcoin/bitcoin/blob/master/src/validation.cpp"/>
-        public void AddOrUpdateCoinbaseCommitmentToBlock(Block block)
+        public virtual void AddOrUpdateCoinbaseCommitmentToBlock(Block block)
         {
             WitnessCommitmentsRule.ClearWitnessCommitment(this.Network, block);
             WitnessCommitmentsRule.CreateWitnessCommitment(this.Network, block);

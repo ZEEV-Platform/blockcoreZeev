@@ -11,6 +11,8 @@ using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
+using Blockcore.Networks.ZEEV.Consensus;
+using Blockcore.Networks.ZEEV.Crypto.Blake2b;
 using DBreeze.Utils;
 using Microsoft.Extensions.Logging;
 using Polly;
@@ -33,28 +35,28 @@ namespace Blockcore.Networks.ZEEV.Rules
     /// kind of blocks.
     /// <seealso cref="https://bitcointalk.org/index.php?topic=102395.0"/>
     /// </remarks>
-    public class ZEEVBlockMerkleRootRule : IntegrityValidationConsensusRule
+    public class ZEEVBlockMerkleRootRule : PartialValidationConsensusRule //IntegrityValidationConsensusRule
     {
         /// <inheritdoc />
         /// <exception cref="ConsensusErrors.BadMerkleRoot">The block merkle root is different from the computed merkle root.</exception>
         /// <exception cref="ConsensusErrors.BadTransactionDuplicate">One of the leaf nodes of the merkle tree has a duplicate hash within the subtree.</exception>
-        public override void Run(RuleContext context)
-        {
-            Block block = context.ValidationContext.BlockToValidate;
+        //public override void Run(RuleContext context)
+        //{
+        //    Block block = context.ValidationContext.BlockToValidate;
 
-            uint256 hashMerkleRoot2 = BlockMerkleRoot(block, out bool mutated);
-            if (block.Header.HashMerkleRoot != hashMerkleRoot2)
-            {
-                this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
-                ConsensusErrors.BadMerkleRoot.Throw();
-            }
+        //    uint256 hashMerkleRoot2 = BlockMerkleRoot(block, out bool mutated);
+        //    if (block.Header.HashMerkleRoot != hashMerkleRoot2)
+        //    {
+        //        this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
+        //        ConsensusErrors.BadMerkleRoot.Throw();
+        //    }
 
-            if (mutated)
-            {
-                this.Logger.LogTrace("(-)[BAD_TX_DUP]");
-                ConsensusErrors.BadTransactionDuplicate.Throw();
-            }
-        }
+        //    if (mutated)
+        //    {
+        //        this.Logger.LogTrace("(-)[BAD_TX_DUP]");
+        //        ConsensusErrors.BadTransactionDuplicate.Throw();
+        //    }
+        //}
 
         /// <summary>
         /// Calculates merkle root for block's transactions.
@@ -65,9 +67,9 @@ namespace Blockcore.Networks.ZEEV.Rules
         public static uint256 BlockMerkleRoot(Block block, out bool mutated)
         {
             var leaves = new List<uint256>(block.Transactions.Count);
-            foreach (Transaction tx in block.Transactions)
+            foreach (ZEEVTransaction tx in block.Transactions)
             {
-                var txClone = new Transaction();
+                var txClone = new ZEEVTransaction();
                 txClone.FromBytes(tx.ToBytes());
 
                 //we have to remove extranonce for right merkle hash
@@ -96,6 +98,7 @@ namespace Blockcore.Networks.ZEEV.Rules
 
                     txClone.Inputs[0].ScriptSig = new Script(bytesNewScript);
 
+                    var txCloneHex = txClone.ToHex();
                     var hashClone = new uint256(txClone.GetHash().ToBytes());
                     leaves.Add(hashClone);
                 } 
@@ -164,7 +167,7 @@ namespace Blockcore.Networks.ZEEV.Rules
 
                     Buffer.BlockCopy(subTreeHashes[level].ToBytes(), 0, hash, 0, 32);
                     Buffer.BlockCopy(currentLeaveHash.ToBytes(), 0, hash, 32, 32);
-                    currentLeaveHash = Hashes.Hash256(hash);
+                    currentLeaveHash = new uint256(Blake2B.ComputeHash(hash, new Blake2BConfig() { OutputSizeInBytes = 32 }));
                 }
 
                 // Store the resulting hash at subTreeHashes position level.
@@ -202,7 +205,7 @@ namespace Blockcore.Networks.ZEEV.Rules
                     var rootBytes = root.ToBytes();
                     Buffer.BlockCopy(rootBytes, 0, hash, 0, 32);
                     Buffer.BlockCopy(rootBytes, 0, hash, 32, 32);
-                    root = Hashes.Hash256(hash);
+                    root = new uint256(Blake2B.ComputeHash(hash, new Blake2BConfig() { OutputSizeInBytes = 32 }));
 
                     // Increment processedLeavesCount to the value it would have if two entries at this
                     // level had existed.
@@ -224,7 +227,7 @@ namespace Blockcore.Networks.ZEEV.Rules
 
                         Buffer.BlockCopy(subTreeHashes[level].ToBytes(), 0, hashh, 0, 32);
                         Buffer.BlockCopy(root.ToBytes(), 0, hashh, 32, 32);
-                        root = Hashes.Hash256(hashh);
+                        root = new uint256(Blake2B.ComputeHash(hashh, new Blake2BConfig() { OutputSizeInBytes = 32 }));
 
                         level++;
                     }
@@ -234,24 +237,24 @@ namespace Blockcore.Networks.ZEEV.Rules
             return root;
         }
 
-        //public override Task RunAsync(RuleContext context)
-        //{
-        //    Block block = context.ValidationContext.BlockToValidate;
+        public override Task RunAsync(RuleContext context)
+        {
+            Block block = context.ValidationContext.BlockToValidate;
 
-        //    uint256 hashMerkleRoot2 = BlockMerkleRoot(block, out bool mutated);
-        //    if (block.Header.HashMerkleRoot != hashMerkleRoot2)
-        //    {
-        //        this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
-        //        ConsensusErrors.BadMerkleRoot.Throw();
-        //    }
+            uint256 hashMerkleRoot2 = BlockMerkleRoot(block, out bool mutated);
+            if (block.Header.HashMerkleRoot != hashMerkleRoot2)
+            {
+                this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
+                ConsensusErrors.BadMerkleRoot.Throw();
+            }
 
-        //    if (mutated)
-        //    {
-        //        this.Logger.LogTrace("(-)[BAD_TX_DUP]");
-        //        ConsensusErrors.BadTransactionDuplicate.Throw();
-        //    }
+            if (mutated)
+            {
+                this.Logger.LogTrace("(-)[BAD_TX_DUP]");
+                ConsensusErrors.BadTransactionDuplicate.Throw();
+            }
 
-        //    return Task.CompletedTask;
-        //}
+            return Task.CompletedTask;
+        }
     }
 }

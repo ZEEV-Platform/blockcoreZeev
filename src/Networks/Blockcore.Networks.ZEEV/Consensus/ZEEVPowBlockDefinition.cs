@@ -1,13 +1,16 @@
 ﻿using Blockcore.Base.Deployments;
 using Blockcore.Consensus;
+using Blockcore.Consensus.BlockInfo;
 using Blockcore.Consensus.Chain;
 using Blockcore.Consensus.ScriptInfo;
+using Blockcore.Features.Consensus.Rules.CommonRules;
 using Blockcore.Features.MemoryPool;
 using Blockcore.Features.MemoryPool.Interfaces;
 using Blockcore.Features.Miner;
 using Blockcore.Mining;
 using Blockcore.NBitcoin;
 using Blockcore.Networks;
+using Blockcore.Networks.ZEEV.Rules;
 using Blockcore.Utilities;
 using Microsoft.Extensions.Logging;
 
@@ -74,6 +77,17 @@ namespace Blockcore.Networks.ZEEV.Consensus
             var treeHashBlockTreeRoot = this.ChainTip.GetAncestor(interval * rootInterval);
 
             return treeHashBlockTreeRoot.HashBlock;
+        }
+
+        /// <summary>
+        /// Adds the coinbase commitment to the coinbase transaction according to  https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki.
+        /// </summary>
+        /// <param name="block">The new block that is being mined.</param>
+        /// <seealso cref="https://github.com/bitcoin/bitcoin/blob/master/src/validation.cpp"/>
+        public override void AddOrUpdateCoinbaseCommitmentToBlock(Block block)
+        {
+            ZEEVWitnessCommitmentsRule.ClearWitnessCommitment(this.Network, block);
+            ZEEVWitnessCommitmentsRule.CreateWitnessCommitment(this.Network, block);
         }
     }
 }
