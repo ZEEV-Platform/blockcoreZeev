@@ -35,28 +35,28 @@ namespace Blockcore.Networks.ZEEV.Rules
     /// kind of blocks.
     /// <seealso cref="https://bitcointalk.org/index.php?topic=102395.0"/>
     /// </remarks>
-    public class ZEEVBlockMerkleRootRule : PartialValidationConsensusRule //IntegrityValidationConsensusRule
+    public class ZEEVBlockMerkleRootRule : IntegrityValidationConsensusRule
     {
         /// <inheritdoc />
         /// <exception cref="ConsensusErrors.BadMerkleRoot">The block merkle root is different from the computed merkle root.</exception>
         /// <exception cref="ConsensusErrors.BadTransactionDuplicate">One of the leaf nodes of the merkle tree has a duplicate hash within the subtree.</exception>
-        //public override void Run(RuleContext context)
-        //{
-        //    Block block = context.ValidationContext.BlockToValidate;
+        public override void Run(RuleContext context)
+        {
+            Block block = context.ValidationContext.BlockToValidate;
 
-        //    uint256 hashMerkleRoot2 = BlockMerkleRoot(block, out bool mutated);
-        //    if (block.Header.HashMerkleRoot != hashMerkleRoot2)
-        //    {
-        //        this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
-        //        ConsensusErrors.BadMerkleRoot.Throw();
-        //    }
+            uint256 hashMerkleRoot2 = BlockMerkleRoot(block, out bool mutated);
+            if (block.Header.HashMerkleRoot != hashMerkleRoot2)
+            {
+                this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
+                ConsensusErrors.BadMerkleRoot.Throw();
+            }
 
-        //    if (mutated)
-        //    {
-        //        this.Logger.LogTrace("(-)[BAD_TX_DUP]");
-        //        ConsensusErrors.BadTransactionDuplicate.Throw();
-        //    }
-        //}
+            if (mutated)
+            {
+                this.Logger.LogTrace("(-)[BAD_TX_DUP]");
+                ConsensusErrors.BadTransactionDuplicate.Throw();
+            }
+        }
 
         /// <summary>
         /// Calculates merkle root for block's transactions.
@@ -237,24 +237,24 @@ namespace Blockcore.Networks.ZEEV.Rules
             return root;
         }
 
-        public override Task RunAsync(RuleContext context)
-        {
-            Block block = context.ValidationContext.BlockToValidate;
+        //public override Task RunAsync(RuleContext context)
+        //{
+        //    Block block = context.ValidationContext.BlockToValidate;
 
-            uint256 hashMerkleRoot2 = BlockMerkleRoot(block, out bool mutated);
-            if (block.Header.HashMerkleRoot != hashMerkleRoot2)
-            {
-                this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
-                ConsensusErrors.BadMerkleRoot.Throw();
-            }
+        //    uint256 hashMerkleRoot2 = BlockMerkleRoot(block, out bool mutated);
+        //    if (block.Header.HashMerkleRoot != hashMerkleRoot2)
+        //    {
+        //        this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
+        //        ConsensusErrors.BadMerkleRoot.Throw();
+        //    }
 
-            if (mutated)
-            {
-                this.Logger.LogTrace("(-)[BAD_TX_DUP]");
-                ConsensusErrors.BadTransactionDuplicate.Throw();
-            }
+        //    if (mutated)
+        //    {
+        //        this.Logger.LogTrace("(-)[BAD_TX_DUP]");
+        //        ConsensusErrors.BadTransactionDuplicate.Throw();
+        //    }
 
-            return Task.CompletedTask;
-        }
+        //    return Task.CompletedTask;
+        //}
     }
 }

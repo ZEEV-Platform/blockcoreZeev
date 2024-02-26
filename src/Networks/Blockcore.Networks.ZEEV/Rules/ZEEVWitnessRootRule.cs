@@ -35,7 +35,7 @@ namespace Blockcore.Networks.ZEEV.Rules
     /// kind of blocks.
     /// <seealso cref="https://bitcointalk.org/index.php?topic=102395.0"/>
     /// </remarks>
-    public class ZEEVWitnessRootRule : PartialValidationConsensusRule //IntegrityValidationConsensusRule
+    public class ZEEVWitnessRootRule : IntegrityValidationConsensusRule
     {
         /// <inheritdoc />
         /// <exception cref="ConsensusErrors.BadMerkleRoot">The block merkle root is different from the computed merkle root.</exception>
@@ -83,24 +83,24 @@ namespace Blockcore.Networks.ZEEV.Rules
             return ZEEVBlockMerkleRootRule.ComputeMerkleRoot(leaves, out mutated);
         }
 
-        public override Task RunAsync(RuleContext context)
-        {
-            Block block = context.ValidationContext.BlockToValidate;
+        //public override Task RunAsync(RuleContext context)
+        //{
+        //    Block block = context.ValidationContext.BlockToValidate;
 
-            uint256 hashWitnessRoot2 = BlockWitnessRoot(block, out bool mutated);
-            if (((ZEEVBlockHeader)block.Header).HashWitnessRoot != hashWitnessRoot2)
-            {
-                this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
-                ConsensusErrors.BadMerkleRoot.Throw();
-            }
+        //    uint256 hashWitnessRoot2 = BlockWitnessRoot(block, out bool mutated);
+        //    if (((ZEEVBlockHeader)block.Header).HashWitnessRoot != hashWitnessRoot2)
+        //    {
+        //        this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
+        //        ConsensusErrors.BadMerkleRoot.Throw();
+        //    }
 
-            if (mutated)
-            {
-                this.Logger.LogTrace("(-)[BAD_TX_DUP]");
-                ConsensusErrors.BadTransactionDuplicate.Throw();
-            }
+        //    if (mutated)
+        //    {
+        //        this.Logger.LogTrace("(-)[BAD_TX_DUP]");
+        //        ConsensusErrors.BadTransactionDuplicate.Throw();
+        //    }
 
-            return Task.CompletedTask;
-        }
+        //    return Task.CompletedTask;
+        //}
     }
 }
