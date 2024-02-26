@@ -36,15 +36,6 @@ namespace Blockcore.Networks.ZEEV.Consensus
                 h = new uint256(hash);
             }
 
-            //using (var hs = new HashStream())
-            //{
-            //    ReadWrite(new BitcoinStream(hs, true)
-            //    {
-            //        TransactionOptions = TransactionOptions.None
-            //    });
-            //    h = hs.GetHash();
-            //}
-
             hashes = this.hashes;
             if (hashes != null)
             {
@@ -71,7 +62,7 @@ namespace Blockcore.Networks.ZEEV.Consensus
             {
                 var stream = new BitcoinStream(ms, true)
                 {
-                    TransactionOptions = TransactionOptions.None
+                    TransactionOptions = TransactionOptions.Witness
                 };
 
                 this.ReadWrite(stream);
@@ -82,15 +73,6 @@ namespace Blockcore.Networks.ZEEV.Consensus
 
                 h = new uint256(hash);
             }
-
-            //using (var hs = new HashStream())
-            //{
-            //    ReadWrite(new BitcoinStream(hs, true)
-            //    {
-            //        TransactionOptions = TransactionOptions.Witness
-            //    });
-            //    h = hs.GetHash();
-            //}
 
             hashes = this.hashes;
             if (hashes != null)

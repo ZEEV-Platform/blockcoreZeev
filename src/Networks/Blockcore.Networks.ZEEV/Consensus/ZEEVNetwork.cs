@@ -47,10 +47,10 @@ namespace Blockcore.Networks.ZEEV.Consensus
             ((ZEEVBlockHeader)genesis.Header).HashReservedRoot = uint256.Zero;
             ((ZEEVBlockHeader)genesis.Header).HashMask = uint256.Zero;
             ((ZEEVBlockHeader)genesis.Header).HashTreeRoot = uint256.Zero;
-            ((ZEEVBlockHeader)genesis.Header).HashWitnessRoot = uint256.Zero;
 
             genesis.UpdateMerkleRoot();
-            
+            ((ZEEVBlockHeader)genesis.Header).HashWitnessRoot = ZEEVWitnessCommitmentsRule.BlockWitnessMerkleRoot(genesis, out bool _);
+
             return genesis;
         }
 
@@ -63,7 +63,8 @@ namespace Blockcore.Networks.ZEEV.Consensus
                 .Register<ZEEVCheckTimeDelayPowRule>();
 
             consensus.ConsensusRules
-                .Register<ZEEVBlockMerkleRootRule>();
+                .Register<ZEEVBlockMerkleRootRule>()
+                .Register<ZEEVWitnessRootRule>();
 
             consensus.ConsensusRules
                 .Register<SetActivationDeploymentsPartialValidationRule>()
