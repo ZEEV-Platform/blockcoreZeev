@@ -92,6 +92,27 @@ namespace Blockcore.Features.Wallet.Api.Controllers
             this.walletTransactionHandler = walletTransactionHandler;
         }
 
+        /// <summary>
+        /// Returns a json object containing index information.
+        /// </summary>
+        /// <returns>(getindexinfo) Object with informatin about index.</returns>
+        [ActionName("getindexinfo")]
+        [ActionDescription("Returns a json object containing index information.")]
+        public Dictionary<string, GetIndexInfoDetailModel> GetIndexInfo(string index = "")
+        {
+            var indexInfo = new Dictionary<string, GetIndexInfoDetailModel>();
+
+            if (this.storeSettings.TxIndex)
+            {
+                var indexDetail = new GetIndexInfoDetailModel();
+                indexDetail.Synced = true;
+                indexDetail.BestBlockHeight = this.ChainIndexer.Tip.Height;
+                indexInfo.Add("txindex", indexDetail);
+            }
+
+            return indexInfo;
+        }
+
         [ActionName("setwallet")]
         [ActionDescription("Selects the active wallet on RPC based on the name of the wallet supplied.")]
         public bool SetWallet(string walletname)
