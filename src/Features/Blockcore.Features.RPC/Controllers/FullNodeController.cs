@@ -299,24 +299,48 @@ namespace Blockcore.Features.RPC.Controllers
         /// <remarks>The binary format is not supported with RPC.</remarks>
         [ActionName("getblockheader")]
         [ActionDescription("Gets the block header of the block identified by the hash.")]
-        public object GetBlockHeader(string hash, bool isJsonFormat = true)
+        public object GetBlockHeader(string blockHash, bool isJsonFormat = true)
         {
-            Guard.NotNull(hash, nameof(hash));
+            Guard.NotNull(blockHash, nameof(blockHash));
+            uint256 blockId = uint256.Parse(blockHash);
 
-            this.logger.LogDebug("RPC GetBlockHeader {0}", hash);
+            this.logger.LogDebug("RPC GetBlockHeader {0}", blockId);
 
             if (this.ChainIndexer == null)
                 return null;
 
-            BlockHeader blockHeader = this.ChainIndexer.GetHeader(uint256.Parse(hash))?.Header;
+            var chainedHeader = this.ChainIndexer.GetHeader(blockId);
 
-            if (blockHeader == null)
+            if (chainedHeader == null)
+                return null;
+
+            Block block = chainedHeader.Block ?? this.blockStore?.GetBlock(blockId);
+
+            // In rare occasions a block that is found in the
+            // indexer may not have been pushed to the store yet.
+            if (block == null)
+                return null;
+
+            if (chainedHeader.Header == null)
                 return null;
 
             if (isJsonFormat)
-                return new BlockHeaderModel(blockHeader);
+            {
+                var json = new BlockHeaderModel(chainedHeader.Header);
+                json.Hash = block.GetHash().ToString();
+                json.Confirmations = this.ChainIndexer.Tip.Height - chainedHeader.Height + 1;
+                json.NumberOfTransactions = block.Transactions.Count();
+                json.NextBlockHash = chainedHeader.Next?.FirstOrDefault()?.HashBlock.ToString();
+                json.Difficulty = block.Header.Bits.Difficulty;
+                json.ChainWork = chainedHeader.ChainWork.ToString();
+                json.Height = chainedHeader.Height;
+                json.VersionHex = block.Header.Version.ToString("x8");
+                json.MedianTime = chainedHeader.GetMedianTimePast().ToUnixTimeSeconds();
 
-            return new HexModel(blockHeader.ToHex(this.Network.Consensus.ConsensusFactory));
+                return json;
+            }
+
+            return new HexModel(chainedHeader.Header.ToHex(this.Network.Consensus.ConsensusFactory));
         }
 
         /// <summary>
