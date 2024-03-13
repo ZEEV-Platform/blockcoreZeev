@@ -3,6 +3,7 @@ using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Features.Consensus.CoinViews;
 using Blockcore.Features.MemoryPool.Fee;
 using Blockcore.NBitcoin;
+using static Blockcore.Features.MemoryPool.TxMempool;
 
 namespace Blockcore.Features.MemoryPool.Interfaces
 {
@@ -169,6 +170,13 @@ namespace Blockcore.Features.MemoryPool.Interfaces
         Transaction Get(uint256 hash);
 
         /// <summary>
+        /// Gets the MemPoolEntry from the memory pool based upon the transaction hash.
+        /// </summary>
+        /// <param name="hash">Transaction hash.</param>
+        /// <returns>The transaction.</returns>
+        TxMempoolEntry GetEntry(uint256 hash);
+
+        /// <summary>
         /// The minimum fee to get into the mempool, which may itself not be enough for larger-sized transactions.
         /// </summary>
         /// <param name="sizelimit">Size limit of the memory pool in bytes.</param>
@@ -245,5 +253,12 @@ namespace Blockcore.Features.MemoryPool.Interfaces
         /// </summary>
         /// <param name="stream">Stream to write to.</param>
         void WriteFeeEstimates(BitcoinStream stream);
+
+        /// <summary>
+        /// Get parents of entry
+        /// </summary>
+        /// <param name="entry">Parents for entry</param>
+        /// <returns></returns>
+        SetEntries GetMemPoolParents(TxMempoolEntry entry);
     }
 }
