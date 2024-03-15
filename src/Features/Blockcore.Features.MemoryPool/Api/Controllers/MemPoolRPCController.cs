@@ -25,6 +25,7 @@ using static Blockcore.Features.MemoryPool.TxMempool;
 using System.Net;
 using System.Xml.Linq;
 using Blockcore.Connection;
+using Blockcore.Utilities.JsonConverters;
 
 namespace Blockcore.Features.MemoryPool.Api.Controllers
 {
@@ -120,11 +121,19 @@ namespace Blockcore.Features.MemoryPool.Api.Controllers
         /// <returns>(GetMemPoolEntry) Return object with informations.</returns>
         [ActionName("getmempoolentry")]
         [ActionDescription("Returns mempool data for given transaction.")]
-        public GetMemPoolEntryModel GetMempoolEntry(string txid)
+        public IActionResult GetMempoolEntry(string txid)
         {
-            Guard.NotEmpty(txid, "txid");
-            var entry = this.MemPool.GetEntry(new uint256(txid));
-            return GetMemPoolEntryFromTx(entry);
+            try
+            {
+                Guard.NotEmpty(txid, "txid");
+                var entry = this.MemPool.GetEntry(new uint256(txid));
+                return this.Json(ResultHelper.BuildResultResponse(GetMemPoolEntryFromTx(entry)));
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError("Exception occurred: {0}", e.ToString());
+                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
+            }
         }
 
         /// <summary>
@@ -133,20 +142,28 @@ namespace Blockcore.Features.MemoryPool.Api.Controllers
         /// <returns>(GetMemPoolInfo) Return object with informations.</returns>
         [ActionName("getmempoolinfo")]
         [ActionDescription("Returns details on the active state of the TX memory pool.")]
-        public GetMemPoolInfoModel GetMempoolInfo()
+        public IActionResult GetMempoolInfo()
         {
-            var maxmem = this.MempoolManager.mempoolSettings.MaxMempool * 1000000;
-            var result = new GetMemPoolInfoModel
+            try
             {
-                Size = this.MemPool.Size,
-                Usage = this.MemPool.DynamicMemoryUsage(),
-                Bytes = this.MempoolManager.MempoolSize().Result,
-                Maxmempool = maxmem,
-                MempoolMinFee = this.MemPool.GetMinFee(maxmem).FeePerK.ToUnit(MoneyUnit.BTC),
-                MinRelayTxFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.BTC)
-            };
+                var maxmem = this.MempoolManager.mempoolSettings.MaxMempool * 1000000;
+                var result = new GetMemPoolInfoModel
+                {
+                    Size = this.MemPool.Size,
+                    Usage = this.MemPool.DynamicMemoryUsage(),
+                    Bytes = this.MempoolManager.MempoolSize().Result,
+                    Maxmempool = maxmem,
+                    MempoolMinFee = this.MemPool.GetMinFee(maxmem).FeePerK.ToUnit(MoneyUnit.BTC),
+                    MinRelayTxFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.BTC)
+                };
 
-            return result;
+                return this.Json(ResultHelper.BuildResultResponse(result));
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError("Exception occurred: {0}", e.ToString());
+                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
+            }
         }
 
         /// <summary>
@@ -155,9 +172,123 @@ namespace Blockcore.Features.MemoryPool.Api.Controllers
         /// <returns>(bool) True if all ok.</returns>
         [ActionName("savemempool")]
         [ActionDescription("Dumps the mempool to disk.")]
-        public void SaveMemPool()
+        public IActionResult SaveMemPool()
         {
-            this.MempoolManager.SavePool();
+            try
+            {
+                this.MempoolManager.SavePool();
+                return this.Json(ResultHelper.BuildResultResponse(true));
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError("Exception occurred: {0}", e.ToString());
+                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// If txid is in the mempool, returns all in-mempool ancestors.
+        /// </summary>
+        /// <param name="txid">The transaction id (must be in mempool).</param>
+        /// <param name="verbose">True for a json object, false for array of transaction ids</param>
+        /// <returns>(List, GetMemPoolEntry or List, string) Return object with informations.</returns>
+        [ActionName("getmempoolancestors")]
+        [ActionDescription("If txid is in the mempool, returns all in-mempool ancestors.")]
+        public IActionResult GetMempoolAncestors(string txid, bool verbose)
+        {
+            try
+            {
+                Guard.NotEmpty(txid, nameof(txid));
+
+                var entryTx = this.MemPool.GetEntry(new uint256(txid));
+                Guard.NotNull(entryTx, "entryTx does not exist.");
+
+                var setAncestors = new SetEntries();
+                string dummy = string.Empty;
+                long nNoLimit = long.MaxValue;
+                this.MemPool.CalculateMemPoolAncestors(entryTx, setAncestors, nNoLimit, nNoLimit, nNoLimit, nNoLimit, out dummy, false);
+
+                if (verbose)
+                {
+                    var result = new List<GetMemPoolEntryModel>();
+
+                    if (setAncestors != null)
+                    {
+                        foreach (var entry in setAncestors)
+                        {
+                            result.Add(GetMemPoolEntryFromTx(entry));
+                        }
+                    }
+                    return this.Json(ResultHelper.BuildResultResponse(result));
+                }
+
+                var listTxHash = new List<string>();
+                if (setAncestors != null)
+                {
+                    foreach (var entry in setAncestors)
+                    {
+                        listTxHash.Add(entry.TransactionHash.ToString());
+                    }
+                }
+
+                return this.Json(ResultHelper.BuildResultResponse(listTxHash));
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError("Exception occurred: {0}", e.ToString());
+                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// If txid is in the mempool, returns all in-mempool descendants.
+        /// </summary>
+        /// <param name="txid">The transaction id (must be in mempool).</param>
+        /// <param name="verbose">True for a json object, false for array of transaction ids.</param>
+        /// <returns>(List, GetMemPoolEntry or List, string) Return object with informations.</returns>
+        [ActionName("getmempooldescendants")]
+        [ActionDescription("If txid is in the mempool, returns all in-mempool descendants.")]
+        public IActionResult GetMempoolDescendants(string txid, bool verbose)
+        {
+            try
+            {
+                Guard.NotEmpty(txid, nameof(txid));
+                var entryTx = this.MemPool.GetEntry(new uint256(txid));
+                var setDescendants = new SetEntries();
+                this.MemPool.CalculateDescendants(entryTx, setDescendants);
+
+                if (verbose)
+                {
+                    var result = new List<GetMemPoolEntryModel>();
+
+                    if (setDescendants != null)
+                    {
+                        foreach (var entry in setDescendants)
+                        {
+                            result.Add(GetMemPoolEntryFromTx(entry));
+                        }
+                    }
+
+                    return this.Json(ResultHelper.BuildResultResponse(result));
+                }
+
+                var listTxHash = new List<string>();
+
+                if (setDescendants != null)
+                {
+                    foreach (var entry in setDescendants)
+                    {
+                        listTxHash.Add(entry.TransactionHash.ToString());
+                    }
+                }
+
+                return this.Json(ResultHelper.BuildResultResponse(listTxHash));
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError("Exception occurred: {0}", e.ToString());
+                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
+            }
         }
     }
 }
