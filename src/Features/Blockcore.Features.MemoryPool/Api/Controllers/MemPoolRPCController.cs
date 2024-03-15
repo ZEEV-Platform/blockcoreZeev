@@ -290,5 +290,40 @@ namespace Blockcore.Features.MemoryPool.Api.Controllers
                 return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
             }
         }
+
+        /// <summary>
+        /// Returns all transaction ids in memory pool as a json array of string transaction ids. Hint: use getmempoolentry to fetch a specific transaction from the mempool.
+        /// </summary>
+        /// <param name="verbose">True for a json object, false for array of transaction ids.</param>
+        /// <returns>(List, GetMemPoolEntry or List, string) Object with informations.</returns>
+        [ActionName("getrawmempool")]
+        [ActionDescription("Returns all transaction ids in memory pool as a json array of string transaction ids. Hint: use getmempoolentry to fetch a specific transaction from the mempool.")]
+        public IActionResult GetRawMempool(bool verbose)
+        {
+            try
+            {
+                var memPoolTransactions = this.MempoolManager.GetMempoolAsync().Result;
+
+                if (verbose)
+                {
+                    var result = new Dictionary<string, GetMemPoolEntryModel>();
+
+                    foreach (var itemTxId in memPoolTransactions)
+                    {
+                        var entry = this.MemPool.GetEntry(itemTxId);
+                        result.Add(itemTxId.ToString(), GetMemPoolEntryFromTx(entry));
+                    }
+
+                    return this.Json(ResultHelper.BuildResultResponse(result));
+                }
+
+                return this.Json(ResultHelper.BuildResultResponse(memPoolTransactions));
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError("Exception occurred: {0}", e.ToString());
+                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
+            }
+        }
     }
 }
