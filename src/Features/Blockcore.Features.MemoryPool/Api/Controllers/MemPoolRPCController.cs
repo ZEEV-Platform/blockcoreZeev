@@ -84,7 +84,7 @@ namespace Blockcore.Features.MemoryPool.Api.Controllers
                 Ancestor = entry.ModFeesWithAncestors.ToUnit(MoneyUnit.BTC),
                 Descendant = entry.ModFeesWithDescendants.ToUnit(MoneyUnit.BTC),
                 Base = entry.Fee.ToUnit(MoneyUnit.BTC),
-                Modified = entry.ModifiedFee
+                Modified = new Money(entry.ModifiedFee).ToUnit(MoneyUnit.BTC)
             };
 
             var weight = entry.GetTxSize();
