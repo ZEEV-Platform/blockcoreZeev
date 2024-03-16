@@ -87,9 +87,11 @@ namespace Blockcore.Features.MemoryPool.Api.Controllers
                 Modified = entry.ModifiedFee
             };
 
+            var weight = entry.GetTxSize();
+
             var resultEntry = new GetMemPoolEntryModel
             {
-                Size = entry.GetTxSize(),
+                Size = weight / this.Network.Consensus.Options.WitnessScaleFactor,
                 Time = entry.Time,
                 Height = entry.EntryHeight,
                 WTXID = entry.TransactionHash.ToString(),
@@ -97,7 +99,8 @@ namespace Blockcore.Features.MemoryPool.Api.Controllers
                 DescendantSize = entry.SizeWithDescendants,
                 AncestorCount = entry.CountWithAncestors,
                 AncestorSize = entry.SizeWithAncestors,
-                Fees = fees
+                Fees = fees,
+                Weight = weight
             };
 
             var parents = this.MemPool.GetMemPoolParents(entry);

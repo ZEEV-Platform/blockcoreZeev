@@ -275,7 +275,7 @@ namespace Blockcore.Features.Miner.Api.Controllers
 
                                 transaction.Fee = (long)pblockTemplate.TotalFee.ToUnit(MoneyUnit.Satoshi);
                                 transaction.Sigops = nSigOps;
-                                transaction.Weight = item.GetSerializedSize();
+                                transaction.Weight = item.GetVirtualSize(this.Network.Consensus.Options.WitnessScaleFactor);
 
                                 blockTemplate.Transactions.Add(transaction);
                             }

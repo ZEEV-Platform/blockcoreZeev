@@ -10,7 +10,7 @@ namespace Blockcore.Features.MemoryPool.Api.Models
         public long Size { get; set; }
 
         [JsonProperty(PropertyName = "weight")]
-        public int Weight { get; set; }
+        public long Weight { get; set; }
 
         [JsonProperty(PropertyName = "time")]
         public long Time { get; set; }
