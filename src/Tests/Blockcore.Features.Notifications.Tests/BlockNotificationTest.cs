@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NBitcoin;
+using Blockcore.NBitcoin;
 using Blockcore.AsyncWork;
 using Blockcore.Consensus;
 using Blockcore.EventBus.CoreEvents;

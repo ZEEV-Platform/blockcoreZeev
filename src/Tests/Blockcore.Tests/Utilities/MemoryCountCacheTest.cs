@@ -1,6 +1,6 @@
 ﻿using Blockcore.NBitcoin;
 using Blockcore.Utilities;
-using NBitcoin;
+using Blockcore.NBitcoin;
 using Xunit;
 
 namespace Blockcore.Tests.Utilities

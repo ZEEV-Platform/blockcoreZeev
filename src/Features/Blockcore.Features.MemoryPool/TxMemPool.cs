@@ -282,15 +282,32 @@ namespace Blockcore.Features.MemoryPool
         }
 
         /// <inheritdoc />
+        public TxMempoolEntry GetEntry(uint256 hash)
+        {
+            return this.MapTx.TryGet(hash);
+        }
+
+        /// <returns>Set of parent entries.</returns>
+        public SetEntries GetMemPoolParents(TxMempoolEntry entry)
+        {
+            Guard.NotNull(entry, nameof(entry));
+
+            Guard.Assert(this.MapTx.ContainsKey(entry.TransactionHash));
+            TxLinks it = this.mapLinks.TryGet(entry);
+            Guard.Assert(it != null);
+            return it.Parents;
+        }
+
+        /// <inheritdoc />
         public FeeRate EstimateFee(int nBlocks)
         {
             return this.MinerPolicyEstimator.EstimateFee(nBlocks);
         }
 
         /// <inheritdoc />
-        public FeeRate EstimateSmartFee(int nBlocks, out int answerFoundAtBlocks)
+        public FeeRate EstimateSmartFee(int nBlocks, out int answerFoundAtBlocks, int? currentHeight = null, bool requireGreater = true)
         {
-            return this.MinerPolicyEstimator.EstimateSmartFee(nBlocks, this, out answerFoundAtBlocks);
+            return this.MinerPolicyEstimator.EstimateSmartFee(nBlocks, this, out answerFoundAtBlocks, currentHeight, requireGreater);
         }
 
         /// <inheritdoc />
@@ -424,22 +441,6 @@ namespace Blockcore.Features.MemoryPool
             {
                 ancestorIt.UpdateDescendantState(updateSize, updateFee, updateCount);
             }
-        }
-
-        /// <summary>
-        /// Gets the parents of a memory pool entry.
-        /// </summary>
-        /// <param name="entry">Memory pool entry.</param>
-        /// <returns>Set of parent entries.</returns>
-        private SetEntries GetMemPoolParents(TxMempoolEntry entry)
-        {
-            Guard.NotNull(entry, nameof(entry));
-
-            Guard.Assert(this.MapTx.ContainsKey(entry.TransactionHash));
-            TxLinks it = this.mapLinks.TryGet(entry);
-            Guard.Assert(it != null);
-
-            return it.Parents;
         }
 
         /// <summary>

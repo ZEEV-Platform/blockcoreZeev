@@ -10,7 +10,7 @@ using Blockcore.Utilities;
 using DBreeze;
 using DBreeze.DataTypes;
 using FluentAssertions;
-using NBitcoin;
+using Blockcore.NBitcoin;
 using Xunit;
 
 namespace Blockcore.Tests.Utilities

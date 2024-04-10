@@ -301,7 +301,7 @@ namespace Blockcore.Features.MemoryPool.Fee
         /// confTarget blocks. If no answer can be given at confTarget, return an
         /// estimate at the lowest target where one can be given.
         /// </summary>
-        public FeeRate EstimateSmartFee(int confTarget, ITxMempool pool, out int answerFoundAtTarget)
+        public FeeRate EstimateSmartFee(int confTarget, ITxMempool pool, out int answerFoundAtTarget, int? currentHeight = null, bool requireGreater = true)
         {
             answerFoundAtTarget = confTarget;
 
@@ -316,8 +316,8 @@ namespace Blockcore.Features.MemoryPool.Fee
             double median = -1;
             while (median < 0 && confTarget <= this.feeStats.GetMaxConfirms())
             {
-                median = this.feeStats.EstimateMedianVal(confTarget++, SufficientFeeTxs, MinSuccessPct, true,
-                    this.nBestSeenHeight);
+                median = this.feeStats.EstimateMedianVal(confTarget++, SufficientFeeTxs, MinSuccessPct, requireGreater,
+                    (currentHeight.HasValue ? currentHeight.Value : this.nBestSeenHeight));
             }
 
             answerFoundAtTarget = confTarget - 1;

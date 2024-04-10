@@ -83,6 +83,10 @@ namespace Blockcore.Node
                 case "RSC":
                     nodeSettings = new NodeSettings(networksSelector: Blockcore.Networks.RoyalSportsCity.Networks.Networks.RoyalSportsCity, args: args);
                     break;
+
+                case "ZEEV":
+                    nodeSettings = new NodeSettings(networksSelector: Blockcore.Networks.ZEEV.Networks.ZEEV, args: args);
+                    break;
             }
 
             return nodeSettings;

@@ -2,7 +2,7 @@
 using System.Linq;
 using Blockcore.Consensus;
 using Blockcore.NBitcoin;
-using NBitcoin;
+using Blockcore.NBitcoin;
 
 namespace Blockcore.Tests.Consensus
 {

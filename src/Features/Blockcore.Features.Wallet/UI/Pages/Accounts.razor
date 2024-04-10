@@ -177,7 +177,7 @@
     {
         NavigationManager.NavigateTo("walletrecover");
     }
-    private string ParseAccount(Blockcore.Features.Wallet.Types.HdAccount account)
+    private string ParseAccount(Blockcore.Features.Wallet.Interfaces.IHdAccount account)
     {
         if (account.Purpose == 44)
         {

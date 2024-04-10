@@ -300,24 +300,48 @@ namespace Blockcore.Features.RPC.Controllers
         /// <remarks>The binary format is not supported with RPC.</remarks>
         [ActionName("getblockheader")]
         [ActionDescription("Gets the block header of the block identified by the hash.")]
-        public object GetBlockHeader(string hash, bool isJsonFormat = true)
+        public object GetBlockHeader(string blockHash, bool isJsonFormat = true)
         {
-            Guard.NotNull(hash, nameof(hash));
+            Guard.NotNull(blockHash, nameof(blockHash));
+            uint256 blockId = uint256.Parse(blockHash);
 
-            this.logger.LogDebug("RPC GetBlockHeader {0}", hash);
+            this.logger.LogDebug("RPC GetBlockHeader {0}", blockId);
 
             if (this.ChainIndexer == null)
                 return null;
 
-            BlockHeader blockHeader = this.ChainIndexer.GetHeader(uint256.Parse(hash))?.Header;
+            var chainedHeader = this.ChainIndexer.GetHeader(blockId);
 
-            if (blockHeader == null)
+            if (chainedHeader == null)
+                return null;
+
+            Block block = chainedHeader.Block ?? this.blockStore?.GetBlock(blockId);
+
+            // In rare occasions a block that is found in the
+            // indexer may not have been pushed to the store yet.
+            if (block == null)
+                return null;
+
+            if (chainedHeader.Header == null)
                 return null;
 
             if (isJsonFormat)
-                return new BlockHeaderModel(blockHeader);
+            {
+                var json = new BlockHeaderModel(chainedHeader.Header);
+                json.Hash = block.GetHash().ToString();
+                json.Confirmations = this.ChainIndexer.Tip.Height - chainedHeader.Height + 1;
+                json.NumberOfTransactions = block.Transactions.Count();
+                json.NextBlockHash = chainedHeader.Next?.FirstOrDefault()?.HashBlock.ToString();
+                json.Difficulty = block.Header.Bits.Difficulty;
+                json.ChainWork = chainedHeader.ChainWork.ToString();
+                json.Height = chainedHeader.Height;
+                json.VersionHex = block.Header.Version.ToString("x8");
+                json.MedianTime = chainedHeader.GetMedianTimePast().ToUnixTimeSeconds();
 
-            return new HexModel(blockHeader.ToHex(this.Network.Consensus.ConsensusFactory));
+                return json;
+            }
+
+            return new HexModel(chainedHeader.Header.ToHex(this.Network.Consensus.ConsensusFactory));
         }
 
         /// <summary>
@@ -463,7 +487,7 @@ namespace Blockcore.Features.RPC.Controllers
         {
             var blockchainInfo = new BlockchainInfoModel
             {
-                Chain = this.Network?.Name,
+                Chain = this.Network?.NetworkType == NetworkType.Mainnet ? "main" : "test",
                 Blocks = (uint)(this.ChainState?.ConsensusTip?.Height ?? 0),
                 Headers = (uint)(this.ChainIndexer?.Height ?? 0),
                 BestBlockHash = this.ChainState?.ConsensusTip?.HashBlock,
@@ -498,19 +522,24 @@ namespace Blockcore.Features.RPC.Controllers
             // softforkbip9 deployments
             blockchainInfo.SoftForksBip9 = new Dictionary<string, SoftForksBip9>();
 
-            ConsensusRuleEngine ruleEngine = (ConsensusRuleEngine)this.ConsensusManager.ConsensusRules;
-            ThresholdState[] thresholdStates = ruleEngine.NodeDeployments.BIP9.GetStates(this.ChainIndexer.Tip.Previous);
-            List<ThresholdStateModel> metrics = ruleEngine.NodeDeployments.BIP9.GetThresholdStateMetrics(this.ChainIndexer.Tip.Previous, thresholdStates);
-
-            foreach (ThresholdStateModel metric in metrics.Where(m => !m.DeploymentName.ToLower().Contains("test"))) // to remove the test dummy
+            var previousHeader = this.ChainIndexer.Tip.Previous;
+            if (previousHeader != null)
             {
-                // TODO: Deployment timeout may not be implemented yet
 
-                // Deployments with timeout value of 0 are hidden.
-                // A timeout value of 0 guarantees a softfork will never be activated.
-                // This is used when softfork codes are merged without specifying the deployment schedule.
-                if (metric.TimeTimeOut?.Ticks > 0)
-                    blockchainInfo.SoftForksBip9.Add(metric.DeploymentName, this.CreateSoftForksBip9(metric, thresholdStates[metric.DeploymentIndex]));
+                ConsensusRuleEngine ruleEngine = (ConsensusRuleEngine)this.ConsensusManager.ConsensusRules;
+                ThresholdState[] thresholdStates = ruleEngine.NodeDeployments.BIP9.GetStates(previousHeader);
+                List<ThresholdStateModel> metrics = ruleEngine.NodeDeployments.BIP9.GetThresholdStateMetrics(previousHeader, thresholdStates);
+
+                foreach (ThresholdStateModel metric in metrics.Where(m => !m.DeploymentName.ToLower().Contains("test"))) // to remove the test dummy
+                {
+                    // TODO: Deployment timeout may not be implemented yet
+
+                    // Deployments with timeout value of 0 are hidden.
+                    // A timeout value of 0 guarantees a softfork will never be activated.
+                    // This is used when softfork codes are merged without specifying the deployment schedule.
+                    if (metric.TimeTimeOut?.Ticks > 0)
+                        blockchainInfo.SoftForksBip9.Add(metric.DeploymentName, this.CreateSoftForksBip9(metric, thresholdStates[metric.DeploymentIndex]));
+                }
             }
 
             // TODO: Implement blockchainInfo.warnings

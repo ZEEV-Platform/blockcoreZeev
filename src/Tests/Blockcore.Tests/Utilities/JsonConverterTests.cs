@@ -7,7 +7,7 @@ using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.OpenAsset;
 using Blockcore.Tests.Common;
 using Blockcore.Utilities.JsonConverters;
-using NBitcoin;
+using Blockcore.NBitcoin;
 using Xunit;
 
 namespace Blockcore.Tests.Utilities

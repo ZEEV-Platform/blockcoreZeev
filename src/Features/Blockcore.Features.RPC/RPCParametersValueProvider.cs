@@ -74,7 +74,16 @@ namespace Blockcore.Features.RPC
 
             int index = actionParameters.IndexOf(parameter);
 
-            var parameters = (JArray)req["params"];
+            var parameters = req["params"] as JArray;
+            JValue jValue = null;
+            if (parameters == null)
+            {
+                jValue = req["params"] as JValue;
+            }
+            if (jValue != null)
+            {
+                parameters = jValue.ToObject<JArray>();
+            }
             if (parameters == null)
             {
                 var parameterInfo = (parameter as ControllerParameterDescriptor)?.ParameterInfo;

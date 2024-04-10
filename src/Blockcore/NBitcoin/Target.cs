@@ -158,6 +158,11 @@ namespace Blockcore.NBitcoin
             return ToUInt256(this.target);
         }
 
+        public byte[] ToBytes()
+        {
+            return this.target.ToByteArray();
+        }
+
         internal static uint256 ToUInt256(BigInteger input)
         {
             return ToUInt256(input.ToByteArray());

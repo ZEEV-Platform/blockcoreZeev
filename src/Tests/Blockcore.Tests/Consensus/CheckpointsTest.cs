@@ -6,7 +6,7 @@ using Blockcore.Consensus.Checkpoints;
 using Blockcore.NBitcoin;
 using Blockcore.Networks;
 using Blockcore.Tests.Common;
-using NBitcoin;
+using Blockcore.NBitcoin;
 using Xunit;
 
 namespace Blockcore.Tests.Consensus

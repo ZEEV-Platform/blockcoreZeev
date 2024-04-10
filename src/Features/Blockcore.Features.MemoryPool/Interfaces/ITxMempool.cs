@@ -3,6 +3,7 @@ using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Features.Consensus.CoinViews;
 using Blockcore.Features.MemoryPool.Fee;
 using Blockcore.NBitcoin;
+using static Blockcore.Features.MemoryPool.TxMempool;
 
 namespace Blockcore.Features.MemoryPool.Interfaces
 {
@@ -134,8 +135,10 @@ namespace Blockcore.Features.MemoryPool.Interfaces
         /// </summary>
         /// <param name="nBlocks">The confirmation target blocks.</param>
         /// <param name="answerFoundAtBlocks">The block where the fee was found.</param>
+        /// <param name="requireGreater">Return the lowest feerate such that all higher values pass minSuccess OR return the highest feerate such that all lower values fail minSuccess.</param>
+        /// <param name="currentHeight">Current height which can override actual processed block height.</param>
         /// <returns>The fee rate estimate.</returns>
-        FeeRate EstimateSmartFee(int nBlocks, out int answerFoundAtBlocks);
+        FeeRate EstimateSmartFee(int nBlocks, out int answerFoundAtBlocks, int? currentHeight = null, bool requireGreater = true);
 
         /// <summary>
         /// Estimates the smart priority using <see cref="MinerPolicyEstimator"/>.
@@ -165,6 +168,13 @@ namespace Blockcore.Features.MemoryPool.Interfaces
         /// <param name="hash">Transaction hash.</param>
         /// <returns>The transaction.</returns>
         Transaction Get(uint256 hash);
+
+        /// <summary>
+        /// Gets the MemPoolEntry from the memory pool based upon the transaction hash.
+        /// </summary>
+        /// <param name="hash">Transaction hash.</param>
+        /// <returns>The transaction.</returns>
+        TxMempoolEntry GetEntry(uint256 hash);
 
         /// <summary>
         /// The minimum fee to get into the mempool, which may itself not be enough for larger-sized transactions.
@@ -243,5 +253,12 @@ namespace Blockcore.Features.MemoryPool.Interfaces
         /// </summary>
         /// <param name="stream">Stream to write to.</param>
         void WriteFeeEstimates(BitcoinStream stream);
+
+        /// <summary>
+        /// Get parents of entry
+        /// </summary>
+        /// <param name="entry">Parents for entry</param>
+        /// <returns></returns>
+        SetEntries GetMemPoolParents(TxMempoolEntry entry);
     }
 }

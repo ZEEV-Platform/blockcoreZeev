@@ -42,7 +42,7 @@
     </div>
 
     Types.Wallet wallet = this.WalletManager.GetWallet(walletname);
-    HdAccount account = wallet.GetAccount(accountname);
+    IHdAccount account = wallet.GetAccount(accountname);
 
     var accountmodel = new AddressesModel
             {

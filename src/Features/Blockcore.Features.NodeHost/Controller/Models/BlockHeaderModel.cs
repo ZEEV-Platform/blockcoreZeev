@@ -111,5 +111,32 @@ namespace Blockcore.Controllers.Models
                 (byte)(compact)
             };
         }
+
+        [JsonProperty("nTx")]
+        public int NumberOfTransactions { get; set; }
+
+        [JsonProperty("nextblockhash")]
+        public string NextBlockHash { get; set; }
+
+        [JsonProperty("difficulty")]
+        public double Difficulty { get; set; }
+
+        [JsonProperty("chainwork")]
+        public string ChainWork { get; set; }
+
+        [JsonProperty("mediantime")]
+        public long MedianTime { get; set; }
+
+        [JsonProperty("versionHex")]
+        public string VersionHex { get; set; }
+
+        [JsonProperty("height")]
+        public int Height { get; set; }
+
+        [JsonProperty("hash")]
+        public string Hash { get; set; }
+
+        [JsonProperty("confirmations")]
+        public int Confirmations { get; set; }
     }
 }

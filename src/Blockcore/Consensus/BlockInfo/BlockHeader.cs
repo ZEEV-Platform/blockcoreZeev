@@ -24,15 +24,15 @@ namespace Blockcore.Consensus.BlockInfo
 
         private static BigInteger pow256 = BigInteger.ValueOf(2).Pow(256);
 
-        private uint256 hashPrevBlock;
+        protected uint256 hashPrevBlock;
 
-        public uint256 HashPrevBlock { get { return this.hashPrevBlock; } set { this.hashPrevBlock = value; } }
+        public virtual uint256 HashPrevBlock { get { return this.hashPrevBlock; } set { this.hashPrevBlock = value; } }
 
-        private uint time;
+        protected uint time;
 
         public uint Time { get { return this.time; } set { this.time = value; } }
 
-        private uint bits;
+        protected uint bits;
 
         public Target Bits { get { return this.bits; } set { this.bits = value; } }
 
@@ -40,13 +40,13 @@ namespace Blockcore.Consensus.BlockInfo
 
         public int Version { get { return this.version; } set { this.version = value; } }
 
-        private uint nonce;
+        protected uint nonce;
 
         public uint Nonce { get { return this.nonce; } set { this.nonce = value; } }
 
-        private uint256 hashMerkleRoot;
+        protected uint256 hashMerkleRoot;
 
-        public uint256 HashMerkleRoot { get { return this.hashMerkleRoot; } set { this.hashMerkleRoot = value; } }
+        public virtual uint256 HashMerkleRoot { get { return this.hashMerkleRoot; } set { this.hashMerkleRoot = value; } }
 
         public bool IsNull { get { return (this.bits == 0); } }
 
@@ -176,7 +176,7 @@ namespace Blockcore.Consensus.BlockInfo
                 this.hashes[0] = this.GetHash();
         }
 
-        public bool CheckProofOfWork()
+        public virtual bool CheckProofOfWork()
         {
             BigInteger bits = this.Bits.ToBigInteger();
             if ((bits.CompareTo(BigInteger.Zero) <= 0) || (bits.CompareTo(pow256) >= 0))

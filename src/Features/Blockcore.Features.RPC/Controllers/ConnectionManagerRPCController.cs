@@ -125,5 +125,16 @@ namespace Blockcore.Controllers
 
             return peerList;
         }
+
+        /// <summary>
+        /// Returns the number of connections to other nodes.
+        /// </summary>
+        /// <returns>(int) Count or Error.</returns>
+        [ActionName("getconnectioncount")]
+        [ActionDescription("Returns the number of connections to other nodes.")]
+        public int GetConnectionCount()
+        {
+            return this.ConnectionManager.ConnectedPeers.Count();
+        }
     }
 }

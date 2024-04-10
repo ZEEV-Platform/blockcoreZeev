@@ -84,7 +84,7 @@ namespace Blockcore.Features.RPC
                     throw new NotImplementedException("The request is not supported.");
                 }
 
-                httpContext.Response.ContentType = ContentType;
+                httpContext.Response.ContentType = this.ContentType;
 
                 // Write the response body.
                 using (StreamWriter streamWriter = new StreamWriter(httpContext.Response.Body, Encoding.Default, 1024, true))
@@ -134,44 +134,44 @@ namespace Blockcore.Features.RPC
             if (ex is ArgumentException || ex is FormatException)
             {
                 JObject response = CreateError(RPCErrorCode.RPC_MISC_ERROR, "Argument error: " + ex.Message);
-                httpContext.Response.ContentType = ContentType;
+                httpContext.Response.ContentType = this.ContentType;
                 await httpContext.Response.WriteAsync(response.ToString(Formatting.Indented));
             }
             else if (ex is BlockNotFoundException)
             {
                 JObject response = CreateError(RPCErrorCode.RPC_INVALID_REQUEST, "Argument error: " + ex.Message);
-                httpContext.Response.ContentType = ContentType;
+                httpContext.Response.ContentType = this.ContentType;
                 await httpContext.Response.WriteAsync(response.ToString(Formatting.Indented));
             }
             else if (ex is ConfigurationException)
             {
                 JObject response = CreateError(RPCErrorCode.RPC_INTERNAL_ERROR, ex.Message);
-                httpContext.Response.ContentType = ContentType;
+                httpContext.Response.ContentType = this.ContentType;
                 await httpContext.Response.WriteAsync(response.ToString(Formatting.Indented));
             }
             else if (ex is RPCServerException)
             {
                 var rpcEx = (RPCServerException)ex;
                 JObject response = CreateError(rpcEx.ErrorCode, ex.Message);
-                httpContext.Response.ContentType = ContentType;
+                httpContext.Response.ContentType = this.ContentType;
                 await httpContext.Response.WriteAsync(response.ToString(Formatting.Indented));
             }
             else if (httpContext.Response?.StatusCode == 404)
             {
                 JObject response = CreateError(RPCErrorCode.RPC_METHOD_NOT_FOUND, "Method not found");
-                httpContext.Response.ContentType = ContentType;
+                httpContext.Response.ContentType = this.ContentType;
                 await httpContext.Response.WriteAsync(response.ToString(Formatting.Indented));
             }
             else if (this.IsDependencyFailure(ex))
             {
                 JObject response = CreateError(RPCErrorCode.RPC_METHOD_NOT_FOUND, ex.Message);
-                httpContext.Response.ContentType = ContentType;
+                httpContext.Response.ContentType = this.ContentType;
                 await httpContext.Response.WriteAsync(response.ToString(Formatting.Indented));
             }
             else if (httpContext.Response?.StatusCode == 500 || ex != null)
             {
                 JObject response = CreateError(RPCErrorCode.RPC_INTERNAL_ERROR, "Internal error");
-                httpContext.Response.ContentType = ContentType;
+                httpContext.Response.ContentType = this.ContentType;
                 this.logger.LogError(new EventId(0), ex, "Internal error while calling RPC Method");
                 await httpContext.Response.WriteAsync(response.ToString(Formatting.Indented));
             }
@@ -230,20 +230,31 @@ namespace Blockcore.Features.RPC
             {
                 await this.next.Invoke(context).ConfigureAwait(false);
 
-                if (responseMemoryStream.Length == 0)
-                    throw new Exception("Method not found");
+                if (context.Response.StatusCode == StatusCodes.Status404NotFound)
+                    throw new Exception("Method not found - " + requestObj.ToString());
 
-                responseMemoryStream.Position = 0;
-                using (var streamReader = new StreamReader(responseMemoryStream))
-                using (var textReader = new JsonTextReader(streamReader))
+                if (responseMemoryStream.Length == 0)
                 {
-                    // Ensure floats are parsed as decimals and not as doubles.
-                    textReader.FloatParseHandling = FloatParseHandling.Decimal;
-                    response = await JObject.LoadAsync(textReader);
+                    response = new JObject();
+                    response.Add("result", null);
+                    response.Add("error", null);
+                } 
+                else
+                {
+                    responseMemoryStream.Position = 0;
+                    using (var streamReader = new StreamReader(responseMemoryStream))
+                    using (var textReader = new JsonTextReader(streamReader))
+                    {
+                        // Ensure floats are parsed as decimals and not as doubles.
+                        textReader.FloatParseHandling = FloatParseHandling.Decimal;
+                        response = await JObject.LoadAsync(textReader);
+                    }
                 }
             }
             catch (Exception ex)
             {
+                this.logger.LogDebug("RPC request: {0} {1}", ex.Message, ex.StackTrace);
+
                 await this.HandleRpcInvokeExceptionAsync(context, ex);
 
                 context.Response.Body.Position = 0;
