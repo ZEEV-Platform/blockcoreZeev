@@ -119,7 +119,9 @@ namespace Blockcore.Features.BlockStore.AddressIndexing
         public void PurgeOldRewindData(int height)
         {
             // Delete all in one go based on query. This is more optimal than query, iterate and delete individual records.
-            int purgedCount = this.addressIndexerRewindData.DeleteMany(x => x.BlockHeight < height);
+            //BsonExpression predicate = Query.LT("BlockHeight", height);
+           // int purgedCount = this.addressIndexerRewindData.DeleteMany(predicate);
+           int purgedCount = this.addressIndexerRewindData.DeleteMany(x => x.BlockHeight < height);
 
             this.logger.LogInformation("Purged {0} rewind data items.", purgedCount);
         }
