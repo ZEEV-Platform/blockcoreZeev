@@ -6,7 +6,7 @@ using Blockcore.NBitcoin.BIP39;
 
 namespace Blockcore.NBitcoin
 {
-    internal class BitReader
+    public class BitReader
     {
         private BitArray array;
 
@@ -101,7 +101,7 @@ namespace Blockcore.NBitcoin
         }
     }
 
-    internal class BitWriter
+    public class BitWriter
     {
         private List<bool> values = new List<bool>();
 
@@ -119,7 +119,7 @@ namespace Blockcore.NBitcoin
             this._Position++;
         }
 
-        internal void Write(byte[] bytes)
+        public void Write(byte[] bytes)
         {
             Write(bytes, bytes.Length * 8);
         }

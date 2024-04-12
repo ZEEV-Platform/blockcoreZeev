@@ -2,7 +2,7 @@ using System;
 
 namespace Blockcore.NBitcoin.BouncyCastle.crypto.parameters
 {
-    internal class KeyParameter
+    public class KeyParameter
         : ICipherParameters
     {
         private readonly byte[] key;

@@ -21,7 +21,7 @@ using System;
 
 namespace Blockcore.NBitcoin.Crypto.Cryptsharp
 {
-    internal static class Check
+    public static class Check
     {
         public static void Bounds(string valueName, Array value, int offset, int count)
         {

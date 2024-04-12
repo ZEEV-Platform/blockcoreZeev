@@ -19,7 +19,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 namespace Blockcore.NBitcoin.Crypto.Cryptsharp
 {
-    internal static class BitPacking
+    public static class BitPacking
     {
         public static uint UInt24FromLEBytes(byte[] bytes, int offset)
         {

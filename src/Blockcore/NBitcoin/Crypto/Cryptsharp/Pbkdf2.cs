@@ -44,7 +44,7 @@ namespace Blockcore.NBitcoin.Crypto.Cryptsharp
     /// Stream derivedKeyStream = new Pbkdf2(new HMACSHA512(key), salt, 1000);
     /// </code>
     /// </example>
-    internal class Pbkdf2 : Stream
+    public class Pbkdf2 : Stream
     {
         #region PBKDF2
 

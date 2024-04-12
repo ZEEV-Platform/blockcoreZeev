@@ -21,7 +21,7 @@ using System;
 
 namespace Blockcore.NBitcoin.Crypto.Cryptsharp
 {
-    internal static class Exceptions
+    public static class Exceptions
     {
         public static ArgumentException Argument
             (string valueName, string message, params object[] args)

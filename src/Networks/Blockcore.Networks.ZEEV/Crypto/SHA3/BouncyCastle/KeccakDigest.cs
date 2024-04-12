@@ -24,6 +24,7 @@ SOFTWARE.
 
 using System;
 using System.Diagnostics;
+using Blockcore.NBitcoin.BouncyCastle.crypto;
 
 namespace Blockcore.Networks.ZEEV.Crypto.SHA3.BouncyCastle
 {
@@ -33,7 +34,7 @@ namespace Blockcore.Networks.ZEEV.Crypto.SHA3.BouncyCastle
     /// <remarks>
     ///     Following the naming conventions used in the C source code to enable easy review of the implementation.
     /// </remarks>
-    internal class KeccakDigest
+    public class KeccakDigest
         : IDigest, IMemoable
     {
         private static readonly ulong[] KeccakRoundConstants =

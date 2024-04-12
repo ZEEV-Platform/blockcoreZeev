@@ -3,7 +3,7 @@ namespace Blockcore.NBitcoin.BouncyCastle.crypto
     /**
      * interface that a message digest conforms to.
      */
-    internal interface IDigest
+    public interface IDigest
     {
         /**
          * return the algorithm name

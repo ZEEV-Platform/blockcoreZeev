@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Blockcore.NBitcoin.BIP39
 {
-    internal class KDTable
+    public class KDTable
     {
         public static string NormalizeKD(string str)
         {

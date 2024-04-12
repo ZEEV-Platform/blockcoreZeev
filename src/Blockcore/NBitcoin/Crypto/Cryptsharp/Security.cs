@@ -21,7 +21,7 @@ using System;
 
 namespace Blockcore.NBitcoin.Crypto.Cryptsharp
 {
-    internal static class Security
+    public static class Security
     {
         public static void Clear(Array array)
         {

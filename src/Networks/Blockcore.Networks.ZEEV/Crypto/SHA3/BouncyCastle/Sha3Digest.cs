@@ -33,7 +33,7 @@ namespace Blockcore.Networks.ZEEV.Crypto.SHA3.BouncyCastle
     /// <remarks>
     ///     Following the naming conventions used in the C source code to enable easy review of the implementation.
     /// </remarks>
-    internal class Sha3Digest
+    public class Sha3Digest
         : KeccakDigest
     {
         public Sha3Digest()

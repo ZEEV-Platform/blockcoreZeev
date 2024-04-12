@@ -3,7 +3,7 @@ namespace Blockcore.NBitcoin.BouncyCastle.crypto
     /**
      * The base interface for implementations of message authentication codes (MACs).
      */
-    internal interface IMac
+    public interface IMac
     {
         /**
          * Initialise the MAC.
