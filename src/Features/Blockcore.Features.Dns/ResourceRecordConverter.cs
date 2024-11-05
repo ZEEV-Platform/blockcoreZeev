@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using DNS.Protocol;
 using DNS.Protocol.ResourceRecords;
@@ -182,8 +183,9 @@ namespace Blockcore.Features.Dns
         private PointerResourceRecord ReadPointerResourceRecordJson(JObject jObject)
         {
             Domain domain = this.ReadDomainJson(jObject, NameFieldName);
+            IPAddress ip = ConvertDomainToIPAddress(domain);
             Domain pointerDomain = this.ReadDomainJson(jObject, PointerDomainNameFieldName);
-            return new PointerResourceRecord(domain, pointerDomain);
+            return new PointerResourceRecord(ip, pointerDomain);
         }
 
         /// <summary>
@@ -321,6 +323,49 @@ namespace Blockcore.Features.Dns
                 { ExpireIntervalFieldName, JToken.FromObject(resourceRecord.ExpireInterval, serializer)},
                 { MinimumTimeToLiveFieldName, JToken.FromObject(resourceRecord.MinimumTimeToLive, serializer)}
              };
+        }
+
+        public static IPAddress ConvertDomainToIPAddress(Domain domain)
+        {
+            string domainString = domain.ToString();
+
+            // Pro IPv4
+            if (domainString.EndsWith("in-addr.arpa"))
+            {
+                string[] parts = domainString.Split('.');
+                if (parts.Length >= 4)
+                {
+                    string ipString = string.Join(".", new[] {
+                parts[3], parts[2], parts[1], parts[0]
+            });
+                    return IPAddress.Parse(ipString);
+                }
+            }
+            // Pro IPv6
+            else if (domainString.EndsWith("ip6.arpa"))
+            {
+                string ipv6Parts = domainString.Replace(".ip6.arpa", "");
+                string ipv6String = string.Join("", ipv6Parts.Split('.')
+                    .Reverse()
+                    .Where(c => c.Length == 1)
+                    .Chunk(4)
+                    .Select(chunk => string.Join("", chunk)));
+
+                string formattedIPv6 = string.Join(":", Enumerable.Range(0, 8)
+                    .Select(i => ipv6String.Substring(i * 4, 4)));
+
+                return IPAddress.Parse(formattedIPv6);
+            }
+
+            // Pokud není ani jeden z předchozích případů, zkusíme přímé parsování
+            try
+            {
+                return IPAddress.Parse(domainString);
+            }
+            catch
+            {
+                throw new ArgumentException("Nepodařilo se převést Domain na IPAddress");
+            }
         }
     }
 }

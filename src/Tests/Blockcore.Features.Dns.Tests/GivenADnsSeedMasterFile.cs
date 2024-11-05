@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Xml.Linq;
 using DNS.Protocol;
 using DNS.Protocol.ResourceRecords;
 using FluentAssertions;
@@ -148,12 +149,12 @@ namespace Blockcore.Features.Dns.Tests
         public void WhenLoad_AndStreamContainsPointerResourceRecord_ThenEntryIsPopulated()
         {
             // Arrange
-            var domain = new Domain("stratis.test.com");
-            var nsDomain = new Domain("pointer.stratis.test.com");
+            var domain = new Domain("pointer.stratis.test.com");
+            var ip = "69.167.164.199";
 
-            var testResourceRecord = new PointerResourceRecord(domain, nsDomain);
+            var testResourceRecord = new PointerResourceRecord(IPAddress.Parse(ip), domain);
 
-            var question = new Question(domain, RecordType.PTR);
+            var question = new Question(testResourceRecord.Name, RecordType.PTR);
 
             // Act.
             IList<IResourceRecord> resourceRecords = this.WhenLoad_AndStreamContainsEntry_ThenEntryIsPopulated(testResourceRecord, question);
@@ -164,7 +165,7 @@ namespace Blockcore.Features.Dns.Tests
 
             IList<PointerResourceRecord> pointerResourceRecord = resourceRecords.OfType<PointerResourceRecord>().ToList();
             pointerResourceRecord.Should().HaveCount(1);
-            pointerResourceRecord[0].Name.ToString().Should().Be(domain.ToString());
+            pointerResourceRecord[0].Name.ToString().Should().Be(Domain.PointerName(IPAddress.Parse(ip)).ToString());
             pointerResourceRecord[0].PointerDomainName.ToString().Should().Be(testResourceRecord.PointerDomainName.ToString());
         }
 
@@ -412,10 +413,10 @@ namespace Blockcore.Features.Dns.Tests
         public void WhenSave_AndMasterListContainsPointerResourceRecord_ThenEntryIsSaved()
         {
             // Arrange
-            var domain = new Domain("stratis.test.com");
-            var nsDomain = new Domain("pointer.stratis.test.com");
+            var domain = new Domain("pointer.stratis.test.com");
+            var ip = "69.167.164.199";
 
-            var testResourceRecord = new PointerResourceRecord(domain, nsDomain);
+            var testResourceRecord = new PointerResourceRecord(IPAddress.Parse(ip), domain);
             var masterFile = new DnsSeedMasterFile(new List<IResourceRecord> { testResourceRecord });
 
             using (var stream = new MemoryStream())
@@ -432,7 +433,7 @@ namespace Blockcore.Features.Dns.Tests
 
                 IList<PointerResourceRecord> pointerResourceRecord = resourceRecords.OfType<PointerResourceRecord>().ToList();
                 pointerResourceRecord.Should().HaveCount(1);
-                pointerResourceRecord[0].Name.ToString().Should().Be(domain.ToString());
+                pointerResourceRecord[0].Name.ToString().Should().Be(Domain.PointerName(IPAddress.Parse(ip)).ToString());
                 pointerResourceRecord[0].PointerDomainName.ToString().Should().Be(testResourceRecord.PointerDomainName.ToString());
             }
         }

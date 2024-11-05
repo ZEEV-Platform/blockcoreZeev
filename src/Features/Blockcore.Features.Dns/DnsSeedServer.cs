@@ -388,11 +388,11 @@ namespace Blockcore.Features.Dns
                 }
 
                 // Resolve request against masterfile.
-                request = new Request(header, Question.GetAllFromArray(udpRequest.Item2, header.Size, header.QuestionCount));
+                request = new Request(header, Question.GetAllFromArray(udpRequest.Item2, header.Size, header.QuestionCount), new List<IResourceRecord>());
                 IResponse response = this.Resolve(request);
 
                 // Send response.
-                await this.udpClient.SendAsync(response.ToArray(), response.Size, udpRequest.Item1).WithCancellationTimeout(UdpTimeout);
+                await this.udpClient.SendAsync(response.ToArray(), response.Size, udpRequest.Item1).WithCancellationTimeout(TimeSpan.FromMilliseconds(UdpTimeout));
             }
             catch (SocketException e)
             {
@@ -415,7 +415,7 @@ namespace Blockcore.Features.Dns
 
                 try
                 {
-                    await this.udpClient.SendAsync(response.ToArray(), response.Size, udpRequest.Item1).WithCancellationTimeout(UdpTimeout);
+                    await this.udpClient.SendAsync(response.ToArray(), response.Size, udpRequest.Item1).WithCancellationTimeout(TimeSpan.FromMilliseconds(UdpTimeout));
                 }
                 catch (SocketException ex)
                 {
