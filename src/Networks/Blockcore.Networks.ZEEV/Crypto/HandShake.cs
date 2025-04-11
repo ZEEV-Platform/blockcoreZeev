@@ -4,8 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Blockcore.NBitcoin;
-using Blockcore.Networks.ZEEV.Crypto.Blake2b;
-using Blockcore.Networks.ZEEV.Crypto.SHA3;
+using Org.BouncyCastle.Crypto.Digests;
 using static HashLib.HashFactory.Crypto;
 
 namespace Blockcore.Networks.ZEEV.Crypto
@@ -87,8 +86,6 @@ namespace Blockcore.Networks.ZEEV.Crypto
                 //    return bw.render();
                 //}
                 //var subHeader = buffer.Skip(128).Take(128).ToArray();
-                var blake2bConfig = new Blake2BConfig();
-                blake2bConfig.OutputSizeInBytes = 32;
                 //var subHeaderHash = Blake2B.ComputeHash(subHeader, blake2bConfig);
 
                 //var maskHash = buffer.Skip(96).Take(32).ToArray();
@@ -137,7 +134,7 @@ namespace Blockcore.Networks.ZEEV.Crypto
                     hex2xxccc.AppendFormat("{0:x2}", b);
                 var sfff2xxxccc = hex2xxccc.ToString();
 
-                var left = Blake2B.ComputeHash(data);
+                var left = Blake2B.Blake2B512().ComputeHash(data);
 
                 StringBuilder hex2x = new StringBuilder(left.Length * 2);
                 foreach (byte b in left)
@@ -145,7 +142,8 @@ namespace Blockcore.Networks.ZEEV.Crypto
                 var sfff2x = hex2x.ToString();
 
                 var right = Sha3.Sha3256().ComputeHash(data.Concat(pad8).ToArray());
-                buffer = Blake2B.ComputeHash(left.Concat(pad32).Concat(right).ToArray(), blake2bConfig);
+                var rightBC = Sha3.Sha3256().ComputeHash(data.Concat(pad8).ToArray());
+                buffer = Blake2B.Blake2B256().ComputeHash(left.Concat(pad32).Concat(right).ToArray());
             }
 
             return new uint256(buffer.Take(32).Reverse().ToArray());

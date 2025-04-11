@@ -1,40 +1,44 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
-using Blockcore.Networks.ZEEV.Crypto.SHA3.BouncyCastle;
+using System.Text;
+using System.Threading.Tasks;
+using Org.BouncyCastle.Crypto.Digests;
 
-namespace Blockcore.Networks.ZEEV.Crypto.SHA3
+namespace Blockcore.Networks.ZEEV.Crypto
 {
-    public class Sha3 : HashAlgorithm
+    public class Blake2B : HashAlgorithm
     {
-        private readonly Sha3Digest _digest;
+        private readonly Blake2bDigest _digest;
         private readonly int _hashBitLength;
 
-        internal Sha3(int hashBitLength)
+        internal Blake2B(int hashBitLength)
         {
             _hashBitLength = hashBitLength;
-            _digest = new Sha3Digest(_hashBitLength);
+            _digest = new Blake2bDigest(_hashBitLength);
         }
 
         public override int HashSize => _hashBitLength;
 
-        public static Sha3 Sha3224()
+        public static Blake2B Blake2B224()
         {
-            return new Sha3(224);
+            return new Blake2B(224);
         }
 
-        public static Sha3 Sha3256()
+        public static Blake2B Blake2B256()
         {
-            return new Sha3(256);
+            return new Blake2B(256);
         }
 
-        public static Sha3 Sha3384()
+        public static Blake2B Blake2B384()
         {
-            return new Sha3(384);
+            return new Blake2B(384);
         }
 
-        public static Sha3 Sha3512()
+        public static Blake2B Blake2B512()
         {
-            return new Sha3(512);
+            return new Blake2B(512);
         }
 
         public override void Initialize()

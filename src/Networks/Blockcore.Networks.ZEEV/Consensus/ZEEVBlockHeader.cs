@@ -11,7 +11,6 @@ using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks.ZEEV.Components;
 using Blockcore.Networks.ZEEV.Crypto;
-using Blockcore.Networks.ZEEV.Crypto.Blake2b;
 using DBreeze.Utils;
 using HashLib;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -395,7 +394,7 @@ size:   data:
 
         private byte[] maskHash(byte[] prevBlockHash)
         {
-            return Blake2B.ComputeHash(prevBlockHash.Concat(new byte[32]).ToArray(), new Blake2BConfig() { OutputSizeInBytes = 32 });
+            return Blake2B.Blake2B256().ComputeHash(prevBlockHash.Concat(new byte[32]).ToArray());
         }
 
         private byte[] subHash()
@@ -422,13 +421,13 @@ size:   data:
                 var bytes = ms.GetBuffer();
                 Array.Resize(ref bytes, (int)ms.Length);
 
-                return Blake2B.ComputeHash(bytes, new Blake2BConfig() { OutputSizeInBytes = 32 });
+                return Blake2B.Blake2B256().ComputeHash(bytes);
             }
         }
 
         private byte[] commitHash(byte[] prevBlockHash)
         {
-            return Blake2B.ComputeHash(subHash().Concat(maskHash(prevBlockHash)), new Blake2BConfig() { OutputSizeInBytes = 32 });
+            return Blake2B.Blake2B256().ComputeHash(subHash().Concat(maskHash(prevBlockHash)));
         }
 
         private byte[] padding(int size, byte[] prevBlock, byte[] treeRoot)

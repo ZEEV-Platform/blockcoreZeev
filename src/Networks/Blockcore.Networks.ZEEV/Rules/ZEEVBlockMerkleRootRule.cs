@@ -12,7 +12,7 @@ using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks.ZEEV.Consensus;
-using Blockcore.Networks.ZEEV.Crypto.Blake2b;
+using Blockcore.Networks.ZEEV.Crypto;
 using DBreeze.Utils;
 using Microsoft.Extensions.Logging;
 using Polly;
@@ -167,7 +167,7 @@ namespace Blockcore.Networks.ZEEV.Rules
 
                     Buffer.BlockCopy(subTreeHashes[level].ToBytes(), 0, hash, 0, 32);
                     Buffer.BlockCopy(currentLeaveHash.ToBytes(), 0, hash, 32, 32);
-                    currentLeaveHash = new uint256(Blake2B.ComputeHash(hash, new Blake2BConfig() { OutputSizeInBytes = 32 }));
+                    currentLeaveHash = new uint256(Blake2B.Blake2B256().ComputeHash(hash));
                 }
 
                 // Store the resulting hash at subTreeHashes position level.
@@ -205,7 +205,7 @@ namespace Blockcore.Networks.ZEEV.Rules
                     var rootBytes = root.ToBytes();
                     Buffer.BlockCopy(rootBytes, 0, hash, 0, 32);
                     Buffer.BlockCopy(rootBytes, 0, hash, 32, 32);
-                    root = new uint256(Blake2B.ComputeHash(hash, new Blake2BConfig() { OutputSizeInBytes = 32 }));
+                    root = new uint256(Blake2B.Blake2B256().ComputeHash(hash));
 
                     // Increment processedLeavesCount to the value it would have if two entries at this
                     // level had existed.
@@ -227,7 +227,7 @@ namespace Blockcore.Networks.ZEEV.Rules
 
                         Buffer.BlockCopy(subTreeHashes[level].ToBytes(), 0, hashh, 0, 32);
                         Buffer.BlockCopy(root.ToBytes(), 0, hashh, 32, 32);
-                        root = new uint256(Blake2B.ComputeHash(hashh, new Blake2BConfig() { OutputSizeInBytes = 32 }));
+                        root = new uint256(Blake2B.Blake2B256().ComputeHash(hashh));
 
                         level++;
                     }

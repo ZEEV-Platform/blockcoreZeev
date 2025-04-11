@@ -2,7 +2,7 @@
 using System.IO;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
-using Blockcore.Networks.ZEEV.Crypto.Blake2b;
+using Blockcore.Networks.ZEEV.Crypto;
 using DBreeze.Utils;
 
 namespace Blockcore.Networks.ZEEV.Consensus
@@ -31,7 +31,7 @@ namespace Blockcore.Networks.ZEEV.Consensus
                 var bytes = ms.GetBuffer();
                 Array.Resize(ref bytes, (int)ms.Length);
                 var bytesHex = bytes.ToHexFromByteArray();
-                var hash = Blake2B.ComputeHash(bytes, new Blake2BConfig() { OutputSizeInBytes = 32 });
+                var hash = Blake2B.Blake2B256().ComputeHash(bytes);
 
                 h = new uint256(hash);
             }
@@ -69,7 +69,7 @@ namespace Blockcore.Networks.ZEEV.Consensus
                 var bytes = ms.GetBuffer();
                 Array.Resize(ref bytes, (int)ms.Length);
                 var bytesHex = bytes.ToHexFromByteArray();
-                var hash = Blake2B.ComputeHash(bytes, new Blake2BConfig() { OutputSizeInBytes = 32 });
+                var hash = Blake2B.Blake2B256().ComputeHash(bytes);
 
                 h = new uint256(hash);
             }

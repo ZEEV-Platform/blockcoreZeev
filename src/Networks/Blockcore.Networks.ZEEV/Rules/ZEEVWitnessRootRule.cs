@@ -12,7 +12,6 @@ using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks.ZEEV.Consensus;
-using Blockcore.Networks.ZEEV.Crypto.Blake2b;
 using DBreeze.Utils;
 using Microsoft.Extensions.Logging;
 using Polly;
