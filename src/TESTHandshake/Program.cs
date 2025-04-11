@@ -24,8 +24,6 @@ namespace HandshakeTEST
 {
     public class Program
     {
-        //private static BigInteger pow256 = BigInteger.ValueOf(2).Pow(256);
-
         public static async Task Main(string[] args)
         {
             HeaderTest();

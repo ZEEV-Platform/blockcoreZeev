@@ -168,12 +168,10 @@ namespace Org.BouncyCastle.Pqc.Crypto.Utilities
                 if (version != 1)
                     throw new IOException("unknown private key version: " + version);
 
-                var keySeq = (Asn1Sequence)DerSequence.FromByteArray(DerOctetString.GetInstance(keyEnc[2]).GetOctets());
-
                 return new FalconPrivateKeyParameters(spParams,
-                    Asn1OctetString.GetInstance(keySeq[1]).GetOctets(),
-                    Asn1OctetString.GetInstance(keySeq[2]).GetOctets(),
-                    Asn1OctetString.GetInstance(keySeq[3]).GetOctets(),
+                    Asn1OctetString.GetInstance(keyEnc[1]).GetOctets(),
+                    Asn1OctetString.GetInstance(keyEnc[2]).GetOctets(),
+                    Asn1OctetString.GetInstance(keyEnc[3]).GetOctets(),
                     keyInfo.PublicKey?.GetOctets()); // encT1
             }
             if (algOid.On(BCObjectIdentifiers.pqc_kem_ntru))
