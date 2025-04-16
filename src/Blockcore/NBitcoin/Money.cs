@@ -60,8 +60,8 @@ namespace Blockcore.NBitcoin
 
     public enum MoneyUnit : int
     {
-        BTC = 100000000,
-        MilliBTC = 100000,
+        ZEEV = 100000000,
+        MilliZEEV = 100000,
         Bit = 100,
         Satoshi = 1
     }
@@ -291,7 +291,7 @@ namespace Blockcore.NBitcoin
 
             try
             {
-                nRet = new Money(value, MoneyUnit.BTC);
+                nRet = new Money(value, MoneyUnit.ZEEV);
                 return true;
             }
             catch (OverflowException)
@@ -857,11 +857,11 @@ namespace Blockcore.NBitcoin
                 i++;
             }
             char unit = format[i];
-            var unitToUseInCalc = MoneyUnit.BTC;
+            var unitToUseInCalc = MoneyUnit.ZEEV;
             switch (unit)
             {
                 case 'B':
-                    unitToUseInCalc = MoneyUnit.BTC;
+                    unitToUseInCalc = MoneyUnit.ZEEV;
                     break;
             }
             decimal val = Convert.ToDecimal(arg) / (int)unitToUseInCalc;

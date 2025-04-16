@@ -28,14 +28,14 @@ namespace Blockcore.Node
             try
             {
                 string chain = args
-                   .DefaultIfEmpty("--chain=BTC")
+                   .DefaultIfEmpty("--chain=ZEEV")
                    .Where(arg => arg.StartsWith("--chain", ignoreCase: true, CultureInfo.InvariantCulture))
                    .Select(arg => arg.Replace("--chain=", string.Empty, ignoreCase: true, CultureInfo.InvariantCulture))
                    .FirstOrDefault();
 
                 if (string.IsNullOrWhiteSpace(chain))
                 {
-                    chain = "BTC";
+                    chain = "ZEEV";
                 }
 
                 NodeSettings nodeSettings = NetworkSelector.Create(chain, args);

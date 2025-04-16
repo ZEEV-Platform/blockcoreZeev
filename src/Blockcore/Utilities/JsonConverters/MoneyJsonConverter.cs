@@ -56,7 +56,7 @@ namespace Blockcore.Utilities.JsonConverters
         {
             try
             {
-                return reader.TokenType == JsonToken.Null ? null : new Money((decimal)reader.Value, MoneyUnit.BTC);
+                return reader.TokenType == JsonToken.Null ? null : new Money((decimal)reader.Value, MoneyUnit.ZEEV);
             }
             catch (InvalidCastException)
             {
@@ -67,7 +67,7 @@ namespace Blockcore.Utilities.JsonConverters
         /// <inheritdoc />
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            writer.WriteValue(((Money)value).ToUnit(MoneyUnit.BTC));
+            writer.WriteValue(((Money)value).ToUnit(MoneyUnit.ZEEV));
         }
     }
 }

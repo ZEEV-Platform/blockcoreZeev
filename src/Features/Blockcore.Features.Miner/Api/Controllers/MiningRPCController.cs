@@ -428,10 +428,10 @@ namespace Blockcore.Features.Miner.Api.Controllers
             var estimation = this.txMempool.EstimateSmartFee(nblocks, out foundAtBlock, height, isConservative);
 
             result.Blocks = foundAtBlock;
-            result.FeeRate = estimation.FeePerK.ToUnit(MoneyUnit.BTC);
+            result.FeeRate = estimation.FeePerK.ToUnit(MoneyUnit.ZEEV);
             if (result.FeeRate.Equals(0))
             {
-                result.FeeRate = new Money(10).ToUnit(MoneyUnit.BTC);
+                result.FeeRate = new Money(10).ToUnit(MoneyUnit.ZEEV);
             }
 
             return result;

@@ -223,7 +223,7 @@ namespace Blockcore.Controllers.Models
         public Vout(int n, TxOut txout, Network network)
         {
             this.N = n;
-            this.Value = txout.Value.ToDecimal(MoneyUnit.BTC);
+            this.Value = txout.Value.ToDecimal(MoneyUnit.ZEEV);
             this.ScriptPubKey = new ScriptPubKey(txout.ScriptPubKey, network);
         }
 

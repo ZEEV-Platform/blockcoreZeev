@@ -42,7 +42,7 @@ namespace Blockcore.Features.Wallet.Types
             this.minTxFee = nodeSettings.MinTxFeeRate;
             this.fallbackFee = nodeSettings.FallbackTxFeeRate;
             this.payTxFee = new FeeRate(0);
-            this.maxTxFee = new Money(0.1M, MoneyUnit.BTC);
+            this.maxTxFee = new Money(0.1M, MoneyUnit.ZEEV);
             this.minRelayTxFee = nodeSettings.MinRelayTxFeeRate;
         }
 

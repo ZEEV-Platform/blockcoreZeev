@@ -171,7 +171,7 @@
     {
         ColdStakingManager = this.WalletManager as ColdStakingManager;
 
-        this.Fee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.BTC);
+        this.Fee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV);
 
         return Task.CompletedTask;
     }
@@ -185,7 +185,7 @@
     public void MaxAmount()
     {
         var accountBalance = this.WalletManager.GetBalances(walletname, "coldStakingColdAddresses").Single();
-        this.Amount = accountBalance.AmountConfirmed.ToDecimal(MoneyUnit.BTC) - this.Fee;
+        this.Amount = accountBalance.AmountConfirmed.ToDecimal(MoneyUnit.ZEEV) - this.Fee;
     }
 
     private bool IsWithdrawing { get; set; }
@@ -212,8 +212,8 @@
                 this.Address,
                 this.walletname,
                 this.Password,
-                new Money(this.Amount, MoneyUnit.BTC),
-                new Money(this.Fee, MoneyUnit.BTC));
+                new Money(this.Amount, MoneyUnit.ZEEV),
+                new Money(this.Fee, MoneyUnit.ZEEV));
 
             await this.BroadcasterManager.BroadcastTransactionAsync(transaction);
 

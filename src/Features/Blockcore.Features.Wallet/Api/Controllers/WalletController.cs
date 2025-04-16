@@ -1336,7 +1336,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                     model.UtxoAmounts = spendableTransactions
                                         .GroupBy(s => s.Transaction.Amount)
                                         .OrderByDescending(sg => sg.Count())
-                                        .Select(sg => new UtxoAmountModel { Amount = sg.Key.ToDecimal(MoneyUnit.BTC), Count = sg.Count() })
+                                        .Select(sg => new UtxoAmountModel { Amount = sg.Key.ToDecimal(MoneyUnit.ZEEV), Count = sg.Count() })
                                         .ToList();
 
                     // This is number of UTXO originating from the same transaction

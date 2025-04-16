@@ -9,6 +9,9 @@
 //------------------------------------------------------------------------------
 
 namespace Blockcore.Properties {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -16,7 +19,7 @@ namespace Blockcore.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -58,20 +61,15 @@ namespace Blockcore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 
-        ///        --                    
-        ///    ./yNMs                    
-        ///   -MMMMMs                    
-        ///   -MMMMMs                    
-        ///   -MMMMMs                    
-        ///   -MMMMMs    ``              
-        ///   -MMMMMs    /my/.`          
-        ///   -MMMMMs    /MMMNds:.       
-        ///   -MMMMMs    /MMMMMMMmh+-    
-        ///   -MMMMMs    `:sdNMMMMMMM.    _      _   _     _  _   _   _ 
-        ///   -MMMMMs       `-/mMMMMM.   |_) |  / \ /  |/ /  / \ |_) |_ 
-        ///   -MMMMMs          yMMMMM.   |_) |_ \_/ \_ |\ \_ \_/ | \ |_ 
-        ///   -MMMMMs          yMMMMM.                ww [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to            
+        ///      
+        ///      
+        ///      
+        ///           .-..-....                                                                                
+        ///       -.-...-..-.-.                                                                                
+        ///    -         ...-.                                                                                 
+        ///  -------.   ..-..-    #######    #######   #######   ###  ###   #######    #######    ##   ####  ##
+        /// ------.    .-.-.-        ###     #######   #######    ### ##    ## [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Logo {
             get {

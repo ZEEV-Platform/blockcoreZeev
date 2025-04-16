@@ -190,7 +190,7 @@ namespace Blockcore.Features.WalletWatchOnly.Api.Controllers
             var listTransactionModel = new ListTransactionsModel()
             {
                 InvolvesWatchOnly = isWatchOnly,
-                Amount = transactionOutputData.Amount.ToDecimal(MoneyUnit.BTC),
+                Amount = transactionOutputData.Amount.ToDecimal(MoneyUnit.ZEEV),
                 Address = transactionOutputData.Address,
                 Category = ListSinceBlockTransactionCategoryModel.Receive,
                 TransactionId = transaction.GetHash().ToString(),
@@ -218,7 +218,7 @@ namespace Blockcore.Features.WalletWatchOnly.Api.Controllers
             var spentTransactionOutput = new ListTransactionsModel()
             {
                 InvolvesWatchOnly = isWatchOnly,
-                Amount = -transactionOutputData.Amount.ToDecimal(MoneyUnit.BTC),
+                Amount = -transactionOutputData.Amount.ToDecimal(MoneyUnit.ZEEV),
                 Address = transactionOutputData.Address,
                 Category = ListSinceBlockTransactionCategoryModel.Send,
                 TransactionId = spendingDetails.TransactionId.ToString(),

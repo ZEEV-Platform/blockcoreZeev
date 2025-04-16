@@ -185,7 +185,7 @@
     {
         ColdStakingManager = this.WalletManager as ColdStakingManager;
 
-        this.Fee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.BTC);
+        this.Fee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV);
 
         var address = this.ColdStakingManager.GetFirstUnusedColdStakingAddress(this.walletname, true);
 
@@ -216,7 +216,7 @@
     {
         var mainAccountBalance = this.WalletManager.GetBalances(walletname, "account 0").Single();
 
-        this.Amount = mainAccountBalance.AmountConfirmed.ToUnit(MoneyUnit.BTC);
+        this.Amount = mainAccountBalance.AmountConfirmed.ToUnit(MoneyUnit.ZEEV);
 
         this.Amount = this.Amount - this.Fee;
 
@@ -224,7 +224,7 @@
         {
             TxNullDataTemplate template = this.Network.StandardScriptsRegistry.GetScriptTemplates.OfType<TxNullDataTemplate>().First();
 
-            this.Amount = this.Amount - new Money(template.MinRequiredSatoshiFee, MoneyUnit.Satoshi).ToUnit(MoneyUnit.BTC);
+            this.Amount = this.Amount - new Money(template.MinRequiredSatoshiFee, MoneyUnit.Satoshi).ToUnit(MoneyUnit.ZEEV);
         }
     }
 
@@ -235,7 +235,7 @@
     public void MaxAmount()
     {
         var accountBalance = this.WalletManager.GetBalances(walletname, "account 0").Single();
-        this.Amount = accountBalance.AmountConfirmed.ToDecimal(MoneyUnit.BTC) - this.Fee;
+        this.Amount = accountBalance.AmountConfirmed.ToDecimal(MoneyUnit.ZEEV) - this.Fee;
     }
     private async Task Setup()
     {
@@ -254,8 +254,8 @@
                 this.walletname,
                 "account 0",
                 this.Password,
-                new Money(this.Amount, MoneyUnit.BTC),
-                new Money(this.Fee, MoneyUnit.BTC),
+                new Money(this.Amount, MoneyUnit.ZEEV),
+                new Money(this.Fee, MoneyUnit.ZEEV),
                 this.PayToScript);
 
             await this.BroadcasterManager.BroadcastTransactionAsync(transaction);

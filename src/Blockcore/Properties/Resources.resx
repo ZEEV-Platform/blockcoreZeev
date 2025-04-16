@@ -118,26 +118,23 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Logo" xml:space="preserve">
-    <value>
-        --                    
-    ./yNMs                    
-   -MMMMMs                    
-   -MMMMMs                    
-   -MMMMMs                    
-   -MMMMMs    ``              
-   -MMMMMs    /my/.`          
-   -MMMMMs    /MMMNds:.       
-   -MMMMMs    /MMMMMMMmh+-    
-   -MMMMMs    `:sdNMMMMMMM.    _      _   _     _  _   _   _ 
-   -MMMMMs       `-/mMMMMM.   |_) |  / \ /  |/ /  / \ |_) |_ 
-   -MMMMMs          yMMMMM.   |_) |_ \_/ \_ |\ \_ \_/ | \ |_ 
-   -MMMMMs          yMMMMM.                www.blockcore.net
-   -MMMMMh-`      `:dMMMMM.   
-   -MMMMMMNmy/..+ymMMMMMMM.   {title}
-   `/ymMMMMMMMNNMMMMMMMmy/    
-      `-ohNMMMMMMMMNh+-`      
-          `:smMMds:`          
-              ..
+    <value>           
+      
+      
+      
+           .-..-....                                                                                
+       -.-...-..-.-.                                                                                
+    -         ...-.                                                                                 
+  -------.   ..-..-    #######    #######   #######   ###  ###   #######    #######    ##   ####  ##
+ ------.    .-.-.-        ###     #######   #######    ### ##    ##        ##    ###   ##   ## #####
+------    .-..-..       ###       ##        ##          ####     ##        ##    ###   ##   ##  ####
+------........         ########    ######    ######      ##       ######     #####     ##    #    ##
+------------                                                                        www.zeevcoin.com                
+--------              Blockcore {title}
+
+
+
+
            </value>
   </data>
 </root>

@@ -276,7 +276,7 @@ namespace Blockcore.Features.RPC.Controllers
                 Proxy = string.Empty,
                 Difficulty = this.GetNetworkDifficulty()?.Difficulty ?? 0,
                 Testnet = this.Network.IsTest(),
-                RelayFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.BTC) ?? 0,
+                RelayFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.ZEEV) ?? 0,
                 Errors = string.Empty,
 
                 //TODO: Wallet related infos: walletversion, balance, keypNetwoololdest, keypoolsize, unlocked_until, paytxfee
@@ -468,8 +468,8 @@ namespace Blockcore.Features.RPC.Controllers
                 TimeOffset = this.ConnectionManager?.ConnectedPeers?.GetMedianTimeOffset() ?? 0,
                 Connections = this.ConnectionManager?.ConnectedPeers?.Count(),
                 IsNetworkActive = true,
-                RelayFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.BTC) ?? 0,
-                IncrementalFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.BTC) ?? 0 // set to same as min relay fee
+                RelayFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.ZEEV) ?? 0,
+                IncrementalFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.ZEEV) ?? 0 // set to same as min relay fee
             };
 
             var services = this.ConnectionManager?.Parameters?.Services;
