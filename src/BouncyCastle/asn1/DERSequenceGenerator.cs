@@ -36,5 +36,5 @@ namespace Org.BouncyCastle.Asn1
 		{
 			return _bOut;
 		}
-	}
+    }
 }

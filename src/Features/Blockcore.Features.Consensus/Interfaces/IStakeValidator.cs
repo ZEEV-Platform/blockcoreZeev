@@ -5,8 +5,8 @@ using Blockcore.Consensus.Chain;
 using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.Utilities;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Features.Consensus.Interfaces
 {

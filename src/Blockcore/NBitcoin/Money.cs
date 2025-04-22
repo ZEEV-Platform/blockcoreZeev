@@ -60,10 +60,10 @@ namespace Blockcore.NBitcoin
 
     public enum MoneyUnit : int
     {
-        ZEEV = 100000000,
-        MilliZEEV = 100000,
-        Bit = 100,
-        Satoshi = 1
+        ZEEV = 100000000,     // Full coin
+        Photon = 100000,      // 0.001 ZEEV
+        Pulse = 100,          // 0.000001 ZEEV
+        Planck = 1            // 0.00000001 ZEEV (smallest unit)
     }
 
     public interface IMoney : IComparable, IComparable<IMoney>, IEquatable<IMoney>
@@ -435,26 +435,26 @@ namespace Blockcore.NBitcoin
         {
             // overflow safe.
             // decimal operations are checked by default
-            return new Money(coins * COIN, MoneyUnit.Satoshi);
+            return new Money(coins * COIN, MoneyUnit.Planck);
         }
 
         public static Money Bits(decimal bits)
         {
             // overflow safe.
             // decimal operations are checked by default
-            return new Money(bits * CENT, MoneyUnit.Satoshi);
+            return new Money(bits * CENT, MoneyUnit.Planck);
         }
 
         public static Money Cents(decimal cents)
         {
             // overflow safe.
             // decimal operations are checked by default
-            return new Money(cents * CENT, MoneyUnit.Satoshi);
+            return new Money(cents * CENT, MoneyUnit.Planck);
         }
 
         public static Money Satoshis(decimal sats)
         {
-            return new Money(sats, MoneyUnit.Satoshi);
+            return new Money(sats, MoneyUnit.Planck);
         }
 
         public static Money Satoshis(ulong sats)

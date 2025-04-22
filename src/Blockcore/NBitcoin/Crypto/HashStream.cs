@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Blockcore.NBitcoin.BouncyCastle.crypto.digests;
+using Org.BouncyCastle.Crypto.Digests;
 
 namespace Blockcore.NBitcoin.Crypto
 {

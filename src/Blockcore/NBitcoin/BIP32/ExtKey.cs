@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Linq;
 using Blockcore.Consensus.ScriptInfo;
-using Blockcore.NBitcoin.BouncyCastle.crypto.digests;
-using Blockcore.NBitcoin.BouncyCastle.crypto.macs;
-using Blockcore.NBitcoin.BouncyCastle.crypto.parameters;
-using Blockcore.NBitcoin.BouncyCastle.math;
+using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.DataEncoders;
 using Blockcore.Networks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Blockcore.NBitcoin.BIP32
 {
@@ -16,15 +14,13 @@ namespace Blockcore.NBitcoin.BIP32
     /// </summary>
     public class ExtKey : IBitcoinSerializable, IDestination, ISecret
     {
-        public static bool UseBCForHMACSHA512 = false;
-
         /// <summary>
         /// Parses the Base58 data (checking the network if specified), checks it represents the
         /// correct type of item, and then returns the corresponding ExtKey.
         /// </summary>
         public static ExtKey Parse(string wif, Network expectedNetwork = null)
         {
-            return Network.Parse<BitcoinExtKey>(wif, expectedNetwork).ExtKey;
+            return Network.Parse<ZeevExtKey>(wif, expectedNetwork).ExtKey;
         }
 
         private const int FingerprintLength = 4;
@@ -36,12 +32,7 @@ namespace Blockcore.NBitcoin.BIP32
         private byte nDepth;
         private byte[] vchFingerprint = new byte[FingerprintLength];
 
-        private static byte[] hashkey = Encoders.ASCII.DecodeData("Bitcoin seed");
-
-        public static void OverrideHashKey(byte[] newHashkey)
-        {
-            hashkey = newHashkey;
-        }        
+        private static byte[] hashkey = Encoders.ASCII.DecodeData("ZEEV seed"); 
 
         /// <summary>
         /// Gets the depth of this extended key from the root key.
@@ -80,7 +71,7 @@ namespace Blockcore.NBitcoin.BIP32
         /// Constructor. Reconstructs an extended key from the Base58 representations of 
         /// the public key and corresponding private key.  
         /// </summary>
-        public ExtKey(BitcoinExtPubKey extPubKey, BitcoinSecret key)
+        public ExtKey(ZeevExtPubKey extPubKey, ZeevSecret key)
             : this(extPubKey.ExtPubKey, key.PrivateKey)
         {
         }
@@ -172,21 +163,8 @@ namespace Blockcore.NBitcoin.BIP32
 
         private void SetMaster(byte[] seed)
         {
-            if (UseBCForHMACSHA512)
-            {
-                var mac = new HMac(new Sha512Digest());
-                mac.Init(new KeyParameter(hashkey));
-                byte[] hashMACBC = new byte[mac.GetMacSize()];
-                byte[] hash = new byte[mac.GetMacSize()];
-                mac.BlockUpdate(seed, 0, seed.Length);
-                mac.DoFinal(hash, 0);
-                Array.Copy(hash, hashMACBC, hashMACBC.Length);
-                this.key = new Key(hashMACBC.SafeSubarray(0, 32));
-                Buffer.BlockCopy(hashMACBC, 32, this.vchChainCode, 0, ChainCodeLength);
-                return;
-            }
+            byte[] hashMAC = new Hashes().HMACSHA3512(hashkey, seed);
 
-            byte[] hashMAC = Hashes.HMACSHA512(hashkey, seed);
             this.key = new Key(hashMAC.SafeSubarray(0, 32));
 
             Buffer.BlockCopy(hashMAC, 32, this.vchChainCode, 0, ChainCodeLength);
@@ -283,9 +261,9 @@ namespace Blockcore.NBitcoin.BIP32
         /// <summary>
         /// Converts the extended key to the base58 representation, within the specified network.
         /// </summary>
-        public BitcoinExtKey GetWif(Network network)
+        public ZeevExtKey GetWif(Network network)
         {
-            return new BitcoinExtKey(this, network);
+            return new ZeevExtKey(this, network);
         }
 
         #region IBitcoinSerializable Members
@@ -311,7 +289,7 @@ namespace Blockcore.NBitcoin.BIP32
         /// </summary>
         public string ToString(Network network)
         {
-            return new BitcoinExtKey(this, network).ToString();
+            return new ZeevExtKey(this, network).ToString();
         }
 
         #region IDestination Members
@@ -345,52 +323,52 @@ namespace Blockcore.NBitcoin.BIP32
         /// combinated with the public key of the parent (hardened children cannot be
         /// used to recreate the parent).
         /// </summary>
-        public ExtKey GetParentExtKey(ExtPubKey parent)
-        {
-            if(parent == null)
-                throw new ArgumentNullException("parent");
-            if(this.Depth == 0)
-                throw new InvalidOperationException("This ExtKey is the root key of the HD tree");
-            if(this.IsHardened)
-                throw new InvalidOperationException("This private key is hardened, so you can't get its parent");
-            byte[] expectedFingerPrint = parent.CalculateChildFingerprint();
-            if(parent.Depth != this.Depth - 1 || !expectedFingerPrint.SequenceEqual(this.vchFingerprint))
-                throw new ArgumentException("The parent ExtPubKey is not the immediate parent of this ExtKey", "parent");
+        //public ExtKey GetParentExtKey(ExtPubKey parent)
+        //{
+        //    if(parent == null)
+        //        throw new ArgumentNullException("parent");
+        //    if(this.Depth == 0)
+        //        throw new InvalidOperationException("This ExtKey is the root key of the HD tree");
+        //    if(this.IsHardened)
+        //        throw new InvalidOperationException("This private key is hardened, so you can't get its parent");
+        //    byte[] expectedFingerPrint = parent.CalculateChildFingerprint();
+        //    if(parent.Depth != this.Depth - 1 || !expectedFingerPrint.SequenceEqual(this.vchFingerprint))
+        //        throw new ArgumentException("The parent ExtPubKey is not the immediate parent of this ExtKey", "parent");
 
-            byte[] l = null;
-            var ll = new byte[32];
-            var lr = new byte[32];
+        //    byte[] l = null;
+        //    var ll = new byte[32];
+        //    var lr = new byte[32];
 
-            byte[] pubKey = parent.PubKey.ToBytes();
-            l = Hashes.BIP32Hash(parent.vchChainCode, this.nChild, pubKey[0], pubKey.SafeSubarray(1));
-            Array.Copy(l, ll, 32);
-            Array.Copy(l, 32, lr, 0, 32);
-            byte[] ccChild = lr;
+        //    byte[] pubKey = parent.PubKey.ToBytes();
+        //    l = Hashes.BIP32Hash(parent.vchChainCode, this.nChild, pubKey[0], pubKey.SafeSubarray(1));
+        //    Array.Copy(l, ll, 32);
+        //    Array.Copy(l, 32, lr, 0, 32);
+        //    byte[] ccChild = lr;
 
-            var parse256LL = new BigInteger(1, ll);
-            BigInteger N = ECKey.CURVE.N;
+        //    var parse256LL = new BigInteger(1, ll);
+        //    BigInteger N = ECKey.CURVE.N;
 
-            if(!ccChild.SequenceEqual(this.vchChainCode))
-                throw new InvalidOperationException("The derived chain code of the parent is not equal to this child chain code");
+        //    if(!ccChild.SequenceEqual(this.vchChainCode))
+        //        throw new InvalidOperationException("The derived chain code of the parent is not equal to this child chain code");
 
-            byte[] keyBytes = this.PrivateKey.ToBytes();
-            var key = new BigInteger(1, keyBytes);
+        //    byte[] keyBytes = this.PrivateKey.ToBytes();
+        //    var key = new BigInteger(1, keyBytes);
 
-            BigInteger kPar = key.Add(parse256LL.Negate()).Mod(N);
-            byte[] keyParentBytes = kPar.ToByteArrayUnsigned();
-            if(keyParentBytes.Length < 32)
-                keyParentBytes = new byte[32 - keyParentBytes.Length].Concat(keyParentBytes).ToArray();
+        //    BigInteger kPar = key.Add(parse256LL.Negate()).Mod(N);
+        //    byte[] keyParentBytes = kPar.ToByteArrayUnsigned();
+        //    if(keyParentBytes.Length < 32)
+        //        keyParentBytes = new byte[32 - keyParentBytes.Length].Concat(keyParentBytes).ToArray();
 
-            var parentExtKey = new ExtKey
-            {
-                vchChainCode = parent.vchChainCode,
-                nDepth = parent.Depth,
-                vchFingerprint = parent.Fingerprint,
-                nChild = parent.nChild,
-                key = new Key(keyParentBytes)
-            };
-            return parentExtKey;
-        }
+        //    var parentExtKey = new ExtKey
+        //    {
+        //        vchChainCode = parent.vchChainCode,
+        //        nDepth = parent.Depth,
+        //        vchFingerprint = parent.Fingerprint,
+        //        nChild = parent.nChild,
+        //        key = new Key(keyParentBytes)
+        //    };
+        //    return parentExtKey;
+        //}
 
     }
 }

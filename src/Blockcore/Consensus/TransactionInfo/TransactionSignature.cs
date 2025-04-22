@@ -1,10 +1,10 @@
 ﻿using System;
 using Blockcore.Consensus.ScriptInfo;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.DataEncoders;
 using Blockcore.Networks;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Consensus.TransactionInfo
 {

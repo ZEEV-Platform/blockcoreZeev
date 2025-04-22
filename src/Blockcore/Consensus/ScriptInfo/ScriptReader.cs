@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.NBitcoin.DataEncoders;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Consensus.ScriptInfo
 {
@@ -213,12 +213,6 @@ namespace Blockcore.Consensus.ScriptInfo
                     return "OP_WITHIN";
 
                 // crypto
-                case OpcodeType.OP_RIPEMD160:
-                    return "OP_RIPEMD160";
-                case OpcodeType.OP_SHA1:
-                    return "OP_SHA1";
-                case OpcodeType.OP_SHA256:
-                    return "OP_SHA256";
                 case OpcodeType.OP_HASH160:
                     return "OP_HASH160";
                 case OpcodeType.OP_HASH256:
@@ -255,6 +249,26 @@ namespace Blockcore.Consensus.ScriptInfo
                     return "OP_NOP8";
                 case OpcodeType.OP_NOP9:
                     return "OP_NOP9";
+
+
+                case OpcodeType.OP_SHA3224:
+                    return "OP_SHA3224";
+                case OpcodeType.OP_SHA3256:
+                    return "OP_SHA3256";
+                case OpcodeType.OP_SHA3384:
+                    return "OP_SHA3384";
+                case OpcodeType.OP_SHA3512:
+                    return "OP_SHA3512";
+                case OpcodeType.OP_BLAKE2B160:
+                    return "OP_BLAKE2B160";
+                case OpcodeType.OP_BLAKE2B224:
+                    return "OP_BLAKE2B224";
+                case OpcodeType.OP_BLAKE2B256:
+                    return "OP_BLAKE2B256";
+                case OpcodeType.OP_BLAKE2B384:
+                    return "OP_BLAKE2B384";
+                case OpcodeType.OP_BLAKE2B512:
+                    return "OP_BLAKE2B512";
 
                 default:
                     return Enum.GetName(typeof(OpcodeType), opcode);

@@ -6,7 +6,7 @@ using Org.BouncyCastle.Utilities.Encoders;
 
 namespace Org.BouncyCastle.Math.EC.Custom.Sec
 {
-    internal class SecP256K1Curve
+    public class SecP256K1Curve
         : AbstractFpCurve
     {
         public static readonly BigInteger q = SecP256K1FieldElement.Q;

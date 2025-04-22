@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Blockcore.Consensus.ScriptInfo;
+using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.DataEncoders;
 using Blockcore.Networks;
@@ -14,7 +15,7 @@ namespace Blockcore.NBitcoin.BIP32
     {
         public static ExtPubKey Parse(string wif, Network expectedNetwork = null)
         {
-            return Network.Parse<BitcoinExtPubKey>(wif, expectedNetwork).ExtPubKey;
+            return Network.Parse<ZeevExtPubKey>(wif, expectedNetwork).ExtPubKey;
         }
 
         private const int FingerprintLength = 4;
@@ -156,16 +157,16 @@ namespace Blockcore.NBitcoin.BIP32
 
         public ExtPubKey Derive(int index, bool hardened)
         {
-            if(index < 0)
+            if (index < 0)
                 throw new ArgumentOutOfRangeException("index", "the index can't be negative");
             uint realIndex = (uint)index;
             realIndex = hardened ? realIndex | 0x80000000u : realIndex;
             return Derive(realIndex);
         }
 
-        public BitcoinExtPubKey GetWif(Network network)
+        public ZeevExtPubKey GetWif(Network network)
         {
-            return new BitcoinExtPubKey(this, network);
+            return new ZeevExtPubKey(this, network);
         }
 
         #region IBitcoinSerializable Members
@@ -187,7 +188,7 @@ namespace Blockcore.NBitcoin.BIP32
         {
             get
             {
-                return Hashes.Hash256(this.ToBytes());
+                return new Hashes().Hash256(this.ToBytes());
             }
         }
 
@@ -220,7 +221,7 @@ namespace Blockcore.NBitcoin.BIP32
 
         public string ToString(Network network)
         {
-            return new BitcoinExtPubKey(this, network).ToString();
+            return new ZeevExtPubKey(this, network).ToString();
         }
 
         #region IDestination Members

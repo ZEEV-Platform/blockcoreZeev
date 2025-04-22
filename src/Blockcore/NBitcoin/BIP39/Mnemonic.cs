@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.BIP32;
-using Blockcore.NBitcoin.BouncyCastle.crypto.digests;
-using Blockcore.NBitcoin.BouncyCastle.crypto.macs;
-using Blockcore.NBitcoin.BouncyCastle.crypto.parameters;
+using Blockcore.NBitcoin.BIP39;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.Crypto.Cryptsharp;
+using Org.BouncyCastle.Crypto.Digests;
+using Org.BouncyCastle.Crypto.Macs;
+using Org.BouncyCastle.Crypto.Parameters;
 
 namespace Blockcore.NBitcoin.BIP39
 {
@@ -59,7 +62,7 @@ namespace Blockcore.NBitcoin.BIP39
                 throw new ArgumentException("The length for entropy should be : " + String.Join(",", entArray), "entropy");
 
             int cs = csArray[i];
-            byte[] checksum = Hashes.SHA256(entropy);
+            byte[] checksum = Sha3.Sha3512().ComputeHash(entropy);
             var entcsResult = new BitWriter();
 
             entcsResult.Write(entropy);
@@ -103,7 +106,7 @@ namespace Blockcore.NBitcoin.BIP39
                     BitArray bits = Wordlist.ToBits(this._Indices);
                     writer.Write(bits, ent);
                     byte[] entropy = writer.ToBytes();
-                    byte[] checksum = Hashes.SHA256(entropy);
+                    byte[] checksum = Sha3.Sha3512().ComputeHash(entropy);
 
                     writer.Write(checksum, cs);
                     int[] expectedIndices = writer.ToIntegers();
@@ -150,7 +153,7 @@ namespace Blockcore.NBitcoin.BIP39
             byte[] salt = Concat(Encoding.UTF8.GetBytes("mnemonic"), Normalize(passphrase));
             byte[] bytes = Normalize(this._Mnemonic);
 
-            var mac = new HMac(new Sha512Digest());
+            var mac = new HMac(new Sha3Digest(512));
             mac.Init(new KeyParameter(bytes));
             return Pbkdf2.ComputeDerivedKey(mac, salt, 2048, 64);
         }
@@ -186,9 +189,8 @@ namespace Blockcore.NBitcoin.BIP39
         {
             return this._Mnemonic;
         }
-
-
     }
+
     public enum WordCount : int
     {
         Twelve = 12,

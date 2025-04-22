@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.NBitcoin.Crypto;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.NBitcoin.DataEncoders
 {
@@ -15,7 +15,7 @@ namespace Blockcore.NBitcoin.DataEncoders
             var toEncode = new byte[count + 4];
             Buffer.BlockCopy(data, offset, toEncode, 0, count);
 
-            byte[] hash = Hashes.Hash256(data, offset, count).ToBytes();
+            byte[] hash = new Hashes().Hash256(data, offset, count).ToBytes();
             Buffer.BlockCopy(hash, 0, toEncode, count, 4);
 
             return InternalEncoder.EncodeData(toEncode, 0, toEncode.Length);
@@ -29,7 +29,7 @@ namespace Blockcore.NBitcoin.DataEncoders
                 Array.Clear(vchRet, 0, vchRet.Length);
                 throw new FormatException("Invalid checked base 58 string");
             }
-            byte[] calculatedHash = Hashes.Hash256(vchRet, 0, vchRet.Length - 4).ToBytes().SafeSubarray(0, 4);
+            byte[] calculatedHash = new Hashes().Hash256(vchRet, 0, vchRet.Length - 4).ToBytes().SafeSubarray(0, 4);
             byte[] expectedHash = vchRet.SafeSubarray(vchRet.Length - 4, 4);
 
             if(!Utils.ArrayEqual(calculatedHash, expectedHash))

@@ -10,11 +10,8 @@ using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
-using Blockcore.Networks;
 using Blockcore.Networks.ZEEV.Consensus;
-using Blockcore.Networks.ZEEV.Crypto;
 using Blockcore.P2P.Protocol.Payloads;
-using HashLib;
 using Microsoft.Extensions.Logging;
 
 namespace Blockcore.Networks.ZEEV.Rules

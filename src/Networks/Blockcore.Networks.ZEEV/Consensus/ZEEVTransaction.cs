@@ -2,7 +2,7 @@
 using System.IO;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
-using Blockcore.Networks.ZEEV.Crypto;
+using Blockcore.NBitcoin.Crypto;
 using DBreeze.Utils;
 
 namespace Blockcore.Networks.ZEEV.Consensus

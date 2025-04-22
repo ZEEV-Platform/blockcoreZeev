@@ -107,7 +107,7 @@ namespace Blockcore.P2P.Protocol
 
             if (stream.Serializing)
             {
-                checksum = Hashes.Hash256(payloadBytes, 0, length).GetLow32();
+                checksum = new Hashes().Hash256(payloadBytes, 0, length).GetLow32();
             }
 
             stream.ReadWrite(ref checksum);
@@ -177,7 +177,7 @@ namespace Blockcore.P2P.Protocol
 
         internal static bool VerifyChecksum(uint256 checksum, byte[] payload, int length)
         {
-            return checksum == Hashes.Hash256(payload, 0, length).GetLow32();
+            return checksum == new Hashes().Hash256(payload, 0, length).GetLow32();
         }
 
         public override string ToString()

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
-using Blockcore.NBitcoin.BouncyCastle.math;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.NBitcoin
 {

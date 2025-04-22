@@ -77,7 +77,7 @@ namespace Blockcore.NBitcoin
             }
         }
 
-        public BitcoinEncryptedSecret Encrypt(string password)
+        public ZeevEncryptedSecret Encrypt(string password)
         {
             return this.PrivateKey.GetEncryptedBitcoinSecret(password, this.Network);
         }

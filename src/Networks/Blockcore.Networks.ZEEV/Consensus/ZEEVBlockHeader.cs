@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Blockcore.Consensus;
 using Blockcore.Consensus.BlockInfo;
 using Blockcore.Consensus.Chain;
@@ -12,11 +9,6 @@ using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks.ZEEV.Components;
 using Blockcore.Networks.ZEEV.Crypto;
 using DBreeze.Utils;
-using HashLib;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
-using Polly;
-using static System.Net.Mime.MediaTypeNames;
-using static Blockcore.Features.Consensus.CoinViews.Coindb.FasterCoindb;
 
 namespace Blockcore.Networks.ZEEV.Consensus
 {

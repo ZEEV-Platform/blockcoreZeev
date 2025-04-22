@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Blockcore.Base.Deployments;
 using Blockcore.Consensus;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Networks.ZEEV.Consensus
 {

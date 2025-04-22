@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using Blockcore.NBitcoin.BouncyCastle.asn1;
-using Blockcore.NBitcoin.BouncyCastle.math;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.NBitcoin.Crypto
 {
@@ -64,7 +64,6 @@ namespace Blockcore.NBitcoin.Crypto
             var seq = new DerSequenceGenerator(bos);
             seq.AddObject(new DerInteger(this.R));
             seq.AddObject(new DerInteger(this.S));
-            seq.Close();
             return bos.ToArray();
 
         }

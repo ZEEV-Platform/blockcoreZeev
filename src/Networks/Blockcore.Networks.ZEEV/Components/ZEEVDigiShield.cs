@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Blockcore.Consensus.Chain;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.Networks.ZEEV.Consensus;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Networks.ZEEV.Components
 {

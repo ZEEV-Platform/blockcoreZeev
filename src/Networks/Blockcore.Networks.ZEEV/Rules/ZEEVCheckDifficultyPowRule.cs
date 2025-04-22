@@ -2,10 +2,10 @@
 using Blockcore.Consensus.Chain;
 using Blockcore.Consensus.Rules;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.Networks.ZEEV.Components;
 using Blockcore.Networks.ZEEV.Consensus;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Networks.ZEEV.Rules
 {

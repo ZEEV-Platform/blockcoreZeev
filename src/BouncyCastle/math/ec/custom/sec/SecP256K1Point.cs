@@ -4,15 +4,15 @@ using Org.BouncyCastle.Math.Raw;
 
 namespace Org.BouncyCastle.Math.EC.Custom.Sec
 {
-    internal class SecP256K1Point
+    public class SecP256K1Point
         : AbstractFpPoint
     {
-        internal SecP256K1Point(ECCurve curve, ECFieldElement x, ECFieldElement y)
+        public SecP256K1Point(ECCurve curve, ECFieldElement x, ECFieldElement y)
             : base(curve, x, y)
         {
         }
 
-        internal SecP256K1Point(ECCurve curve, ECFieldElement x, ECFieldElement y, ECFieldElement[] zs)
+        public SecP256K1Point(ECCurve curve, ECFieldElement x, ECFieldElement y, ECFieldElement[] zs)
             : base(curve, x, y, zs)
         {
         }

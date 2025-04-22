@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using Blockcore.NBitcoin.BouncyCastle.crypto;
-using Blockcore.NBitcoin.BouncyCastle.crypto.digests;
-using Blockcore.NBitcoin.BouncyCastle.crypto.parameters;
-using Blockcore.NBitcoin.BouncyCastle.crypto.signers;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Digests;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Signers;
 
 namespace Blockcore.NBitcoin.Crypto
 {    

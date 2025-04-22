@@ -441,11 +441,7 @@ namespace Blockcore.Consensus.BlockInfo
         /// <inheritdoc />
         public override uint256 GetPoWHash()
         {
-            using (var ms = new MemoryStream())
-            {
-                this.ReadWriteHashingStream(new BitcoinStream(ms, true));
-                return HashX13.Instance.Hash(ms.ToArray());
-            }
+            return this.GetHash();
         }
 
         public ProvenBlockHeader ProvenBlockHeader { get; set; }

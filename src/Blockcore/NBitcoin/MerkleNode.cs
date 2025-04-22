@@ -67,7 +67,7 @@ namespace Blockcore.NBitcoin
         public void UpdateHash()
         {
             MerkleNode right = this.Right ?? this.Left;
-            if(this.Left != null && this.Left.Hash != null && right.Hash != null) this._Hash = Hashes.Hash256(this.Left.Hash.ToBytes().Concat(right.Hash.ToBytes()).ToArray());
+            if(this.Left != null && this.Left.Hash != null && right.Hash != null) this._Hash = new Hashes().Hash256(this.Left.Hash.ToBytes().Concat(right.Hash.ToBytes()).ToArray());
         }
 
         public bool IsLeaf

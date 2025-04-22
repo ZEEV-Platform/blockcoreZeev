@@ -584,44 +584,44 @@ namespace Blockcore.Networks
             return new NBitcoin.OpenAsset.BitcoinAssetId(base58, this);
         }
 
-        private BitcoinPassphraseCode CreatePassphraseCode(string base58)
+        private ZeevPassphraseCode CreatePassphraseCode(string base58)
         {
-            return new BitcoinPassphraseCode(base58, this);
+            return new ZeevPassphraseCode(base58, this);
         }
 
-        private BitcoinEncryptedSecretNoEC CreateEncryptedKeyNoEC(string base58)
+        private ZeevEncryptedSecretNoEC CreateEncryptedKeyNoEC(string base58)
         {
-            return new BitcoinEncryptedSecretNoEC(base58, this);
+            return new ZeevEncryptedSecretNoEC(base58, this);
         }
 
-        private BitcoinEncryptedSecretEC CreateEncryptedKeyEC(string base58)
+        private ZeevEncryptedSecretEC CreateEncryptedKeyEC(string base58)
         {
-            return new BitcoinEncryptedSecretEC(base58, this);
+            return new ZeevEncryptedSecretEC(base58, this);
         }
 
         private Base58Data CreateConfirmationCode(string base58)
         {
-            return new BitcoinConfirmationCode(base58, this);
+            return new ZeevConfirmationCode(base58, this);
         }
 
         private Base58Data CreateBitcoinExtPubKey(string base58)
         {
-            return new BitcoinExtPubKey(base58, this);
+            return new ZeevExtPubKey(base58, this);
         }
 
-        public BitcoinExtKey CreateBitcoinExtKey(ExtKey key)
+        public ZeevExtKey CreateBitcoinExtKey(ExtKey key)
         {
-            return new BitcoinExtKey(key, this);
+            return new ZeevExtKey(key, this);
         }
 
-        public BitcoinExtPubKey CreateBitcoinExtPubKey(ExtPubKey pubkey)
+        public ZeevExtPubKey CreateBitcoinExtPubKey(ExtPubKey pubkey)
         {
-            return new BitcoinExtPubKey(pubkey, this);
+            return new ZeevExtPubKey(pubkey, this);
         }
 
-        public BitcoinExtKey CreateBitcoinExtKey(string base58)
+        public ZeevExtKey CreateBitcoinExtKey(string base58)
         {
-            return new BitcoinExtKey(base58, this);
+            return new ZeevExtKey(base58, this);
         }
 
         public BitcoinSecret CreateBitcoinSecret(Key key)

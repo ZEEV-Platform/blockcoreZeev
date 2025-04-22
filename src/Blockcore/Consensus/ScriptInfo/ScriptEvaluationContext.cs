@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Consensus.ScriptInfo
 {
@@ -1359,28 +1359,46 @@ namespace Blockcore.Consensus.ScriptInfo
                                 //
                                 // Crypto
                                 //
-                                case OpcodeType.OP_RIPEMD160:
-                                case OpcodeType.OP_SHA1:
-                                case OpcodeType.OP_SHA256:
                                 case OpcodeType.OP_HASH160:
                                 case OpcodeType.OP_HASH256:
+                                case OpcodeType.OP_SHA3224:
+                                case OpcodeType.OP_SHA3256:
+                                case OpcodeType.OP_SHA3384:
+                                case OpcodeType.OP_SHA3512:
+                                case OpcodeType.OP_BLAKE2B160:
+                                case OpcodeType.OP_BLAKE2B224:
+                                case OpcodeType.OP_BLAKE2B256:
+                                case OpcodeType.OP_BLAKE2B384:
+                                case OpcodeType.OP_BLAKE2B512:
                                     {
                                         // (in -- hash)
                                         if (this._stack.Count < 1)
                                             return SetError(ScriptError.InvalidStackOperation);
 
                                         byte[] vch = this._stack.Top(-1);
-                                        byte[] vchHash = null; //((opcode == OpcodeType.OP_RIPEMD160 || opcode == OpcodeType.OP_SHA1 || opcode == OpcodeType.OP_HASH160) ? 20 : 32);
-                                        if (opcode.Code == OpcodeType.OP_RIPEMD160)
-                                            vchHash = Hashes.RIPEMD160(vch, 0, vch.Length);
-                                        else if (opcode.Code == OpcodeType.OP_SHA1)
-                                            vchHash = Hashes.SHA1(vch, 0, vch.Length);
-                                        else if (opcode.Code == OpcodeType.OP_SHA256)
-                                            vchHash = Hashes.SHA256(vch, 0, vch.Length);
-                                        else if (opcode.Code == OpcodeType.OP_HASH160)
-                                            vchHash = Hashes.Hash160(vch, 0, vch.Length).ToBytes();
+                                        byte[] vchHash = null;
+                                        if (opcode.Code == OpcodeType.OP_HASH160)
+                                            vchHash = new Hashes().Hash160(vch, 0, vch.Length).ToBytes();
                                         else if (opcode.Code == OpcodeType.OP_HASH256)
-                                            vchHash = Hashes.Hash256(vch, 0, vch.Length).ToBytes();
+                                            vchHash = new Hashes().Hash256(vch, 0, vch.Length).ToBytes();
+                                        else if (opcode.Code == OpcodeType.OP_SHA3224)
+                                            vchHash = new Hashes().Sha3224(vch);
+                                        else if (opcode.Code == OpcodeType.OP_SHA3256)
+                                            vchHash = new Hashes().Sha3256(vch);
+                                        else if (opcode.Code == OpcodeType.OP_SHA3384)
+                                            vchHash = new Hashes().Sha3384(vch);
+                                        else if (opcode.Code == OpcodeType.OP_SHA3512)
+                                            vchHash = new Hashes().Sha3512(vch);
+                                        else if (opcode.Code == OpcodeType.OP_BLAKE2B160)
+                                            vchHash = new Hashes().Blake2B160(vch);
+                                        else if (opcode.Code == OpcodeType.OP_BLAKE2B224)
+                                            vchHash = new Hashes().Blake2B224(vch);
+                                        else if (opcode.Code == OpcodeType.OP_BLAKE2B256)
+                                            vchHash = new Hashes().Blake2B256(vch);
+                                        else if (opcode.Code == OpcodeType.OP_BLAKE2B384)
+                                            vchHash = new Hashes().Blake2B384(vch);
+                                        else if (opcode.Code == OpcodeType.OP_BLAKE2B512)
+                                            vchHash = new Hashes().Blake2B512(vch);
                                         this._stack.Pop();
                                         this._stack.Push(vchHash);
                                         break;

@@ -1,20 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Blockcore.Consensus;
 using Blockcore.Consensus.BlockInfo;
 using Blockcore.Consensus.Rules;
-using Blockcore.Consensus.ScriptInfo;
-using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks.ZEEV.Consensus;
-using DBreeze.Utils;
 using Microsoft.Extensions.Logging;
-using Polly;
 
 namespace Blockcore.Networks.ZEEV.Rules
 {

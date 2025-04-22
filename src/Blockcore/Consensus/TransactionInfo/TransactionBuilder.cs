@@ -300,7 +300,7 @@ namespace Blockcore.Consensus.TransactionInfo
                     if (tv.Item1.Verify(hash, tv.Item2))
                     {
                         var key = new Key();
-                        this._DummyToRealKey.Add(Hashes.Hash256(key.PubKey.ToBytes()), tv.Item1);
+                        this._DummyToRealKey.Add(new Hashes().Hash256(key.PubKey.ToBytes()), tv.Item1);
                         this._VerifiedSignatures.AddOrReplace(key.PubKey.Hash, tv.Item2);
                         return key;
                     }
@@ -314,7 +314,7 @@ namespace Blockcore.Consensus.TransactionInfo
                 var result = new List<Op>();
                 foreach (Op op in ops)
                 {
-                    uint256 h = Hashes.Hash256(op.PushData);
+                    uint256 h = new Hashes().Hash256(op.PushData);
                     PubKey real;
                     if (this._DummyToRealKey.TryGetValue(h, out real))
                         result.Add(Op.GetPushOp(real.ToBytes()));

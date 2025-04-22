@@ -19,7 +19,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 using System;
 using System.IO;
-using Blockcore.NBitcoin.BouncyCastle.crypto;
+using Org.BouncyCastle.Crypto;
 
 namespace Blockcore.NBitcoin.Crypto.Cryptsharp
 {

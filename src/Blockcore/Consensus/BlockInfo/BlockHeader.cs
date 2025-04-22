@@ -1,9 +1,9 @@
 ﻿using System;
 using Blockcore.Consensus.Chain;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Consensus.BlockInfo
 {
