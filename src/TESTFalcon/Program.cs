@@ -70,9 +70,9 @@ namespace FalconTest
             FalconPublicKeyParameters pubk = new FalconPublicKeyParameters(p, pk);
             FalconKeyParameters basevalue = privk;
             FalconKeyParameters basevalue2 = pubk;
-
+           
             var s = new AsymmetricCipherKeyPair(pubk, privk);
-
+          
             var pubrestore = new FalconPublicKeyParameters(_FParam, pubk.GetEncoded());
             var altSubPubEnc = pubk.GetEncoded();
             var altPrivEnc = privk.GetEncoded();

@@ -278,12 +278,12 @@ namespace Blockcore.Consensus.TransactionInfo
             private ICoin coin;
             private SigHash sigHash;
             private IndexedTxIn txIn;
-            private List<Tuple<PubKey, ECDSASignature>> _KnownSignatures;
-            private Dictionary<KeyId, ECDSASignature> _VerifiedSignatures = new Dictionary<KeyId, ECDSASignature>();
+            private List<Tuple<PubKey, FalconSignature>> _KnownSignatures;
+            private Dictionary<KeyId, FalconSignature> _VerifiedSignatures = new Dictionary<KeyId, FalconSignature>();
             private Dictionary<uint256, PubKey> _DummyToRealKey = new Dictionary<uint256, PubKey>();
             private TransactionBuilder builder;
 
-            public KnownSignatureSigner(TransactionBuilder builder, List<Tuple<PubKey, ECDSASignature>> _KnownSignatures, ICoin coin, SigHash sigHash, IndexedTxIn txIn)
+            public KnownSignatureSigner(TransactionBuilder builder, List<Tuple<PubKey, FalconSignature>> _KnownSignatures, ICoin coin, SigHash sigHash, IndexedTxIn txIn)
             {
                 this.builder = builder;
                 this._KnownSignatures = _KnownSignatures;
@@ -294,7 +294,7 @@ namespace Blockcore.Consensus.TransactionInfo
 
             public Key FindKey(Script scriptPubKey)
             {
-                foreach (Tuple<PubKey, ECDSASignature> tv in this._KnownSignatures.Where(tv => IsCompatibleKey(tv.Item1, scriptPubKey)))
+                foreach (Tuple<PubKey, FalconSignature> tv in this._KnownSignatures.Where(tv => IsCompatibleKey(tv.Item1, scriptPubKey)))
                 {
                     uint256 hash = this.txIn.GetSignatureHash(this.builder.Network, this.coin, this.sigHash);
                     if (tv.Item1.Verify(hash, tv.Item2))
@@ -721,7 +721,7 @@ namespace Blockcore.Consensus.TransactionInfo
             return this;
         }
 
-        public TransactionBuilder AddKnownSignature(PubKey pubKey, ECDSASignature signature)
+        public TransactionBuilder AddKnownSignature(PubKey pubKey, FalconSignature signature)
         {
             if (pubKey == null)
                 throw new ArgumentNullException("pubKey");
@@ -1781,7 +1781,7 @@ namespace Blockcore.Consensus.TransactionInfo
             throw new NotSupportedException("Unsupported scriptPubKey");
         }
 
-        private List<Tuple<PubKey, ECDSASignature>> _KnownSignatures = new List<Tuple<PubKey, ECDSASignature>>();
+        private List<Tuple<PubKey, FalconSignature>> _KnownSignatures = new List<Tuple<PubKey, FalconSignature>>();
 
         private Key FindKey(TransactionSigningContext ctx, Script scriptPubKey)
         {

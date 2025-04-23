@@ -246,7 +246,7 @@ namespace Blockcore.Features.Consensus
                 var serializer = new BitcoinStream(ms, true);
                 serializer.ReadWrite(kernel);
                 serializer.ReadWrite(prevStakeModifier);
-                stakeModifier = Hashes.Hash256(ms.ToArray());
+                stakeModifier = new Hashes().Hash256(ms.ToArray());
             }
 
             return stakeModifier;
@@ -332,7 +332,7 @@ namespace Blockcore.Features.Consensus
                 serializer.ReadWrite(prevout.N);
                 serializer.ReadWrite(transactionTime);
 
-                context.HashProofOfStake = Hashes.Hash256(ms.ToArray());
+                context.HashProofOfStake = new Hashes().Hash256(ms.ToArray());
             }
 
             this.logger.LogDebug("Stake modifier V2 is '{0}', hash POS is '{1}'.", prevStakeModifier, context.HashProofOfStake);
@@ -435,7 +435,7 @@ namespace Blockcore.Features.Consensus
             if (PayToPubkeyTemplate.Instance.CheckScriptPubKey(txout.ScriptPubKey))
             {
                 PubKey pubKey = PayToPubkeyTemplate.Instance.ExtractScriptPubKeyParameters(txout.ScriptPubKey);
-                bool res = pubKey.Verify(blockHash, new ECDSASignature(signature.Signature));
+                bool res = pubKey.Verify(blockHash, new FalconSignature(signature.Signature));
                 this.logger.LogTrace("(-)[P2PK]:{0}", res);
                 return res;
             }
@@ -476,7 +476,7 @@ namespace Blockcore.Features.Consensus
                 return false;
             }
 
-            bool verifyRes = new PubKey(data).Verify(blockHash, new ECDSASignature(signature.Signature));
+            bool verifyRes = new PubKey(data).Verify(blockHash, new FalconSignature(signature.Signature));
             return verifyRes;
         }
     }

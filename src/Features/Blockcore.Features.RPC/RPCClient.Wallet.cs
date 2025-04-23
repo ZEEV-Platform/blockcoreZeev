@@ -78,16 +78,16 @@ namespace Blockcore.Features.RPC
 
         // dumpprivkey
 
-        public BitcoinSecret DumpPrivKey(BitcoinAddress address)
+        public ZeevSecret DumpPrivKey(BitcoinAddress address)
         {
             RPCResponse response = SendCommand(RPCOperations.dumpprivkey, address.ToString());
-            return this.Network.Parse<BitcoinSecret>((string)response.Result);
+            return this.Network.Parse<ZeevSecret>((string)response.Result);
         }
 
-        public async Task<BitcoinSecret> DumpPrivKeyAsync(BitcoinAddress address)
+        public async Task<ZeevSecret> DumpPrivKeyAsync(BitcoinAddress address)
         {
             RPCResponse response = await SendCommandAsync(RPCOperations.dumpprivkey, address.ToString()).ConfigureAwait(false);
-            return this.Network.Parse<BitcoinSecret>((string)response.Result);
+            return this.Network.Parse<ZeevSecret>((string)response.Result);
         }
 
         // getaccountaddress
@@ -104,13 +104,13 @@ namespace Blockcore.Features.RPC
             return this.Network.Parse<BitcoinAddress>((string)response.Result);
         }
 
-        public BitcoinSecret GetAccountSecret(string account)
+        public ZeevSecret GetAccountSecret(string account)
         {
             BitcoinAddress address = GetAccountAddress(account);
             return DumpPrivKey(address);
         }
 
-        public async Task<BitcoinSecret> GetAccountSecretAsync(string account)
+        public async Task<ZeevSecret> GetAccountSecretAsync(string account)
         {
             BitcoinAddress address = await GetAccountAddressAsync(account).ConfigureAwait(false);
             return await DumpPrivKeyAsync(address).ConfigureAwait(false);
@@ -258,22 +258,22 @@ namespace Blockcore.Features.RPC
 
         // importprivkey
 
-        public void ImportPrivKey(BitcoinSecret secret)
+        public void ImportPrivKey(ZeevSecret secret)
         {
             SendCommand(RPCOperations.importprivkey, secret.ToWif());
         }
 
-        public void ImportPrivKey(BitcoinSecret secret, string label, bool rescan)
+        public void ImportPrivKey(ZeevSecret secret, string label, bool rescan)
         {
             SendCommand(RPCOperations.importprivkey, secret.ToWif(), label, rescan);
         }
 
-        public async Task ImportPrivKeyAsync(BitcoinSecret secret)
+        public async Task ImportPrivKeyAsync(ZeevSecret secret)
         {
             await SendCommandAsync(RPCOperations.importprivkey, secret.ToWif()).ConfigureAwait(false);
         }
 
-        public async Task ImportPrivKeyAsync(BitcoinSecret secret, string label, bool rescan)
+        public async Task ImportPrivKeyAsync(ZeevSecret secret, string label, bool rescan)
         {
             await SendCommandAsync(RPCOperations.importprivkey, secret.ToWif(), label, rescan).ConfigureAwait(false);
         }
@@ -415,7 +415,7 @@ namespace Blockcore.Features.RPC
             }
         }
 
-        public IEnumerable<BitcoinSecret> ListSecrets()
+        public IEnumerable<ZeevSecret> ListSecrets()
         {
             foreach (AddressGrouping grouping in ListAddressGroupings())
             {

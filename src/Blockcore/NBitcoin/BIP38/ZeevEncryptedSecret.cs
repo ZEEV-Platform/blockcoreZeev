@@ -72,7 +72,19 @@ namespace Blockcore.NBitcoin.BIP38
 
         public override Key GetKey(string password)
         {
-            throw new NotImplementedException();
+            var vPassword = DeriveKey(password);
+            var s = this.Encrypted;
+            var privkey = DecryptKey(this.Encrypted, vPassword);
+
+            var key = new Key(privkey);
+
+            byte[] addressBytes = Encoders.ASCII.DecodeData(key.PubKey.GetAddress(this.Network).ToString());
+            byte[] salt = new Hashes().Hash256(addressBytes).ToBytes().SafeSubarray(0, 4);
+
+            if (!Utils.ArrayEqual(salt, this.AddressHash))
+                throw new SecurityException("Invalid password (or invalid Network)");
+
+            return key;
         }
 
         private byte[] _FirstHalf;
@@ -80,7 +92,7 @@ namespace Blockcore.NBitcoin.BIP38
         {
             get
             {
-                return this._FirstHalf ?? (this._FirstHalf = this.vchData.SafeSubarray(this.ValidLength - 32, 16));
+                return this._FirstHalf ?? (this._FirstHalf = this.vchData.SafeSubarray(this.ValidLength - 60, 30));
             }
         }
 
@@ -146,10 +158,10 @@ namespace Blockcore.NBitcoin.BIP38
         {
             get
             {
-                return this._LastHalf ?? (this._LastHalf = this.vchData.Skip(this.ValidLength - 16).ToArray());
+                return this._LastHalf ?? (this._LastHalf = this.vchData.Skip(this.ValidLength - 30).ToArray());
             }
         }
-        protected int ValidLength = (1 + 4 + 16 + 16);
+        protected int ValidLength = (1 + 4 + 30 + 30);
 
 
         protected override bool IsValid
@@ -176,9 +188,9 @@ namespace Blockcore.NBitcoin.BIP38
             {
                 Type = Argon2Type.DataDependentAddressing,
                 Version = Argon2Version.Nineteen,
-                TimeCost = 3,
-                MemoryCost = 65536,
-                Threads = 4,
+                TimeCost = 5,         
+                MemoryCost = 262144,
+                Threads = 6,       
                 Password = Encoding.UTF8.GetBytes(password),
                 Salt = Encoding.UTF8.GetBytes("+.-)(42sáq?:p{]%"),
                 HashLength = 32           
@@ -190,46 +202,43 @@ namespace Blockcore.NBitcoin.BIP38
             }
         }
 
-        internal static byte[] EncryptKey(byte[] key, byte[] password)
+        internal static byte[] EncryptKey(byte[] data, byte[] key)
         {
-            using (Aes aes = Aes.Create())
-            {
-                aes.Key = password;
-                aes.GenerateIV();
-                byte[] iv = aes.IV;
+            byte[] nonce = RandomNumberGenerator.GetBytes(12);
+            byte[] ciphertext = new byte[data.Length];
+            byte[] tag = new byte[16];
 
-                using (var encryptor = aes.CreateEncryptor())
-                using (var ms = new System.IO.MemoryStream())
-                {
-                    ms.Write(iv, 0, iv.Length);
-                    using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-                    using (var writer = new System.IO.StreamWriter(cs))
-                    {
-                        writer.Write(key);
-                    }
-                    return ms.ToArray();
-                }
+            using (var chacha = new ChaCha20Poly1305(key))
+            {
+                chacha.Encrypt(nonce, data, ciphertext, tag);
             }
+
+            byte[] result = new byte[nonce.Length + tag.Length + ciphertext.Length];
+            Array.Copy(nonce, 0, result, 0, nonce.Length);
+            Array.Copy(tag, 0, result, nonce.Length, tag.Length);
+            Array.Copy(ciphertext, 0, result, nonce.Length + tag.Length, ciphertext.Length);
+
+            return result;
         }
 
-        internal string DecryptKey(byte[] encryptedKey, byte[] password)
+        internal static byte[] DecryptKey(byte[] encryptedData, byte[] key)
         {
-            byte[] iv = new byte[16];
-            Array.Copy(encryptedKey, 0, iv, 0, iv.Length);
+            byte[] nonce = new byte[12];
+            byte[] tag = new byte[16];
+            byte[] ciphertext = new byte[encryptedData.Length - nonce.Length - tag.Length];
 
-            using (Aes aes = Aes.Create())
+            Array.Copy(encryptedData, 0, nonce, 0, nonce.Length);
+            Array.Copy(encryptedData, nonce.Length, tag, 0, tag.Length);
+            Array.Copy(encryptedData, nonce.Length + tag.Length, ciphertext, 0, ciphertext.Length);
+
+            byte[] data = new byte[ciphertext.Length];
+            using (var chacha = new ChaCha20Poly1305(key))
             {
-                aes.Key = password;
-                aes.IV = iv;
-
-                using (var decryptor = aes.CreateDecryptor())
-                using (var ms = new System.IO.MemoryStream(encryptedKey, iv.Length, encryptedKey.Length - iv.Length))
-                using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                using (var reader = new System.IO.StreamReader(cs))
-                {
-                    return reader.ReadToEnd();
-                }
+                chacha.Decrypt(nonce, ciphertext, tag, data);
             }
+
+            return data;
         }
     }
 }
+

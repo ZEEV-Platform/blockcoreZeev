@@ -396,9 +396,9 @@ namespace Blockcore.Networks
             }
         }
 
-        public BitcoinSecret CreateBitcoinSecret(string base58)
+        public ZeevSecret CreateBitcoinSecret(string base58)
         {
-            return new BitcoinSecret(base58, this);
+            return new ZeevSecret(base58, this);
         }
 
         /// <summary>
@@ -624,9 +624,9 @@ namespace Blockcore.Networks
             return new ZeevExtKey(base58, this);
         }
 
-        public BitcoinSecret CreateBitcoinSecret(Key key)
+        public ZeevSecret CreateBitcoinSecret(Key key)
         {
-            return new BitcoinSecret(key, this);
+            return new ZeevSecret(key, this);
         }
 
         public BitcoinPubKeyAddress CreateBitcoinPubKeyAddress(KeyId dest)

@@ -2096,7 +2096,7 @@ namespace Blockcore.Consensus.ScriptInfo
                 int S = 6 + nLenR;
                 var newS = new BigInteger(1, vchSig, S, nLenS);
                 var newR = new BigInteger(1, vchSig, R, nLenR);
-                var sig2 = new ECDSASignature(newR, newS);
+                var sig2 = new FalconSignature(newR, newS);
                 if (sig2.R != scriptSig.Signature.R || sig2.S != scriptSig.Signature.S)
                 {
                     if (!pubkey.Verify(sighash, sig2))

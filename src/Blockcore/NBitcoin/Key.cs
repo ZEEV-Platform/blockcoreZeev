@@ -13,7 +13,7 @@ namespace Blockcore.NBitcoin
 {
     public class Key : IBitcoinSerializable, IDestination
     {
-        private const int KEY_SIZE = 32;
+        private const int SEEDKEY_SIZE = 32;
         private readonly static uint256 N = uint256.Parse("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
 
         public static Key Parse(string wif, Network network = null)
@@ -26,12 +26,12 @@ namespace Blockcore.NBitcoin
             return Network.Parse<ZeevEncryptedSecret>(wif, network).GetKey(password);
         }
 
-        private byte[] vch = new byte[0];
-        internal FalconKey _FalconKey;
+        private byte[] _vectorBytes = new byte[0];
+        private FalconKey _FalconKey;
 
         public Key()
         {
-            var data = new byte[KEY_SIZE];
+            var data = new byte[SEEDKEY_SIZE];
             do
             {
                 RandomUtils.GetBytes(data);
@@ -43,7 +43,7 @@ namespace Blockcore.NBitcoin
         {
             if (count == -1)
                 count = data.Length;
-            if (count != KEY_SIZE)
+            if (count != SEEDKEY_SIZE)
             {
                 throw new FormatException("The size of an EC key should be 32");
             }
@@ -57,13 +57,13 @@ namespace Blockcore.NBitcoin
 
         private void SetBytes(byte[] data, int count)
         {
-            this.vch = data.SafeSubarray(0, count);
-            this._FalconKey = new FalconKey(this.vch, true);
+            this._vectorBytes = data.SafeSubarray(0, count);
+            this._FalconKey = new FalconKey(this._vectorBytes);
         }
 
         private static bool Check(byte[] vch)
         {
-            var candidateKey = new uint256(vch.SafeSubarray(0, KEY_SIZE));
+            var candidateKey = new uint256(vch.SafeSubarray(0, SEEDKEY_SIZE));
             return candidateKey > 0 && candidateKey < N;
         }
 
@@ -152,10 +152,10 @@ namespace Blockcore.NBitcoin
 
         public void ReadWrite(BitcoinStream stream)
         {
-            stream.ReadWrite(ref this.vch);
+            stream.ReadWrite(ref this._vectorBytes);
             if (!stream.Serializing)
             {
-                this._FalconKey = new FalconKey(this.vch, true);
+                this._FalconKey = new FalconKey(this._vectorBytes);
             }
         }
 
@@ -180,7 +180,7 @@ namespace Blockcore.NBitcoin
             ccChild = lr;
 
             var parse256LL = new BigInteger(1, ll);
-            var kPar = new BigInteger(1, this.vch);
+            var kPar = new BigInteger(1, this._vectorBytes);
             BigInteger N = BigInteger.ValueOf(FalconKey.FParam.LogN);
 
             if (parse256LL.CompareTo(N) >= 0)
@@ -257,9 +257,9 @@ namespace Blockcore.NBitcoin
         public override bool Equals(object obj)
         {
             var item = obj as Key;
-            if ((item == null) || (item.vch == null))
+            if ((item == null) || (item._vectorBytes == null))
                 return false;
-            return this.vch.SequenceEqual(item.vch);
+            return this._vectorBytes.SequenceEqual(item._vectorBytes);
             //return this.PubKey.Equals(item.PubKey);
         }
         public static bool operator ==(Key a, Key b)

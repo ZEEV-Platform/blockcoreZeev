@@ -62,31 +62,31 @@ namespace Blockcore.Consensus.TransactionInfo
             }
             return true;
         }
-        public TransactionSignature(ECDSASignature signature, SigHash sigHash)
+        public TransactionSignature(FalconSignature signature, SigHash sigHash)
         {
             if(sigHash == SigHash.Undefined)
                 throw new ArgumentException("sigHash should not be Undefined");
             this._SigHash = sigHash;
             this._Signature = signature;
         }
-        public TransactionSignature(ECDSASignature signature)
+        public TransactionSignature(FalconSignature signature)
             : this(signature, SigHash.All)
         {
 
         }
         public TransactionSignature(byte[] sigSigHash)
         {
-            this._Signature = ECDSASignature.FromDER(sigSigHash);
+            this._Signature = FalconSignature.FromDER(sigSigHash);
             this._SigHash = (SigHash)sigSigHash[sigSigHash.Length - 1];
         }
         public TransactionSignature(byte[] sig, SigHash sigHash)
         {
-            this._Signature = ECDSASignature.FromDER(sig);
+            this._Signature = FalconSignature.FromDER(sig);
             this._SigHash = sigHash;
         }
 
-        private readonly ECDSASignature _Signature;
-        public ECDSASignature Signature
+        private readonly FalconSignature _Signature;
+        public FalconSignature Signature
         {
             get
             {

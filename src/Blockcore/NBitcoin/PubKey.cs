@@ -36,15 +36,17 @@ namespace Blockcore.NBitcoin
         {
             if (bytes == null)
                 throw new ArgumentNullException("bytes");
-            //if (!Check(bytes, false))
-            //{
-            //    throw new FormatException("Invalid public key");
-            //}
+
+            if (!Check(bytes, false))
+            {
+                throw new FormatException("Invalid public key");
+            }
+
             if (@unsafe)
-                this.vch = bytes;
+                this._falconPkBytes = bytes;
             else
             {
-                this.vch = bytes.ToArray();
+                this._falconPkBytes = bytes.ToArray();
                 try
                 {
                     this._FalconKey = new FalconKey(bytes, false);
@@ -62,7 +64,7 @@ namespace Blockcore.NBitcoin
         {
             get
             {
-                if (this._FalconKey == null) this._FalconKey = new FalconKey(this.vch, false);
+                if (this._FalconKey == null) this._FalconKey = new FalconKey(this._falconPkBytes, false);
                 return this._FalconKey;
             }
         }
@@ -87,32 +89,28 @@ namespace Blockcore.NBitcoin
         /// <param name="data">bytes array</param>
         /// <param name="deep">If false, will only check the first byte and length of the array. If true, will also check that the ECC coordinates are correct.</param>
         /// <returns>true if byte array is valid</returns>
-        //public static bool Check(byte[] data, bool deep)
-        //{
-        //    return Check(data, 0, data.Length, deep);
-        //}
+        public static bool Check(byte[] data, bool deep)
+        {
+            return Check(data, 0, data.Length, deep);
+        }
+        public static bool Check(byte[] data, int offset, int count, bool deep)
+        {
+            bool quick = data != null && count == 896 && data.Length >= 896;
 
-        //public static bool Check(byte[] data, int offset, int count, bool deep)
-        //{
-        //    bool quick = data != null &&
-        //            (
-        //                (count == 33 && (data[offset + 0] == 0x02 || data[offset + 0] == 0x03)) ||
-        //                (count == 65 && (data[offset + 0] == 0x04 || data[offset + 0] == 0x06 || data[offset + 0] == 0x07))
-        //            );
-        //    if (!deep || !quick)
-        //        return quick;
-        //    try
-        //    {
-        //        //new ECKey(data.SafeSubarray(offset, count), false);
-        //        return true;
-        //    }
-        //    catch
-        //    {
-        //        return false;
-        //    }
-        //}
+            if (!deep || !quick)
+                return quick;
+            try
+            {
+                new FalconKey(data.SafeSubarray(offset, count), false);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
-        private byte[] vch = new byte[0];
+        private byte[] _falconPkBytes = new byte[0];
         private KeyId _ID;
 
         public KeyId Hash
@@ -121,7 +119,7 @@ namespace Blockcore.NBitcoin
             {
                 if (this._ID == null)
                 {
-                    this._ID = new KeyId(new Hashes().Hash160(this.vch, 0, this.vch.Length));
+                    this._ID = new KeyId(new Hashes().Hash160(this._falconPkBytes, 0, this._falconPkBytes.Length));
                 }
                 return this._ID;
             }
@@ -135,7 +133,7 @@ namespace Blockcore.NBitcoin
             {
                 if (this._WitID == null)
                 {
-                    this._WitID = new WitKeyId(new Hashes().Hash160(this.vch, 0, this.vch.Length));
+                    this._WitID = new WitKeyId(new Hashes().Hash160(this._falconPkBytes, 0, this._falconPkBytes.Length));
                 }
                 return this._WitID;
             }
@@ -144,12 +142,8 @@ namespace Blockcore.NBitcoin
         public bool IsCompressed
         {
             get
-            {
-                if (this.vch.Length == 65)
-                    return false;
-                if (this.vch.Length == 33)
-                    return true;
-                throw new NotSupportedException("Invalid public key size");
+          {
+                return false;
             }
         }
 
@@ -177,31 +171,25 @@ namespace Blockcore.NBitcoin
         //    return new BitcoinScriptAddress(redeem.Hash, network);
         //}
 
-        //public bool Verify(uint256 hash, SchnorrSignature sig)
-        //{
-        //    if (sig == null)
-        //        throw new ArgumentNullException(nameof(sig));
-        //    if (hash == null)
-        //        throw new ArgumentNullException(nameof(hash));
+        public bool Verify(uint256 hash, FalconSignature sig)
+        {
+            if (sig == null)
+                throw new ArgumentNullException(nameof(sig));
+            if (hash == null)
+                throw new ArgumentNullException(nameof(hash));
 
-        //    SchnorrSigner signer = new SchnorrSigner();
-        //    return signer.Verify(hash, this, sig);
-        //}
+            return this.FalconKey.Verify(hash, sig);
+        }
 
-        //public bool Verify(uint256 hash, ECDSASignature sig)
-        //{
-        //    return this.ECKey.Verify(hash, sig);
-        //}
+        public bool Verify(uint256 hash, byte[] sig)
+        {
+            return Verify(hash, FalconSignature.FromDER(sig));
+        }
 
-        //public bool Verify(uint256 hash, byte[] sig)
-        //{
-        //    return Verify(hash, ECDSASignature.FromDER(sig));
-        //}
-
-        //public string ToHex()
-        //{
-        //    return Encoders.Hex.EncodeData(this.vch);
-        //}
+        public string ToHex()
+        {
+            return Encoders.Hex.EncodeData(this._falconPkBytes);
+        }
 
         //#region IBitcoinSerializable Members
 
@@ -213,18 +201,18 @@ namespace Blockcore.NBitcoin
 
         //#endregion IBitcoinSerializable Members
 
-        //public byte[] ToBytes()
-        //{
-        //    return this.vch.ToArray();
-        //}
+        public byte[] ToBytes()
+        {
+            return this._falconPkBytes.ToArray();
+        }
 
-        //public byte[] ToBytes(bool @unsafe)
-        //{
-        //    if (@unsafe)
-        //        return this.vch;
-        //    else
-        //        return this.vch.ToArray();
-        //}
+        public byte[] ToBytes(bool @unsafe)
+        {
+            if (@unsafe)
+                return this._falconPkBytes;
+            else
+                return this._falconPkBytes.ToArray();
+        }
 
         //public override string ToString()
         //{
