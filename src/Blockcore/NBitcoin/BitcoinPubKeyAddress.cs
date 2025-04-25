@@ -56,14 +56,16 @@ namespace Blockcore.NBitcoin
 
         public bool VerifyMessage(string message, string signature)
         {
-            PubKey key = PubKey.RecoverFromMessage(message, signature);
-            return key.Hash == this.Hash;
+            throw new NotImplementedException("FALCON");
+           // PubKey key = PubKey.RecoverFromMessage(message, signature);
+           // return key.Hash == this.Hash;
         }
 
         public bool VerifyMessage(byte[] message, string signature)
         {
-            PubKey key = PubKey.RecoverFromMessage(message, signature);
-            return key.Hash == this.Hash;
+            throw new NotImplementedException("FALCON");
+          //  PubKey key = PubKey.RecoverFromMessage(message, signature);
+            //return key.Hash == this.Hash;
         }
 
         private KeyId _KeyId;

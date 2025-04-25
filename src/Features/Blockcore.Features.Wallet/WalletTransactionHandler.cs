@@ -262,7 +262,7 @@ namespace Blockcore.Features.Wallet
                     continue;
 
                 ExtKey addressExtKey = seedExtKey.Derive(new KeyPath(address.HdPath));
-                BitcoinExtKey addressPrivateKey = addressExtKey.GetWif(wallet.Network);
+                ZeevExtKey addressPrivateKey = addressExtKey.GetWif(wallet.Network);
                 signingKeys.Add(addressPrivateKey);
                 added.Add(address);
             }
@@ -395,7 +395,7 @@ namespace Blockcore.Features.Wallet
         protected void AddFee(TransactionBuildContext context)
         {
             Money fee;
-            Money minTrxFee = new Money(this.network.MinTxFee, MoneyUnit.Satoshi);
+            Money minTrxFee = new Money(this.network.MinTxFee, MoneyUnit.Planck);
 
             // If the fee hasn't been set manually, calculate it based on the fee type that was chosen.
             if (context.TransactionFee == null)

@@ -310,7 +310,7 @@ namespace Blockcore.Features.Wallet
 
             ExtKey extendedKey = HdOperations.GetExtendedKey(mnemonic, passphrase);
 
-            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedBitcoinSecret(password, this.network).ToWif();
+            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedZeevSecret(password, this.network).ToWif();
 
             string accountHdPath = HdOperations.GetAccountHdPath(44, (int)coinType, 0);
             Key privateKey = HdOperations.DecryptSeed(encryptedSeed, password, this.network);
@@ -376,7 +376,7 @@ namespace Blockcore.Features.Wallet
             ExtKey extendedKey = HdOperations.GetExtendedKey(mnemonic, passphrase);
 
             // Create a wallet file.
-            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedBitcoinSecret(password, this.network).ToWif();
+            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedZeevSecret(password, this.network).ToWif();
             Types.Wallet wallet = this.GenerateWalletFile(name, encryptedSeed, extendedKey.ChainCode, coinType: coinType);
 
             // Generate multiple accounts and addresses from the get-go.
@@ -559,7 +559,7 @@ namespace Blockcore.Features.Wallet
             }
 
             // Create a wallet file.
-            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedBitcoinSecret(password, this.network).ToWif();
+            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedZeevSecret(password, this.network).ToWif();
             Types.Wallet wallet = this.GenerateWalletFile(name, encryptedSeed, extendedKey.ChainCode, creationTime, coinType);
 
             // Generate multiple accounts and addresses from the get-go.

@@ -273,7 +273,7 @@ namespace Blockcore.Features.Miner.Api.Controllers
                                 foreach (TxOut txout in item.Outputs)
                                     nSigOps += txout.ScriptPubKey.GetSigOpCount(false);
 
-                                transaction.Fee = (long)pblockTemplate.TotalFee.ToUnit(MoneyUnit.Satoshi);
+                                transaction.Fee = (long)pblockTemplate.TotalFee.ToUnit(MoneyUnit.Planck);
                                 transaction.Sigops = nSigOps;
                                 transaction.Weight = item.GetVirtualSize(this.Network.Consensus.Options.WitnessScaleFactor);
 

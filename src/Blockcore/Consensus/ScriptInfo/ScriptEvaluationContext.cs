@@ -2088,20 +2088,6 @@ namespace Blockcore.Consensus.ScriptInfo
             {
                 if ((this.ScriptVerify & ScriptVerify.StrictEnc) != 0)
                     return false;
-
-                //Replicate OpenSSL bug on 23b397edccd3740a74adb603c9756370fafcde9bcc4483eb271ecad09a94dd63 (http://r6.ca/blog/20111119T211504Z.html)
-                byte nLenR = vchSig[3];
-                byte nLenS = vchSig[5 + nLenR];
-                int R = 4;
-                int S = 6 + nLenR;
-                var newS = new BigInteger(1, vchSig, S, nLenS);
-                var newR = new BigInteger(1, vchSig, R, nLenR);
-                var sig2 = new FalconSignature(newR, newS);
-                if (sig2.R != scriptSig.Signature.R || sig2.S != scriptSig.Signature.S)
-                {
-                    if (!pubkey.Verify(sighash, sig2))
-                        return false;
-                }
             }
 
             return true;

@@ -19,7 +19,7 @@ namespace Blockcore.Features.PoA
         public void Sign(Key key, PoABlockHeader header)
         {
             uint256 headerHash = header.GetHash();
-            ECDSASignature signature = key.Sign(headerHash);
+            FalconSignature signature = key.Sign(headerHash);
 
             header.BlockSignature = new BlockSignature { Signature = signature.ToDER() };
         }
@@ -36,19 +36,13 @@ namespace Blockcore.Features.PoA
                 return false;
             }
 
-            if (!ECDSASignature.IsValidDER(header.BlockSignature.Signature))
+            if (!FalconSignature.IsValidDER(header.BlockSignature.Signature))
             {
                 this.logger.LogTrace("(-)[INVALID_DER]");
                 return false;
             }
 
-            ECDSASignature signature = ECDSASignature.FromDER(header.BlockSignature.Signature);
-
-            if (!signature.IsLowS)
-            {
-                this.logger.LogTrace("(-)[NOT_CANONICAL]");
-                return false;
-            }
+            FalconSignature signature = FalconSignature.FromDER(header.BlockSignature.Signature);
 
             uint256 headerHash = header.GetHash();
             bool isValidSignature = pubKey.Verify(headerHash, signature);

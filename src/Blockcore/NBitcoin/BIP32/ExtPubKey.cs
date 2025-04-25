@@ -26,7 +26,6 @@ namespace Blockcore.NBitcoin.BIP32
         internal byte[] vchFingerprint = new byte[FingerprintLength];
         internal uint nChild;
 
-        //
         internal PubKey pubkey = new PubKey(validPubKey);
         internal byte[] vchChainCode = new byte[ChainCodeLength];
 
@@ -145,7 +144,8 @@ namespace Blockcore.NBitcoin.BIP32
                 vchFingerprint = CalculateChildFingerprint(),
                 nChild = index
             };
-            result.pubkey = this.pubkey.Derivate(this.vchChainCode, index, out result.vchChainCode);
+            throw new NotImplementedException("FALCON");
+            ////////////////////////////result.pubkey = this.pubkey.Derivate(this.vchChainCode, index, out result.vchChainCode);
             return result;
         }
 
@@ -153,15 +153,6 @@ namespace Blockcore.NBitcoin.BIP32
         {
             ExtPubKey result = this;
             return derivation.Indexes.Aggregate(result, (current, index) => current.Derive(index));
-        }
-
-        public ExtPubKey Derive(int index, bool hardened)
-        {
-            if (index < 0)
-                throw new ArgumentOutOfRangeException("index", "the index can't be negative");
-            uint realIndex = (uint)index;
-            realIndex = hardened ? realIndex | 0x80000000u : realIndex;
-            return Derive(realIndex);
         }
 
         public ZeevExtPubKey GetWif(Network network)
@@ -182,8 +173,6 @@ namespace Blockcore.NBitcoin.BIP32
                 stream.ReadWrite(ref this.pubkey);
             }
         }
-
-
         private uint256 Hash
         {
             get

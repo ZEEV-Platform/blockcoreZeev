@@ -224,7 +224,7 @@
         {
             TxNullDataTemplate template = this.Network.StandardScriptsRegistry.GetScriptTemplates.OfType<TxNullDataTemplate>().First();
 
-            this.Amount = this.Amount - new Money(template.MinRequiredSatoshiFee, MoneyUnit.Satoshi).ToUnit(MoneyUnit.ZEEV);
+            this.Amount = this.Amount - new Money(template.MinRequiredSatoshiFee, MoneyUnit.Planck).ToUnit(MoneyUnit.ZEEV);
         }
     }
 

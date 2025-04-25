@@ -18,6 +18,10 @@ namespace Blockcore.NBitcoin.Crypto
             this._signature = Convert.FromBase64String(base64Sign);
         }
 
+        public FalconSignature()
+        {
+        }
+
         public string GetSignatureBase64()
         {
             return Convert.ToBase64String(this._signature);

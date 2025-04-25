@@ -10,7 +10,7 @@ namespace Blockcore.Consensus.TransactionInfo
 {
     public class TransactionSignature
     {
-        private static readonly TransactionSignature _Empty = new TransactionSignature(new ECDSASignature(BigInteger.ValueOf(0), BigInteger.ValueOf(0)), SigHash.All);
+        private static readonly TransactionSignature _Empty = new TransactionSignature(new FalconSignature(), SigHash.All);
         public static TransactionSignature Empty
         {
             get
@@ -169,25 +169,6 @@ namespace Blockcore.Consensus.TransactionInfo
         public override string ToString()
         {
             return Encoders.Hex.EncodeData(ToBytes());
-        }
-
-        public bool IsLowS
-        {
-            get
-            {
-                return this.Signature.IsLowS;
-            }
-        }
-
-
-        /// <summary>
-        /// Enforce LowS on the signature
-        /// </summary>
-        public TransactionSignature MakeCanonical()
-        {
-            if(this.IsLowS)
-                return this;
-            return new TransactionSignature(this.Signature.MakeCanonical(), this.SigHash);
         }
     }
 }

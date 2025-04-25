@@ -67,7 +67,7 @@ namespace Blockcore.Features.Wallet.Helpers
             // Get the extended key.
             var seedExtKey = new ExtKey(privateKey, chainCode);
             ExtKey addressExtKey = seedExtKey.Derive(new KeyPath(hdPath));
-            BitcoinExtKey addressPrivateKey = addressExtKey.GetWif(network);
+            ZeevExtKey addressPrivateKey = addressExtKey.GetWif(network);
             return addressPrivateKey;
         }
 

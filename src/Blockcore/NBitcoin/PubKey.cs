@@ -6,6 +6,7 @@ using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.DataEncoders;
 using Blockcore.Networks;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.NBitcoin
 {
@@ -147,29 +148,16 @@ namespace Blockcore.NBitcoin
             }
         }
 
-        public Script ScriptPubKey
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         public BitcoinPubKeyAddress GetAddress(Network network)
         {
             return network.CreateBitcoinPubKeyAddress(this.Hash);
         }
 
-        public void ReadWrite(BitcoinStream stream)
+        public BitcoinScriptAddress GetScriptAddress(Network network)
         {
-            throw new NotImplementedException();
+            Script redeem = PayToPubkeyTemplate.Instance.GenerateScriptPubKey(this);
+            return new BitcoinScriptAddress(redeem.Hash, network);
         }
-
-        //public BitcoinScriptAddress GetScriptAddress(Network network)
-        //{
-        //    Script redeem = PayToPubkeyTemplate.Instance.GenerateScriptPubKey(this);
-        //    return new BitcoinScriptAddress(redeem.Hash, network);
-        //}
 
         public bool Verify(uint256 hash, FalconSignature sig)
         {
@@ -191,15 +179,15 @@ namespace Blockcore.NBitcoin
             return Encoders.Hex.EncodeData(this._falconPkBytes);
         }
 
-        //#region IBitcoinSerializable Members
+        #region IBitcoinSerializable Members
 
-        //public void ReadWrite(BitcoinStream stream)
-        //{
-        //    stream.ReadWrite(ref this.vch);
-        //    if (!stream.Serializing) this._FalconKey = new FalconKey(this.vch, false);
-        //}
+        public void ReadWrite(BitcoinStream stream)
+        {
+            stream.ReadWrite(ref this._falconPkBytes);
+            if (!stream.Serializing) this._FalconKey = new FalconKey(this._falconPkBytes, false);
+        }
 
-        //#endregion IBitcoinSerializable Members
+        #endregion IBitcoinSerializable Members
 
         public byte[] ToBytes()
         {
@@ -214,48 +202,47 @@ namespace Blockcore.NBitcoin
                 return this._falconPkBytes.ToArray();
         }
 
-        //public override string ToString()
-        //{
-        //    return ToHex();
-        //}
+        public override string ToString()
+        {
+            return ToHex();
+        }
 
-        ///// <summary>
-        ///// Verify message signed using signmessage from bitcoincore
-        ///// </summary>
-        ///// <param name="message">The message</param>
-        ///// <param name="signature">The signature</param>
-        ///// <returns>True if signatures is valid</returns>
-        //public bool VerifyMessage(string message, string signature)
-        //{
-        //    return this.VerifyMessage(Encoding.UTF8.GetBytes(message), signature);
-        //}
+        /// <summary>
+        /// Verify message signed using signmessage from bitcoincore
+        /// </summary>
+        /// <param name="message">The message</param>
+        /// <param name="signature">The signature</param>
+        /// <returns>True if signatures is valid</returns>
+        public bool VerifyMessage(string message, string signature)
+        {
+            return this.VerifyMessage(Encoding.UTF8.GetBytes(message), signature);
+        }
 
-        ///// <summary>
-        ///// Verify message signed using signmessage from bitcoincore
-        ///// </summary>
-        ///// <param name="message">The message</param>
-        ///// <param name="signature">The signature</param>
-        ///// <returns>True if signatures is valid</returns>
-        //public bool VerifyMessage(byte[] messageBytes, string signature)
-        //{
-        //    ECDSASignature sig = DecodeSigString(signature);
-        //    return this.VerifyMessage(messageBytes, sig);
-        //}
+        /// <summary>
+        /// Verify message signed using signmessage from bitcoincore
+        /// </summary>
+        /// <param name="message">The message</param>
+        /// <param name="signature">The signature</param>
+        /// <returns>True if signatures is valid</returns>
+        public bool VerifyMessage(byte[] messageBytes, string signature)
+        {
+            throw new NotImplementedException("FALCON");
+          //  ECDSASignature sig = DecodeSigString(signature);
+            //return this.VerifyMessage(messageBytes, sig);
+        }
 
-        ///// <summary>
-        ///// Verify message signed using signmessage from bitcoincore.
-        ///// </summary>
-        ///// <param name="messageBytes">The message.</param>
-        ///// <param name="sig">The signature.</param>
-        ///// <returns>True if signature is valid.</returns>
-        //public bool VerifyMessage(byte[] messageBytes, ECDSASignature sig)
-        //{
-        //    throw new NotImplementedException();
-
-        //    //byte[] messageSigned = Utils.FormatMessageForSigning(messageBytes);
-        //    //uint256 hash = Hashes.Hash256(messageSigned);
-        //    //return this.FalconKey.Verify(hash, sig);
-        //}
+        /// <summary>
+        /// Verify message signed using signmessage from bitcoincore.
+        /// </summary>
+        /// <param name="messageBytes">The message.</param>
+        /// <param name="sig">The signature.</param>
+        /// <returns>True if signature is valid.</returns>
+        public bool VerifyMessage(byte[] messageBytes, FalconSignature sig)
+        {
+            byte[] messageSigned = Utils.FormatMessageForSigning(messageBytes);
+            uint256 hash = new Hashes().Hash256(messageSigned);
+            return this.FalconKey.Verify(hash, sig);
+        }
 
         ///// <summary>
         ///// Decode signature from bitcoincore verify/signing rpc methods
@@ -293,44 +280,40 @@ namespace Blockcore.NBitcoin
 
         //public static PubKey RecoverCompact(uint256 hash, byte[] signatureEncoded)
         //{
-        //    throw new NotImplementedException();
+        //    if (signatureEncoded.Length < 65)
+        //        throw new ArgumentException("Signature truncated, expected 65 bytes and got " + signatureEncoded.Length);
 
-        //    //if (signatureEncoded.Length < 65)
-        //    //    throw new ArgumentException("Signature truncated, expected 65 bytes and got " + signatureEncoded.Length);
+        //    int header = signatureEncoded[0];
 
-        //    //int header = signatureEncoded[0];
+        //    // The header byte: 0x1B = first key with even y, 0x1C = first key with odd y,
+        //    //                  0x1D = second key with even y, 0x1E = second key with odd y
 
-        //    //// The header byte: 0x1B = first key with even y, 0x1C = first key with odd y,
-        //    ////                  0x1D = second key with even y, 0x1E = second key with odd y
+        //    if (header < 27 || header > 34)
+        //        throw new ArgumentException("Header byte out of range: " + header);
 
-        //    //if (header < 27 || header > 34)
-        //    //    throw new ArgumentException("Header byte out of range: " + header);
+        //    ECDSASignature sig = DecodeSig(signatureEncoded);
+        //    bool compressed = false;
 
-        //    //ECDSASignature sig = DecodeSig(signatureEncoded);
-        //    //bool compressed = false;
+        //    if (header >= 31)
+        //    {
+        //        compressed = true;
+        //        header -= 4;
+        //    }
+        //    int recId = header - 27;
 
-        //    //if (header >= 31)
-        //    //{
-        //    //    compressed = true;
-        //    //    header -= 4;
-        //    //}
-        //    //int recId = header - 27;
-
-        //    //ECKey key = ECKey.RecoverFromSignature(recId, sig, hash, compressed);
-        //    //return key.GetPubKey(compressed);
+        //    ECKey key = ECKey.RecoverFromSignature(recId, sig, hash, compressed);
+        //    return key.GetPubKey(compressed);
         //}
 
         //public PubKey Derivate(byte[] cc, uint nChild, out byte[] ccChild)
         //{
-        //    throw new NotImplementedException();
-
         //    byte[] lr = null;
         //    var l = new byte[32];
         //    var r = new byte[32];
         //    if ((nChild >> 31) == 0)
         //    {
         //        byte[] pubKey = ToBytes();
-        //        lr = Hashes.BIP32Hash(cc, nChild, pubKey[0], pubKey.Skip(1).ToArray());
+        //        lr = new Hashes().BIP32Hash(cc, nChild, pubKey[0], pubKey.Skip(1).ToArray());
         //    }
         //    else
         //    {
@@ -355,133 +338,59 @@ namespace Blockcore.NBitcoin
         //    return new PubKey(p.GetEncoded());
         //}
 
-        //public override bool Equals(object obj)
-        //{
-        //    var item = obj as PubKey;
-        //    if (item == null)
-        //        return false;
-        //    return ToHex().Equals(item.ToHex());
-        //}
+        public override bool Equals(object obj)
+        {
+            var item = obj as PubKey;
+            if (item == null)
+                return false;
+            return ToHex().Equals(item.ToHex());
+        }
 
-        //public static bool operator ==(PubKey a, PubKey b)
-        //{
-        //    if (ReferenceEquals(a, b))
-        //        return true;
-        //    if (((object)a == null) || ((object)b == null))
-        //        return false;
-        //    return a.ToHex() == b.ToHex();
-        //}
+        public static bool operator ==(PubKey a, PubKey b)
+        {
+            if (ReferenceEquals(a, b))
+                return true;
+            if (((object)a == null) || ((object)b == null))
+                return false;
+            return a.ToHex() == b.ToHex();
+        }
 
-        //public static bool operator !=(PubKey a, PubKey b)
-        //{
-        //    return !(a == b);
-        //}
+        public static bool operator !=(PubKey a, PubKey b)
+        {
+            return !(a == b);
+        }
 
-        //public override int GetHashCode()
-        //{
-        //    return ToHex().GetHashCode();
-        //}
+        public override int GetHashCode()
+        {
+            return ToHex().GetHashCode();
+        }
 
-        //public PubKey UncoverSender(Key ephem, PubKey scan)
-        //{
-        //    return Uncover(ephem, scan);
-        //}
+        public string ToString(Network network)
+        {
+            return new BitcoinPubKeyAddress(this.Hash, network).ToString();
+        }
 
-        //public PubKey UncoverReceiver(Key scan, PubKey ephem)
-        //{
-        //    return Uncover(scan, ephem);
-        //}
+        #region IDestination Members
 
-        //public PubKey Uncover(Key priv, PubKey pub)
-        //{
-        //    X9ECParameters curve = ECKey.Secp256k1;
-        //    byte[] hash = GetStealthSharedSecret(priv, pub);
-        //    //Q' = Q + cG
-        //    ECPoint qprim = curve.G.Multiply(new BigInteger(1, hash)).Add(curve.Curve.DecodePoint(ToBytes()));
-        //    return new PubKey(qprim.GetEncoded()).Compress(this.IsCompressed);
-        //}
+        private Script _ScriptPubKey;
 
-        //internal static byte[] GetStealthSharedSecret(Key priv, PubKey pub)
-        //{
-        //    X9ECParameters curve = ECKey.Secp256k1;
-        //    ECPoint pubec = curve.Curve.DecodePoint(pub.ToBytes());
-        //    ECPoint p = pubec.Multiply(new BigInteger(1, priv.ToBytes()));
-        //    byte[] pBytes = new PubKey(p.GetEncoded()).Compress().ToBytes();
-        //    byte[] hash = Hashes.SHA256(pBytes);
-        //    return hash;
-        //}
+        public Script ScriptPubKey
+        {
+            get
+            {
+                if (this._ScriptPubKey == null)
+                {
+                    this._ScriptPubKey = PayToPubkeyTemplate.Instance.GenerateScriptPubKey(this);
+                }
+                return this._ScriptPubKey;
+            }
+        }
 
-        //public PubKey Compress(bool compression)
-        //{
-        //    if (this.IsCompressed == compression)
-        //        return this;
-        //    if (compression)
-        //        return Compress();
-        //    else
-        //        return Decompress();
-        //}
+        public BitcoinWitPubKeyAddress GetSegwitAddress(Network network)
+        {
+            return new BitcoinWitPubKeyAddress(this.WitHash, network);
+        }
 
-        //public string ToString(Network network)
-        //{
-        //    return new BitcoinPubKeyAddress(this.Hash, network).ToString();
-        //}
-
-        //#region IDestination Members
-
-        //private Script _ScriptPubKey;
-
-        //public Script ScriptPubKey
-        //{
-        //    get
-        //    {
-        //        if (this._ScriptPubKey == null)
-        //        {
-        //            this._ScriptPubKey = PayToPubkeyTemplate.Instance.GenerateScriptPubKey(this);
-        //        }
-        //        return this._ScriptPubKey;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Exchange shared secret through ECDH
-        ///// </summary>
-        ///// <param name="key">Private key</param>
-        ///// <returns>Shared secret</returns>
-        //[Obsolete("Use GetSharedPubkey instead")]
-        //public byte[] GetSharedSecret(Key key)
-        //{
-        //    return Hashes.SHA256(GetSharedPubkey(key).ToBytes());
-        //}
-
-        ///// <summary>
-        ///// Exchange shared secret through ECDH
-        ///// </summary>
-        ///// <param name="key">Private key</param>
-        ///// <returns>Shared pubkey</returns>
-        //public PubKey GetSharedPubkey(Key key)
-        //{
-        //    ECPublicKeyParameters pub = this._FalconKey.GetPublicKeyParameters();
-        //    ECPrivateKeyParameters privKey = key._ECKey.PrivateKey;
-
-        //    if (!pub.Parameters.Equals(privKey.Parameters))
-        //        throw new InvalidOperationException("ECDH public key has wrong domain parameters");
-
-        //    ECPoint q = pub.Q.Multiply(privKey.D).Normalize();
-
-        //    if (q.IsInfinity)
-        //        throw new InvalidOperationException("Infinity is not a valid agreement value for ECDH");
-
-        //    ECPoint pubkey = ECKey.Secp256k1.Curve.CreatePoint(q.XCoord.ToBigInteger(), q.YCoord.ToBigInteger());
-        //    pubkey = pubkey.Normalize();
-
-        //    return new ECKey(pubkey.GetEncoded(true), false).GetPubKey(true);
-        //}
-
-        //public BitcoinWitPubKeyAddress GetSegwitAddress(Network network)
-        //{
-        //    return new BitcoinWitPubKeyAddress(this.WitHash, network);
-        //}
-
-        //#endregion IDestination Members
+        #endregion IDestination Members
     }
 }

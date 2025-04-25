@@ -617,7 +617,7 @@ namespace Blockcore.Features.Miner.Staking
                     this.blockProvider.BlockModified(chainTip, block);
 
                     // Append a signature to our block.
-                    ECDSASignature signature = coinstakeContext.Key.Sign(block.GetHash());
+                    FalconSignature signature = coinstakeContext.Key.Sign(block.GetHash());
 
                     block.BlockSignature = new BlockSignature { Signature = signature.ToDER() };
                     return true;
