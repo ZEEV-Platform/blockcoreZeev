@@ -178,7 +178,7 @@ namespace Blockcore.Features.Wallet.Types
     {
         public HdAccountMultisig(MultisigScheme scheme)
         {
-            this.ExtendedPubKey = "N/A";
+            this.ExtendedKey = "N/A";
             this.MultisigScheme = scheme;
         }      
 

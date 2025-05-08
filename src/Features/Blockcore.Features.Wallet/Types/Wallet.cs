@@ -58,12 +58,6 @@ namespace Blockcore.Features.Wallet.Types
         public string Name { get; set; }
 
         /// <summary>
-        /// Flag indicating if it is a watch only wallet.
-        /// </summary>
-        [JsonProperty(PropertyName = "isExtPubKeyWallet")]
-        public bool IsExtPubKeyWallet { get; set; }
-
-        /// <summary>
         /// The seed for this wallet, password encrypted.
         /// </summary>
         [JsonProperty(PropertyName = "encryptedSeed", NullValueHandling = NullValueHandling.Ignore)]
@@ -263,15 +257,15 @@ namespace Blockcore.Features.Wallet.Types
         /// According to BIP44, an account at index (i) can only be created when the account at index (i - 1) contains at least one transaction.
         /// </remarks>
         /// <seealso cref="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki"/>
-        /// <param name="extPubKey">The extended public key for the wallet<see cref="EncryptedSeed"/>.</param>
+        /// <param name="extKey">The extended key for the wallet<see cref="EncryptedSeed"/>.</param>
         /// <param name="accountIndex">Zero-based index of the account to add.</param>
         /// <param name="accountCreationTime">Creation time of the account to be created.</param>
         /// <param name="purpose">A BIP44 purpose (also used in BIP84 and BIP49), this will allow to overwrite the default BIP44 purpose.</param>
         /// <returns>A new HD account.</returns>
-        public IHdAccount AddNewAccount(ExtPubKey extPubKey, int accountIndex, DateTimeOffset accountCreationTime, int purpose)
+        public IHdAccount AddNewAccount(ExtKey extKey, int accountIndex, DateTimeOffset accountCreationTime, int purpose)
         {
             IAccountRoot accountRoot = this.AccountsRoot.Single();
-            return accountRoot.AddNewAccount(extPubKey, accountIndex, this.Network, accountCreationTime, purpose);
+            return accountRoot.AddNewAccount(extKey, accountIndex, this.Network, accountCreationTime, purpose);
         }
 
         /// <summary>
@@ -594,12 +588,12 @@ namespace Blockcore.Features.Wallet.Types
             // Get the extended pub key used to generate addresses for this account.
             string accountHdPath = HdOperations.GetAccountHdPath(purpose, this.CoinType, newAccountIndex);
             Key privateKey = HdOperations.DecryptSeed(encryptedSeed, password, network);
-            ExtPubKey accountExtPubKey = HdOperations.GetExtendedPublicKey(privateKey, chainCode, accountHdPath);
+            ExtKey accountExtKey = HdOperations.GetExtendedPrivateKey(privateKey, chainCode, accountHdPath);
 
             return new HdAccount
             {
                 Index = newAccountIndex,
-                ExtendedPubKey = accountExtPubKey.ToString(network),
+                ExtendedKey = accountExtKey.ToString(network),
                 ExternalAddresses = new List<HdAddress>(),
                 InternalAddresses = new List<HdAddress>(),
                 Name = newAccountName,
@@ -613,10 +607,10 @@ namespace Blockcore.Features.Wallet.Types
         /// <summary>
         /// Adds an account to the current account root using extended public key and account index.
         /// </summary>
-        /// <param name="accountExtPubKey">The extended public key for the account.</param>
+        /// <param name="accountExtKey">The extended key for the account.</param>
         /// <param name="accountIndex">The zero-based account index.</param>
         /// <param name="purpose">A BIP44 purpose (also used in BIP84 and BIP49), this will allow to overwrite the default BIP44 purpose.</param>
-        public IHdAccount AddNewAccount(ExtPubKey accountExtPubKey, int accountIndex, Network network, DateTimeOffset accountCreationTime, int purpose)
+        public IHdAccount AddNewAccount(ExtKey accountExtKey, int accountIndex, Network network, DateTimeOffset accountCreationTime, int purpose)
         {
             ICollection<IHdAccount> hdAccounts = this.Accounts.ToList();
 
@@ -625,10 +619,10 @@ namespace Blockcore.Features.Wallet.Types
                 throw new WalletException("There is already an account in this wallet with index: " + accountIndex);
             }
 
-            if (hdAccounts.Any(x => x.ExtendedPubKey == accountExtPubKey.ToString(network)))
+            if (hdAccounts.Any(x => x.ExtendedKey == accountExtKey.ToString(network)))
             {
                 throw new WalletException("There is already an account in this wallet with this xpubkey: " +
-                                            accountExtPubKey.ToString(network));
+                                            accountExtKey.ToString(network));
             }
 
             string accountHdPath = HdOperations.GetAccountHdPath(purpose, this.CoinType, accountIndex);
@@ -636,7 +630,7 @@ namespace Blockcore.Features.Wallet.Types
             var newAccount = new HdAccount
             {
                 Index = accountIndex,
-                ExtendedPubKey = accountExtPubKey.ToString(network),
+                ExtendedKey = accountExtKey.ToString(network),
                 ExternalAddresses = new List<HdAddress>(),
                 InternalAddresses = new List<HdAddress>(),
                 Name = $"account {accountIndex}",
@@ -716,10 +710,10 @@ namespace Blockcore.Features.Wallet.Types
         public string HdPath { get; set; }
 
         /// <summary>
-        /// An extended pub key used to generate addresses.
+        /// An extended key used to generate addresses.
         /// </summary>
-        [JsonProperty(PropertyName = "extPubKey")]
-        public string ExtendedPubKey { get; set; }
+        [JsonProperty(PropertyName = "extKey")]
+        public string ExtendedKey { get; set; }
 
         /// <summary>
         /// Gets or sets the creation time.
@@ -875,7 +869,7 @@ namespace Blockcore.Features.Wallet.Types
             for (int i = firstNewAddressIndex; i < firstNewAddressIndex + addressesQuantity; i++)
             {
                 // Retrieve the pubkey associated with the private key of this address index.
-                PubKey pubkey = HdOperations.GeneratePublicKey(this.ExtendedPubKey, i, isChange);
+                PubKey pubkey = HdOperations.GeneratePublicKey(this.ExtendedKey, i, isChange);
 
                 // Add the new address details to the list of addresses.
                 var newAddress = new HdAddress

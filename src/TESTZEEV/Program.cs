@@ -1,4 +1,5 @@
-﻿using Blockcore.NBitcoin;
+﻿using Blockcore.Features.Wallet;
+using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.BIP39;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks.ZEEV;
@@ -12,7 +13,6 @@ namespace TESTZEEV
         {
             var seedBytes = TestMnemonic();
             SeekBytesOfSeed(seedBytes);
-            //  var wallet = Blockcore.Features.ZeevWallet.WalletManager.GenerateWalletFile(name, encryptedSeed, extendedKey.ChainCode, coinType: coinType);
 
             Console.ReadKey();
         }

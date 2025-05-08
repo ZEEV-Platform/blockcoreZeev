@@ -109,6 +109,18 @@ namespace Blockcore.Features.Wallet.Helpers
             return extPubKey;
         }
 
+        public static ExtKey GetExtendedPrivateKey(Key privateKey, byte[] chainCode, string hdPath)
+        {
+            Guard.NotNull(privateKey, nameof(privateKey));
+            Guard.NotNull(chainCode, nameof(chainCode));
+            Guard.NotEmpty(hdPath, nameof(hdPath));
+
+            // Get the extended key.
+            var seedExtKey = new ExtKey(privateKey, chainCode);
+            ExtKey addressExtKey = seedExtKey.Derive(new KeyPath(hdPath));
+            return addressExtKey;
+        }
+
         /// <summary>
         /// Gets the HD path of an account.
         /// </summary>

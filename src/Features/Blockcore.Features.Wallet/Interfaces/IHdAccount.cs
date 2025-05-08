@@ -11,7 +11,7 @@ namespace Blockcore.Features.Wallet.Interfaces
     public interface IHdAccount
     {
         DateTimeOffset CreationTime { get; set; }
-        string ExtendedPubKey { get; set; }
+        string ExtendedKey { get; set; }
         int Purpose { get; set; }
         ICollection<HdAddress> ExternalAddresses { get; set; }
         string HdPath { get; set; }

@@ -7,6 +7,7 @@ using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.BIP38;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks;
+using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Math;
 
 namespace Blockcore.NBitcoin
@@ -165,6 +166,7 @@ namespace Blockcore.NBitcoin
         {
             byte[] l = null;
             var hasher = new Hashes();
+
             if ((nChild >> 31) == 0)
             {
                 byte[] pubKey = this.PubKey.ToBytes();
@@ -174,25 +176,15 @@ namespace Blockcore.NBitcoin
             {
                 l = hasher.BIP32Hash(cc, nChild, 0, this.ToBytes());
             }
-            byte[] ll = l.SafeSubarray(0, 32);
-            byte[] lr = l.SafeSubarray(32, 32);
 
-            ccChild = lr;
+            var shake = new ShakeDigest(256);
+            shake.BlockUpdate(l, 0, l.Length);
+            byte[] seed = new byte[32];
+            shake.OutputFinal(seed, 0, seed.Length);
 
-            var parse256LL = new BigInteger(1, ll);
-            var kPar = new BigInteger(1, this._vectorBytes);
-            BigInteger N = BigInteger.ValueOf(FalconKey.FParam.LogN);
+            ccChild = seed;
 
-            if (parse256LL.CompareTo(N) >= 0)
-                throw new InvalidOperationException("You won a prize ! this should happen very rarely. Take a screenshot, and roll the dice again.");
-            BigInteger key = parse256LL.Add(kPar).Mod(N);
-            if (key == BigInteger.Zero)
-                throw new InvalidOperationException("You won the big prize ! this has probability lower than 1 in 2^127. Take a screenshot, and roll the dice again.");
-
-            byte[] keyBytes = key.ToByteArrayUnsigned();
-            if (keyBytes.Length < 32)
-                keyBytes = new byte[32 - keyBytes.Length].Concat(keyBytes).ToArray();
-            return new Key(keyBytes);
+            return new Key(seed);
         }
 
         //public Key Uncover(Key scan, PubKey ephem)

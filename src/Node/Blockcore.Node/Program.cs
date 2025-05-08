@@ -18,6 +18,8 @@ using Blockcore.NBitcoin;
 using Blockcore.Features.RPC.Controllers;
 using Blockcore.Controllers;
 using System.Reflection;
+using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Blockcore.Node
 {
@@ -25,6 +27,23 @@ namespace Blockcore.Node
     {
         public static async Task Main(string[] args)
         {
+            var folderPath = "G:\\_ZEEV_Git\\blockcorefalcon\\src\\Node\\Blockcore.Node\\bin\\Debug\\net8.0\\nodedata\\ZEEV\\ZEEVMain";
+            try
+            {
+                File.Delete(folderPath + "\\txdb\\default.db");
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+                File.Delete(folderPath + "\\default.wallet.json");
+            }
+            catch (Exception)
+            {
+            }
+
             try
             {
                 string chain = args
@@ -43,7 +62,7 @@ namespace Blockcore.Node
 
                 IFullNode node = nodeBuilder.Build();
      
-                Task.Delay(TimeSpan.FromSeconds(15)).ContinueWith((t) => { TestFee(node); }).GetAwaiter();
+                Task.Delay(TimeSpan.FromSeconds(5)).ContinueWith((t) => { TestFee(node); }).GetAwaiter();
 
                 if (node != null)
                     await node.RunAsync();
@@ -70,13 +89,9 @@ namespace Blockcore.Node
             try
             {
                 string walletName = wallet.GetWalletsNames().FirstOrDefault();
+                var password = "testtest";
 
-                if (string.IsNullOrEmpty(walletName))
-                {
-                    var password = "testtest";
-
-                    wallet.CreateWallet(password, "default", "resource"); //purpose: 84 - segwit
-                }
+                wallet.CreateWallet(password, "default", "resource"); //purpose: 84 - segwit
 
                 walletName = wallet.GetWalletsNames().FirstOrDefault();
                 IHdAccount account = wallet.GetAccounts(walletName).FirstOrDefault();

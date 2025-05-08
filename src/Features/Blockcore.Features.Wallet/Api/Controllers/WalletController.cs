@@ -293,56 +293,6 @@ namespace Blockcore.Features.Wallet.Api.Controllers
         }
 
         /// <summary>
-        /// Recovers a wallet using its extended public key. Note that the recovered wallet will not have a private key and is
-        /// only suitable for returning the wallet history using further API calls.
-        /// </summary>
-        /// <param name="request">An object containing the parameters used to recover a wallet using its extended public key.</param>
-        /// <returns>A value of Ok if the wallet was successfully recovered.</returns>
-        [Route("recover-via-extpubkey")]
-        [HttpPost]
-        public IActionResult RecoverViaExtPubKey([FromBody] WalletExtPubRecoveryRequest request)
-        {
-            Guard.NotNull(request, nameof(request));
-
-            if (!this.ModelState.IsValid)
-            {
-                this.logger.LogTrace("(-)[MODEL_STATE_INVALID]");
-                return ModelStateErrors.BuildErrorResponse(this.ModelState);
-            }
-
-            try
-            {
-                string accountExtPubKey =
-                    this.network.IsBitcoin()
-                        ? request.ExtPubKey
-                        : LegacyExtPubKeyConverter.ConvertIfInLegacyStratisFormat(request.ExtPubKey, this.network);
-
-                this.walletManager.RecoverWallet(request.Name, ExtPubKey.Parse(accountExtPubKey), request.AccountIndex, request.CreationDate, request.Purpose);
-
-                this.SyncFromBestHeightForRecoveredWallets(request.CreationDate);
-
-                return this.Ok();
-            }
-            catch (WalletException e)
-            {
-                // Wallet already exists.
-                this.logger.LogError("Exception occurred: {0}", e.ToString());
-                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.Conflict, e.Message, e.ToString());
-            }
-            catch (FileNotFoundException e)
-            {
-                // Wallet does not exist.
-                this.logger.LogError("Exception occurred: {0}", e.ToString());
-                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.NotFound, "Wallet not found.", e.ToString());
-            }
-            catch (Exception e)
-            {
-                this.logger.LogError("Exception occurred: {0}", e.ToString());
-                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
-            }
-        }
-
-        /// <summary>
         /// Gets some general information about a wallet. This includes the network the wallet is for,
         /// the creation date and time for the wallet, the height of the blocks the wallet currently holds,
         /// and the number of connected nodes.
@@ -1187,36 +1137,6 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                 });
 
                 return this.Json(model);
-            }
-            catch (Exception e)
-            {
-                this.logger.LogError("Exception occurred: {0}", e.ToString());
-                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
-            }
-        }
-
-        /// <summary>
-        /// Gets the extended public key of a specified wallet account.
-        /// <param name="request">An object containing the necessary parameters to retrieve
-        /// the extended public key for a wallet account.</param>
-        /// <returns>A JSON object containing the extended public key for a wallet account.</returns>
-        /// </summary>
-        [Route("extpubkey")]
-        [HttpGet]
-        public IActionResult GetExtPubKey([FromQuery] GetExtPubKeyModel request)
-        {
-            Guard.NotNull(request, nameof(request));
-
-            // checks the request is valid
-            if (!this.ModelState.IsValid)
-            {
-                return ModelStateErrors.BuildErrorResponse(this.ModelState);
-            }
-
-            try
-            {
-                string result = this.walletManager.GetExtPubKey(new WalletAccountReference(request.WalletName, request.AccountName));
-                return this.Json(result);
             }
             catch (Exception e)
             {

@@ -15,7 +15,7 @@ namespace Blockcore.Features.Wallet.Interfaces
         uint256 LastBlockSyncedHash { get; set; }
         int? LastBlockSyncedHeight { get; set; }
 
-        IHdAccount AddNewAccount(ExtPubKey accountExtPubKey, int accountIndex, Network network, DateTimeOffset accountCreationTime, int purpose);
+        IHdAccount AddNewAccount(ExtKey accountExtKey, int accountIndex, Network network, DateTimeOffset accountCreationTime, int purpose);
         IHdAccount AddNewAccount(string password, string encryptedSeed, byte[] chainCode, Network network, DateTimeOffset accountCreationTime, int purpose, int? accountIndex = null, string accountName = null);
         IHdAccount CreateAccount(string password, string encryptedSeed, byte[] chainCode, Network network, DateTimeOffset accountCreationTime, int purpose, int newAccountIndex, string newAccountName = null);
         IHdAccount GetAccountByName(string accountName);
