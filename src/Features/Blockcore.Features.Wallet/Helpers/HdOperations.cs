@@ -72,43 +72,12 @@ namespace Blockcore.Features.Wallet.Helpers
         }
 
         /// <summary>
-        /// Gets the extended public key for an account.
-        /// </summary>
-        /// <param name="privateKey">The private key from which to generate the extended public key.</param>
-        /// <param name="chainCode">The chain code used in creating the extended public key.</param>
-        /// <param name="purpose">Purpose of the coin this account is in.</param>
-        /// <param name="coinType">Type of the coin of the account for which to generate an extended public key.</param>
-        /// <param name="accountIndex">Index of the account for which to generate an extended public key.</param>
-        /// <returns>The extended public key for an account, used to derive child keys.</returns>
-        public static ExtPubKey GetExtendedPublicKey(Key privateKey, byte[] chainCode, int purpose, int coinType, int accountIndex)
-        {
-            Guard.NotNull(privateKey, nameof(privateKey));
-            Guard.NotNull(chainCode, nameof(chainCode));
-
-            string accountHdPath = GetAccountHdPath(purpose, coinType, accountIndex);
-            return GetExtendedPublicKey(privateKey, chainCode, accountHdPath);
-        }
-
-        /// <summary>
-        /// Gets the extended public key corresponding to an HD path.
+        /// Gets the extended key corresponding to an HD path.
         /// </summary>
         /// <param name="privateKey">The private key from which to generate the extended public key.</param>
         /// <param name="chainCode">The chain code used in creating the extended public key.</param>
         /// <param name="hdPath">The HD path for which to get the extended public key.</param>
-        /// <returns>The extended public key, used to derive child keys.</returns>
-        public static ExtPubKey GetExtendedPublicKey(Key privateKey, byte[] chainCode, string hdPath)
-        {
-            Guard.NotNull(privateKey, nameof(privateKey));
-            Guard.NotNull(chainCode, nameof(chainCode));
-            Guard.NotEmpty(hdPath, nameof(hdPath));
-
-            // get extended private key
-            var seedExtKey = new ExtKey(privateKey, chainCode);
-            ExtKey addressExtKey = seedExtKey.Derive(new KeyPath(hdPath));
-            ExtPubKey extPubKey = addressExtKey.Neuter();
-            return extPubKey;
-        }
-
+        /// <returns>The extended key, used to derive child keys.</returns>
         public static ExtKey GetExtendedPrivateKey(Key privateKey, byte[] chainCode, string hdPath)
         {
             Guard.NotNull(privateKey, nameof(privateKey));

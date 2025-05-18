@@ -120,35 +120,6 @@ namespace Blockcore.NBitcoin
             return sign.GetSignatureBase64();
         }
 
-        //public byte[] SignCompact(uint256 hash)
-        //{
-        //    FalconSignature sig = new FalconSignature(this._FalconKey.Sign(hash));
-        //    // Now we have to work backwards to figure out the recId needed to recover the signature.
-        //    int recId = -1;
-        //    for (int i = 0; i < 4; i++)
-        //    {
-        //        FalconKey k = FalconKey.RecoverFromSignature(i, sig, hash, this.IsCompressed);
-        //        if (k != null && k.GetPubKey(this.IsCompressed).ToHex() == this.PubKey.ToHex())
-        //        {
-        //            recId = i;
-        //            break;
-        //        }
-        //    }
-
-        //    if (recId == -1)
-        //        throw new InvalidOperationException("Could not construct a recoverable key. This should never happen.");
-
-        //    int headerByte = recId + 27 + (this.IsCompressed ? 4 : 0);
-
-        //    var sigData = new byte[65];  // 1 header + 32 bytes for R + 32 bytes for S
-
-        //    sigData[0] = (byte)headerByte;
-
-        //    Array.Copy(Utils.BigIntegerToBytes(sig.R, 32), 0, sigData, 1, 32);
-        //    Array.Copy(Utils.BigIntegerToBytes(sig.S, 32), 0, sigData, 33, 32);
-        //    return sigData;
-        //}
-
         #region IBitcoinSerializable Members
 
         public void ReadWrite(BitcoinStream stream)
@@ -186,21 +157,6 @@ namespace Blockcore.NBitcoin
 
             return new Key(seed);
         }
-
-        //public Key Uncover(Key scan, PubKey ephem)
-        //{
-        //    X9ECParameters curve = ECKey.Secp256k1;
-        //    byte[] priv = new BigInteger(1, PubKey.GetStealthSharedSecret(scan, ephem))
-        //                    .Add(new BigInteger(1, this.ToBytes()))
-        //                    .Mod(curve.N)
-        //                    .ToByteArrayUnsigned();
-
-        //    if (priv.Length < 32)
-        //        priv = new byte[32 - priv.Length].Concat(priv).ToArray();
-
-        //    var key = new Key(priv, fCompressedIn: this.IsCompressed);
-        //    return key;
-        //}
 
         public ZeevSecret GetBitcoinSecret(Network network)
         {

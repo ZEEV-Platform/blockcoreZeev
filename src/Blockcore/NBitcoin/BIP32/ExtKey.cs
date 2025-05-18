@@ -317,58 +317,5 @@ namespace Blockcore.NBitcoin.BIP32
                 return (this.nChild & 0x80000000u) != 0;
             }
         }
-
-        /// <summary>
-        /// Recreates the private key of the parent from the private key of the child 
-        /// combinated with the public key of the parent (hardened children cannot be
-        /// used to recreate the parent).
-        /// </summary>
-        //public ExtKey GetParentExtKey(ExtPubKey parent)
-        //{
-        //    if(parent == null)
-        //        throw new ArgumentNullException("parent");
-        //    if(this.Depth == 0)
-        //        throw new InvalidOperationException("This ExtKey is the root key of the HD tree");
-        //    if(this.IsHardened)
-        //        throw new InvalidOperationException("This private key is hardened, so you can't get its parent");
-        //    byte[] expectedFingerPrint = parent.CalculateChildFingerprint();
-        //    if(parent.Depth != this.Depth - 1 || !expectedFingerPrint.SequenceEqual(this.vchFingerprint))
-        //        throw new ArgumentException("The parent ExtPubKey is not the immediate parent of this ExtKey", "parent");
-
-        //    byte[] l = null;
-        //    var ll = new byte[32];
-        //    var lr = new byte[32];
-
-        //    byte[] pubKey = parent.PubKey.ToBytes();
-        //    l = Hashes.BIP32Hash(parent.vchChainCode, this.nChild, pubKey[0], pubKey.SafeSubarray(1));
-        //    Array.Copy(l, ll, 32);
-        //    Array.Copy(l, 32, lr, 0, 32);
-        //    byte[] ccChild = lr;
-
-        //    var parse256LL = new BigInteger(1, ll);
-        //    BigInteger N = ECKey.CURVE.N;
-
-        //    if(!ccChild.SequenceEqual(this.vchChainCode))
-        //        throw new InvalidOperationException("The derived chain code of the parent is not equal to this child chain code");
-
-        //    byte[] keyBytes = this.PrivateKey.ToBytes();
-        //    var key = new BigInteger(1, keyBytes);
-
-        //    BigInteger kPar = key.Add(parse256LL.Negate()).Mod(N);
-        //    byte[] keyParentBytes = kPar.ToByteArrayUnsigned();
-        //    if(keyParentBytes.Length < 32)
-        //        keyParentBytes = new byte[32 - keyParentBytes.Length].Concat(keyParentBytes).ToArray();
-
-        //    var parentExtKey = new ExtKey
-        //    {
-        //        vchChainCode = parent.vchChainCode,
-        //        nDepth = parent.Depth,
-        //        vchFingerprint = parent.Fingerprint,
-        //        nChild = parent.nChild,
-        //        key = new Key(keyParentBytes)
-        //    };
-        //    return parentExtKey;
-        //}
-
     }
 }

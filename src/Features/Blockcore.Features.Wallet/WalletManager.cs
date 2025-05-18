@@ -310,54 +310,55 @@ namespace Blockcore.Features.Wallet
             Guard.NotEmpty(mnemonic, nameof(mnemonic));
             Guard.NotNull(passphrase, nameof(passphrase));
 
-            ExtKey extendedKey = HdOperations.GetExtendedKey(mnemonic, passphrase);
+            throw new NotImplementedException("FALCON MULTISIGNATURE NOT SUPPORTED");
+            //ExtKey extendedKey = HdOperations.GetExtendedKey(mnemonic, passphrase);
 
-            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedZeevSecret(password, this.network).ToWif();
+            //string encryptedSeed = extendedKey.PrivateKey.GetEncryptedZeevSecret(password, this.network).ToWif();
 
-            string accountHdPath = HdOperations.GetAccountHdPath(44, (int)coinType, 0);
-            Key privateKey = HdOperations.DecryptSeed(encryptedSeed, password, this.network);
+            //string accountHdPath = HdOperations.GetAccountHdPath(44, (int)coinType, 0);
+            //Key privateKey = HdOperations.DecryptSeed(encryptedSeed, password, this.network);
 
-            ExtPubKey accountExtPubKey = HdOperations.GetExtendedPublicKey(privateKey, extendedKey.ChainCode, accountHdPath);
-  
+            //ExtPubKey accountExtPubKey = HdOperations.GetExtendedPublicKey(privateKey, extendedKey.ChainCode, accountHdPath);
 
-            cosignerXPubs.Add(accountExtPubKey.ToString(this.network));
 
-            var multisigScheme = new MultisigScheme()
-            {
-                Threashold = threashold,
-                XPubs = cosignerXPubs.ToArray()
-            };
+            //cosignerXPubs.Add(accountExtPubKey.ToString(this.network));
 
-            WalletMultisig wallet = new WalletMultisig(walletName, encryptedSeed, extendedKey.ChainCode, this.network);
+            //var multisigScheme = new MultisigScheme()
+            //{
+            //    Threashold = threashold,
+            //    XPubs = cosignerXPubs.ToArray()
+            //};
 
-            var root = new AccountRootMultisig
-            {
-                CoinType = coinType
-            };
-            wallet.AccountsRoot.Add(root);
+            //WalletMultisig wallet = new WalletMultisig(walletName, encryptedSeed, extendedKey.ChainCode, this.network);
 
-            HdAccountMultisig account = wallet.AddNewAccount(multisigScheme, coinType, this.dateTimeProvider.GetTimeOffset());
-            IEnumerable<HdAddress> newReceivingAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer);
-            IEnumerable<HdAddress> newChangeAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer, true);
-            this.UpdateKeysLookup(wallet, newReceivingAddresses.Concat(newChangeAddresses));
+            //var root = new AccountRootMultisig
+            //{
+            //    CoinType = coinType
+            //};
+            //wallet.AccountsRoot.Add(root);
 
-            // If the chain is downloaded, we set the height of the newly created wallet to it.
-            // However, if the chain is still downloading when the user creates a wallet,
-            // we wait until it is downloaded in order to set it. Otherwise, the height of the wallet will be the height of the chain at that moment.
-            if (this.ChainIndexer.IsDownloaded())
-            {
-                this.UpdateLastBlockSyncedHeight(wallet, this.ChainIndexer.Tip);
-            }
-            else
-            {
-                this.UpdateWhenChainDownloaded(new[] { wallet }, this.dateTimeProvider.GetUtcNow());
-            }
+            //HdAccountMultisig account = wallet.AddNewAccount(multisigScheme, coinType, this.dateTimeProvider.GetTimeOffset());
+            //IEnumerable<HdAddress> newReceivingAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer);
+            //IEnumerable<HdAddress> newChangeAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer, true);
+            //this.UpdateKeysLookup(wallet, newReceivingAddresses.Concat(newChangeAddresses));
 
-            wallet.walletStore = new WalletStore(this.network, this.dataFolder, wallet);
-            this.SaveWallet(wallet);
-            this.Load(wallet);
+            //// If the chain is downloaded, we set the height of the newly created wallet to it.
+            //// However, if the chain is still downloading when the user creates a wallet,
+            //// we wait until it is downloaded in order to set it. Otherwise, the height of the wallet will be the height of the chain at that moment.
+            //if (this.ChainIndexer.IsDownloaded())
+            //{
+            //    this.UpdateLastBlockSyncedHeight(wallet, this.ChainIndexer.Tip);
+            //}
+            //else
+            //{
+            //    this.UpdateWhenChainDownloaded(new[] { wallet }, this.dateTimeProvider.GetUtcNow());
+            //}
 
-            return wallet;
+            //wallet.walletStore = new WalletStore(this.network, this.dataFolder, wallet);
+            //this.SaveWallet(wallet);
+            //this.Load(wallet);
+
+            //return wallet;
         }
         private static string GetWalletFileName(WalletMultisig wallet)
         {
@@ -388,7 +389,6 @@ namespace Blockcore.Features.Wallet
                 IEnumerable<HdAddress> newReceivingAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer);
                 IEnumerable<HdAddress> newChangeAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer, true);
                 this.UpdateKeysLookup(wallet, newReceivingAddresses.Concat(newChangeAddresses));
-                this.UpdateKeysLookup(wallet, newReceivingAddresses);
             }
 
             // If the chain is downloaded, we set the height of the newly created wallet to it.

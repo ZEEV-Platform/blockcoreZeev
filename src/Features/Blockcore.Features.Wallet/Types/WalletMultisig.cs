@@ -198,7 +198,7 @@ namespace Blockcore.Features.Wallet.Types
             List<PubKey> derivedPubKeys = new List<PubKey>();
             foreach (var xpub in this.MultisigScheme.XPubs)
             {
-                throw new NotImplementedException("FALCON");
+                throw new NotImplementedException("FALCON MULTISIGNATURE NOT SUPPORTED");
                 //derivedPubKeys.Add(HdOperations.GenerateKey(xpub, hdPathIndex, isChange, network));
             }
             var sortedkeys = LexographicalSort(derivedPubKeys);
