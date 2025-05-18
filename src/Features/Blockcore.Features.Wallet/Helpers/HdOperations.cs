@@ -16,38 +16,38 @@ namespace Blockcore.Features.Wallet.Helpers
         /// <summary>
         /// Generates an HD public key derived from an extended public key.
         /// </summary>
-        /// <param name="accountExtPubKey">The extended public key used to generate child keys.</param>
+        /// <param name="accountExtKey">The extended key used to generate child keys.</param>
         /// <param name="index">The index of the child key to generate.</param>
         /// <param name="isChange">A value indicating whether the public key to generate corresponds to a change address.</param>
         /// <param name="network">Network</param>
         /// <returns>
-        /// An HD public key derived from an extended public key.
+        /// An HD key derived from an public key.
         /// </returns>
-        public static PubKey GeneratePublicKey(string accountExtPubKey, int index, bool isChange, Network network = null)
+        public static ExtKey GenerateKey(string accountExtKey, int index, bool isChange, Network network = null)
         {
-            Guard.NotEmpty(accountExtPubKey, nameof(accountExtPubKey));
+            Guard.NotEmpty(accountExtKey, nameof(accountExtKey));
 
-            return GeneratePublicKey(ExtPubKey.Parse(accountExtPubKey), index, isChange);
+            return GenerateKey(ExtKey.Parse(accountExtKey), index, isChange);
         }
 
         /// <summary>
         /// Generates an HD public key derived from an extended public key.
         /// </summary>
-        /// <param name="accountExtPubKey">The extended public key used to generate child keys.</param>
+        /// <param name="accountExtKey">The extended key used to generate child keys.</param>
         /// <param name="index">The index of the child key to generate.</param>
         /// <param name="isChange">A value indicating whether the public key to generate corresponds to a change address.</param>
         /// <returns>
-        /// An HD public key derived from an extended public key.
+        /// An HD key derived from an extended key.
         /// </returns>
-        public static PubKey GeneratePublicKey(ExtPubKey accountExtPubKey, int index, bool isChange)
+        public static ExtKey GenerateKey(ExtKey accountExtKey, int index, bool isChange)
         {
-            Guard.NotNull(accountExtPubKey, nameof(accountExtPubKey));
+            Guard.NotNull(accountExtKey, nameof(accountExtKey));
 
             int change = isChange ? 1 : 0;
             var keyPath = new KeyPath($"{change}/{index}");
             // TODO: Should probably explicitly be passing the network into Parse
-            ExtPubKey extPubKey = accountExtPubKey.Derive(keyPath);
-            return extPubKey.PubKey;
+            ExtKey extPubKey = accountExtKey.Derive(keyPath);
+            return extPubKey;
         }
 
         /// <summary>

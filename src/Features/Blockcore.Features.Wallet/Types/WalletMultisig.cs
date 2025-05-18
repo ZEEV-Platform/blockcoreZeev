@@ -198,7 +198,8 @@ namespace Blockcore.Features.Wallet.Types
             List<PubKey> derivedPubKeys = new List<PubKey>();
             foreach (var xpub in this.MultisigScheme.XPubs)
             {
-                derivedPubKeys.Add(HdOperations.GeneratePublicKey(xpub, hdPathIndex, isChange, network));
+                throw new NotImplementedException("FALCON");
+                //derivedPubKeys.Add(HdOperations.GenerateKey(xpub, hdPathIndex, isChange, network));
             }
             var sortedkeys = LexographicalSort(derivedPubKeys);
 

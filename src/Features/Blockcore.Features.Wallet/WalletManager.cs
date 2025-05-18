@@ -386,8 +386,8 @@ namespace Blockcore.Features.Wallet
             {
                 IHdAccount account = wallet.AddNewAccount(password, this.dateTimeProvider.GetTimeOffset(), purpose ?? this.defaultPurpose);
                 IEnumerable<HdAddress> newReceivingAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer);
-               // IEnumerable<HdAddress> newChangeAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer, true);
-              //  this.UpdateKeysLookup(wallet, newReceivingAddresses.Concat(newChangeAddresses));
+                IEnumerable<HdAddress> newChangeAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer, true);
+                this.UpdateKeysLookup(wallet, newReceivingAddresses.Concat(newChangeAddresses));
                 this.UpdateKeysLookup(wallet, newReceivingAddresses);
             }
 

@@ -593,7 +593,7 @@ namespace Blockcore.Features.Wallet.Types
             return new HdAccount
             {
                 Index = newAccountIndex,
-                ExtendedKey = accountExtKey.ToString(network),
+                ExtendedKey = accountExtKey.ToString(network), //we are returning derived private key
                 ExternalAddresses = new List<HdAddress>(),
                 InternalAddresses = new List<HdAddress>(),
                 Name = newAccountName,
@@ -869,27 +869,28 @@ namespace Blockcore.Features.Wallet.Types
             for (int i = firstNewAddressIndex; i < firstNewAddressIndex + addressesQuantity; i++)
             {
                 // Retrieve the pubkey associated with the private key of this address index.
-                PubKey pubkey = HdOperations.GeneratePublicKey(this.ExtendedKey, i, isChange);
+                ExtKey key = HdOperations.GenerateKey(this.ExtendedKey, i, isChange);
+                ExtPubKey pubKey = key.Neuter();
 
                 // Add the new address details to the list of addresses.
                 var newAddress = new HdAddress
                 {
                     Index = i,
                     HdPath = HdOperations.CreateHdPath(this.Purpose, this.GetCoinType(), this.Index, isChange, i),
-                    Pubkey = pubkey.ScriptPubKey, // this is a P2PK script type
+                    Pubkey = pubKey.PubKey.ScriptPubKey, // this is a P2PK script type
                 };
 
                 if (newAddress.IsBip44())
                 {
                     // Generate the P2PKH address corresponding to the pubkey.
-                    BitcoinPubKeyAddress address = pubkey.GetAddress(network);
+                    BitcoinPubKeyAddress address = pubKey.PubKey.GetAddress(network);
                     newAddress.ScriptPubKey = address.ScriptPubKey;
                     newAddress.Address = address.ToString();
                 }
                 else if (newAddress.IsBip84())
                 {
                     // Generate the PW2PKH address corresponding to the pubkey.
-                    BitcoinWitPubKeyAddress witAddress = pubkey.GetSegwitAddress(network);
+                    BitcoinWitPubKeyAddress witAddress = pubKey.PubKey.GetSegwitAddress(network);
                     newAddress.ScriptPubKey = witAddress.ScriptPubKey;
                     newAddress.Address = witAddress.ToString();
                 }

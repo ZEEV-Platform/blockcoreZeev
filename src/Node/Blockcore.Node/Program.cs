@@ -20,6 +20,7 @@ using Blockcore.Controllers;
 using System.Reflection;
 using System.IO;
 using System.Runtime.CompilerServices;
+using Blockcore.NBitcoin.BIP39;
 
 namespace Blockcore.Node
 {
@@ -89,9 +90,13 @@ namespace Blockcore.Node
             try
             {
                 string walletName = wallet.GetWalletsNames().FirstOrDefault();
-                var password = "testtest";
 
-                wallet.CreateWallet(password, "default", "resource"); //purpose: 84 - segwit
+                var password = "ThisIsATest";
+                var passphase = "Extra Seed Words";
+
+                var mnemonicSHA3 = new Mnemonic("doctor before local return visa gauge verify net unit bunker learn silk", Wordlist.English);
+
+                wallet.CreateWallet(password, "default", passphase, mnemonicSHA3); //purpose: 84 - segwit
 
                 walletName = wallet.GetWalletsNames().FirstOrDefault();
                 IHdAccount account = wallet.GetAccounts(walletName).FirstOrDefault();
