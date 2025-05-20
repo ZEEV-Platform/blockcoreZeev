@@ -54,20 +54,6 @@ namespace Blockcore.NBitcoin
             return null;
         }
 
-        public bool VerifyMessage(string message, string signature)
-        {
-            throw new NotImplementedException("FALCON");
-           // PubKey key = PubKey.RecoverFromMessage(message, signature);
-           // return key.Hash == this.Hash;
-        }
-
-        public bool VerifyMessage(byte[] message, string signature)
-        {
-            throw new NotImplementedException("FALCON");
-          //  PubKey key = PubKey.RecoverFromMessage(message, signature);
-            //return key.Hash == this.Hash;
-        }
-
         private KeyId _KeyId;
         public KeyId Hash
         {

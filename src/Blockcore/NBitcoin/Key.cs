@@ -120,6 +120,19 @@ namespace Blockcore.NBitcoin
             return sign.GetSignatureBase64();
         }
 
+        public bool VerifyMessage(string message, string signature)
+        {
+            return VerifyMessage(Encoding.UTF8.GetBytes(message), signature);
+        }
+
+        public bool VerifyMessage(byte[] messageBytes, string signature)
+        {
+            byte[] data = Utils.FormatMessageForSigning(messageBytes);
+
+            uint256 hash = new Hashes().Hash256(data);
+            return this._FalconKey.Verify(hash, new FalconSignature(signature));
+        }
+
         #region IBitcoinSerializable Members
 
         public void ReadWrite(BitcoinStream stream)

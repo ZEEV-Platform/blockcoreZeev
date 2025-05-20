@@ -13,6 +13,7 @@ using Blockcore.NBitcoin.BIP32;
 using Blockcore.Networks;
 using Blockcore.Utilities;
 using Blockcore.Utilities.JsonConverters;
+using Mono.Unix.Native;
 using Newtonsoft.Json;
 
 namespace Blockcore.Features.Wallet.Types
@@ -878,6 +879,7 @@ namespace Blockcore.Features.Wallet.Types
                     Index = i,
                     HdPath = HdOperations.CreateHdPath(this.Purpose, this.GetCoinType(), this.Index, isChange, i),
                     Pubkey = pubKey.PubKey.ScriptPubKey, // this is a P2PK script type
+                    EncryptedKey = key.GetWif(network).ToWif(),
                 };
 
                 if (newAddress.IsBip44())
@@ -1017,6 +1019,9 @@ namespace Blockcore.Features.Wallet.Types
         [JsonProperty(PropertyName = "pubkey")]
         [JsonConverter(typeof(ScriptJsonConverter))]
         public Script Pubkey { get; set; }
+
+        [JsonProperty(PropertyName = "encryptedKey")]
+        public string EncryptedKey { get; set; }
 
         /// <summary>
         /// The Base58 representation of this address.

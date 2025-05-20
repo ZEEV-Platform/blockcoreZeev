@@ -460,7 +460,19 @@ namespace Blockcore.Features.Wallet
             try
             {
                 BitcoinPubKeyAddress bitcoinPubKeyAddress = new BitcoinPubKeyAddress(externalAddress, this.network);
-                result = bitcoinPubKeyAddress.VerifyMessage(message, signature);
+
+                // Get wallet
+                foreach (var wallet in this.Wallets)
+                {
+                    HdAddress hdAddress = wallet.GetAddress(bitcoinPubKeyAddress.ToString());
+                    if (hdAddress != null)
+                    {
+                        Key privateKey = new ZeevExtKey(hdAddress.EncryptedKey, this.network).PrivateKey;
+                        result = privateKey.VerifyMessage(message, signature);
+
+                        break;
+                    }
+                }
             }
             catch (Exception ex)
             {
