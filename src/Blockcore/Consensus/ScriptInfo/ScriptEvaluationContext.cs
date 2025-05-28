@@ -658,7 +658,7 @@ namespace Blockcore.Consensus.ScriptInfo
         private static readonly byte[] vchZero = new byte[0];
         private static readonly byte[] vchTrue = new byte[] { 1 };
 
-        private const int MAX_SCRIPT_ELEMENT_SIZE = 520;
+        private const int MAX_SCRIPT_ELEMENT_SIZE = 1024;
 
         public bool EvalScript(Script s, Transaction txTo, int nIn)
         {

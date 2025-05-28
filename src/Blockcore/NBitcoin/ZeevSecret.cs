@@ -65,10 +65,10 @@ namespace Blockcore.NBitcoin
         {
             get
             {
-                if (this.vchData.Length != 33 && this.vchData.Length != 32)
-                    return false;
+                if (this.vchData.Length == 32)
+                    return true;
 
-                 return false;
+                return false;
             }
         }
 

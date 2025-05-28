@@ -53,7 +53,6 @@ namespace Blockcore.Networks.ZEEV.Crypto
 
                 var left = Blake2B.Blake2B512().ComputeHash(data);
                 var right = Sha3.Sha3256().ComputeHash(data.Concat(pad8).ToArray());
-                var rightBC = Sha3.Sha3256().ComputeHash(data.Concat(pad8).ToArray());
                 buffer = Blake2B.Blake2B256().ComputeHash(left.Concat(pad32).Concat(right).ToArray());
             }
 

@@ -557,7 +557,7 @@ namespace Blockcore.Consensus.ScriptInfo
         }
 
         private static string unknown = "OP_UNKNOWN(0x";
-        private const int MAX_SCRIPT_ELEMENT_SIZE = 520;
+        private const int MAX_SCRIPT_ELEMENT_SIZE = 1024;
         internal static Op Read(TextReader textReader)
         {
             string opname = ReadWord(textReader);

@@ -40,10 +40,10 @@ namespace Blockcore.Networks.ZEEV
             this.DefaultAPIPort = 30566; //wf 7766 = decimal 30566
             this.MaxTimeOffsetSeconds = 25 * 60;
             this.MaxTipAge = 48 * 60 * 60;
-            this.MinTxFee = 1000;
+            this.MinTxFee = 2000;
             this.MaxTxFee = Money.Coins(1).Satoshi;
             this.FallbackFee = 20000;
-            this.MinRelayTxFee = 1000;
+            this.MinRelayTxFee = 2000;
             this.DefaultBanTimeSeconds = 60 * 60 * 24; // 500 (MaxReorg) * 64 (TargetSpacing) / 2 = 4 hours, 26 minutes and 40 seconds
 
             var consensusFactory = new ZEEVConsensusFactory();
