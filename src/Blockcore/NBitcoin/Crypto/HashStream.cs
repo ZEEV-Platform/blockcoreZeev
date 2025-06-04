@@ -104,7 +104,7 @@ namespace Blockcore.NBitcoin.Crypto
                 ProcessBlock();
         }
 
-        private Sha256Digest sha = new Sha256Digest();
+        private Sha3Digest sha = new Sha3Digest(256);
         private void ProcessBlock()
         {
             this.sha.BlockUpdate(this._Buffer, 0, this._Pos);

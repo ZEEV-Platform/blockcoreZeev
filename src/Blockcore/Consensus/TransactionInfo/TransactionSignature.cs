@@ -76,7 +76,11 @@ namespace Blockcore.Consensus.TransactionInfo
         }
         public TransactionSignature(byte[] sigSigHash)
         {
-            this._Signature = FalconSignature.FromDER(sigSigHash);
+            //we have to remove last byte (sigHash)
+            var sig = new byte[sigSigHash.Length - 1];
+            Array.Copy(sigSigHash, 0, sig, 0, sig.Length);
+
+            this._Signature = FalconSignature.FromDER(sig);
             this._SigHash = (SigHash)sigSigHash[sigSigHash.Length - 1];
         }
         public TransactionSignature(byte[] sig, SigHash sigHash)
@@ -114,20 +118,6 @@ namespace Blockcore.Consensus.TransactionInfo
         public static bool ValidLength(int length)
         {
             return (67 <= length && length <= 80) || length == 9; //9 = Empty signature
-        }
-
-        public bool Check(Network network, PubKey pubKey, Script scriptPubKey, IndexedTxIn txIn, ScriptVerify verify = ScriptVerify.Standard)
-        {
-            return Check(network, pubKey, scriptPubKey, txIn.Transaction, txIn.Index, verify);
-        }
-
-        public bool Check(Network network, PubKey pubKey, Script scriptPubKey, Transaction tx, uint nIndex, ScriptVerify verify = ScriptVerify.Standard)
-        {
-            return new ScriptEvaluationContext(network)
-            {
-                ScriptVerify = verify,
-                SigHash = this.SigHash
-            }.CheckSig(this, pubKey, scriptPubKey, tx, nIndex);
         }
 
         private string _Id;

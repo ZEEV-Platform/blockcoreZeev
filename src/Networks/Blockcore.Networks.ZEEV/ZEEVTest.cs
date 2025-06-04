@@ -43,7 +43,7 @@ namespace Blockcore.Networks.ZEEV
             this.MinTxFee = 2000;
             this.MaxTxFee = Money.Coins(1).Satoshi;
             this.FallbackFee = 20000;
-            this.MinRelayTxFee = 2000;
+            this.MinRelayTxFee = 1000;
             this.DefaultBanTimeSeconds = 60 * 60 * 24; // 500 (MaxReorg) * 64 (TargetSpacing) / 2 = 4 hours, 26 minutes and 40 seconds
 
             var consensusFactory = new ZEEVConsensusFactory();

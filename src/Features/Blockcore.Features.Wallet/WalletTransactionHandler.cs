@@ -303,7 +303,8 @@ namespace Blockcore.Features.Wallet
             long balance = context.UnspentOutputs.Sum(t => t.Transaction.Amount);
             long totalToSend = context.Recipients.Sum(s => s.Amount) + (context.OpReturnAmount ?? Money.Zero);
             if (balance < totalToSend)
-                throw new WalletException("Not enough funds.");
+                throw new WalletException(string.Format("Not enough funds. Maximum amount confirmed available: {0}", 
+                    new Money(balance).ToUnit(MoneyUnit.ZEEV)));
 
             Money sum = 0;
             var coins = new List<Coin>();

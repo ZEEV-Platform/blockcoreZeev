@@ -169,11 +169,6 @@ namespace Blockcore.NBitcoin
             return this.FalconKey.Verify(hash, sig);
         }
 
-        public bool Verify(uint256 hash, byte[] sig)
-        {
-            return Verify(hash, FalconSignature.FromDER(sig));
-        }
-
         public string ToHex()
         {
             return Encoders.Hex.EncodeData(this._falconPkBytes);

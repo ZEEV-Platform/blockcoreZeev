@@ -48,9 +48,6 @@ namespace Blockcore.Features.Miner
         /// <summary>POW miner.</summary>
         private readonly IPowMining powMining;
 
-        /// <summary>POS staker.</summary>
-        private readonly IPosMinting posMinting;
-
         /// <summary>Instance logger.</summary>
         private readonly ILogger logger;
 
@@ -64,8 +61,7 @@ namespace Blockcore.Features.Miner
             NodeSettings nodeSettings,
             ILoggerFactory loggerFactory,
             ITimeSyncBehaviorState timeSyncBehaviorState,
-            IPowMining powMining,
-            IPosMinting posMinting = null)
+            IPowMining powMining)
         {
             this.connectionManagerSettings = connectionManagerSettings;
             this.network = network;
@@ -73,7 +69,6 @@ namespace Blockcore.Features.Miner
             this.nodeSettings = nodeSettings;
             this.powMining = powMining;
             this.timeSyncBehaviorState = timeSyncBehaviorState;
-            this.posMinting = posMinting;
             this.logger = loggerFactory.CreateLogger(this.GetType().FullName);
         }
 
@@ -94,48 +89,6 @@ namespace Blockcore.Features.Miner
         public static void BuildDefaultConfigurationFile(StringBuilder builder, Network network)
         {
             MinerSettings.BuildDefaultConfigurationFile(builder, network);
-        }
-
-        /// <summary>
-        /// Starts staking a wallet.
-        /// </summary>
-        /// <param name="walletName">The name of the wallet.</param>
-        /// <param name="walletPassword">The password of the wallet.</param>
-        public void StartStaking(string walletName, string walletPassword)
-        {
-            if (this.timeSyncBehaviorState.IsSystemTimeOutOfSync)
-            {
-                string errorMessage = "Staking cannot start, your system time does not match that of other nodes on the network." + Environment.NewLine
-                                    + "Please adjust your system time and restart the node.";
-                this.logger.LogError(errorMessage);
-                throw new ConfigurationException(errorMessage);
-            }
-
-            if (!string.IsNullOrEmpty(walletName) && !string.IsNullOrEmpty(walletPassword))
-            {
-                this.logger.LogInformation("Staking enabled on wallet '{0}'.", walletName);
-
-                this.posMinting.Stake(new WalletSecret
-                {
-                    WalletPassword = walletPassword,
-                    WalletName = walletName
-                });
-            }
-            else
-            {
-                string errorMessage = "Staking not started, wallet name or password were not provided.";
-                this.logger.LogError(errorMessage);
-                throw new ConfigurationException(errorMessage);
-            }
-        }
-
-        /// <summary>
-        /// Stop a staking wallet.
-        /// </summary>
-        public void StopStaking()
-        {
-            this.posMinting?.StopStake();
-            this.logger.LogInformation("Staking stopped.");
         }
 
         /// <summary>
@@ -169,11 +122,6 @@ namespace Blockcore.Features.Miner
                 }
             }
 
-            if (this.minerSettings.Stake)
-            {
-                this.StartStaking(this.minerSettings.WalletName, this.minerSettings.WalletPassword);
-            }
-
             return Task.CompletedTask;
         }
 
@@ -181,17 +129,11 @@ namespace Blockcore.Features.Miner
         public override void Dispose()
         {
             this.StopMining();
-            this.StopStaking();
         }
 
         /// <inheritdoc />
         public override void ValidateDependencies(IFullNodeServiceProvider services)
         {
-            if (services.ServiceProvider.GetService<IPosMinting>() != null)
-            {
-                services.Features.EnsureFeature<BaseWalletFeature>();
-            }
-
             // Mining and staking require block store feature.
             if (this.minerSettings.Mine || this.minerSettings.Stake)
             {
@@ -257,8 +199,6 @@ namespace Blockcore.Features.Miner
                     .FeatureServices(services =>
                     {
                         services.AddSingleton<IPowMining, PowMining>();
-                        services.AddSingleton<IPosMinting, PosMinting>()
-                            .AddSingleton<INetworkWeight, PosMinting>(provider => (PosMinting)provider.GetService<IPosMinting>());
                         services.AddSingleton<IBlockProvider, BlockProvider>();
                         services.AddSingleton<BlockDefinition, PowBlockDefinition>();
                         services.AddSingleton<BlockDefinition, PosBlockDefinition>();
@@ -266,7 +206,6 @@ namespace Blockcore.Features.Miner
                         services.AddSingleton<MinerSettings>();
                         services.AddSingleton<INavigationItem, StakeNavigationItem>();
                         services.AddSingleton<INavigationItem, MineNavigationItem>();
-                        services.AddSingleton<IClientEventBroadcaster, StakingBroadcaster>();
                     });
             });
 

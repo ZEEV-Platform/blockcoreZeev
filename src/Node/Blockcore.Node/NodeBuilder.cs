@@ -3,7 +3,6 @@ using Blockcore.Configuration;
 using Blockcore.Features.BlockStore;
 using Blockcore.Features.ColdStaking;
 using Blockcore.Features.Consensus;
-using Blockcore.Features.Consensus.Interfaces;
 using Blockcore.Features.Diagnostic;
 using Blockcore.Features.MemoryPool;
 using Blockcore.Features.Miner;

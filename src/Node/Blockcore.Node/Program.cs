@@ -22,6 +22,8 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using Blockcore.NBitcoin.BIP39;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Blockcore.Consensus.TransactionInfo;
+using Blockcore.NBitcoin.DataEncoders;
 
 namespace Blockcore.Node
 {
@@ -29,22 +31,22 @@ namespace Blockcore.Node
     {
         public static async Task Main(string[] args)
         {
-            var folderPath = "G:\\_ZEEV_Git\\blockcorefalcon\\src\\Node\\Blockcore.Node\\bin\\Debug\\net8.0\\nodedata\\ZEEV\\ZEEVMain";
-            try
-            {
-                File.Delete(folderPath + "\\txdb\\default.db");
-            }
-            catch (Exception)
-            {
-            }
+            //var folderPath = "G:\\_ZEEV_Git\\blockcorefalcon\\src\\Node\\Blockcore.Node\\bin\\Debug\\net8.0\\nodedata\\ZEEV\\ZEEVMain";
+            //try
+            //{
+            //    File.Delete(folderPath + "\\txdb\\default.db");
+            //}
+            //catch (Exception)
+            //{
+            //}
 
-            try
-            {
-                File.Delete(folderPath + "\\default.wallet.json");
-            }
-            catch (Exception)
-            {
-            }
+            //try
+            //{
+            //    File.Delete(folderPath + "\\default.wallet.json");
+            //}
+            //catch (Exception)
+            //{
+            //}
 
             try
             {
@@ -63,8 +65,8 @@ namespace Blockcore.Node
                 IFullNodeBuilder nodeBuilder = NodeBuilder.Create(chain, nodeSettings);
 
                 IFullNode node = nodeBuilder.Build();
-     
-                Task.Delay(TimeSpan.FromSeconds(5)).ContinueWith((t) => { TestFee(node); }).GetAwaiter();
+
+                //Task.Delay(TimeSpan.FromSeconds(5)).ContinueWith((t) => { TestFee(node); }).GetAwaiter();
 
                 if (node != null)
                     await node.RunAsync();
@@ -117,10 +119,7 @@ namespace Blockcore.Node
                 var result = wallet.SignMessage(password, "default", account.Name, addresses.First().Address, message);
                 var verified = wallet.VerifySignedMessage(result.SignedAddress, message, result.Signature);
 
-                //   var ss = RPCmining.SubmitBlock("a4feb20073584e650000000000000000000000000000000000000000000000007091a1420b944c14e6e2973cbbda3cd06ab8995f57ccacd5c81327cf43d5a7010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000dfbd1089603ae909369ed623e7a05220ad5bd4be74d98ec79c1be32ecf14a6cd00000020ffff7f200101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff275a0c6d696e6564206279206873640473584e650030000001de9ff2110a4d696e696e67636f7265000000000180e66b21160000001976a914cbb39fd33f409b187a4d8bc8a5c08f631bc6740288ac00000000");
-                //       var sxxx = RPC.GetBlock("00000000c698be4f084c39d49a1e4f5d01d3e78af4624e23bbfc1879ff63b3cb");
 
-                // var res = mining.GenerateBlocks(new ReserveScript(address.Pubkey), 100, uint.MaxValue);
 
             }
             catch (Exception e)
