@@ -37,9 +37,6 @@
 	<!-- Any custom target adding things to the Compile item group needs BeforeTargets="BeforeCompile".	-->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
-    <!-- Tell SourceLink to use this remote to derive the published git repository URL and source links. -->
-    <GitRepositoryRemoteName>public</GitRepositoryRemoteName>
-
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
