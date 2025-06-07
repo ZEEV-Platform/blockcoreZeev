@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Consensus.TransactionInfo;
@@ -249,7 +250,16 @@ namespace Blockcore.Features.Wallet
                 return;
 
             Types.Wallet wallet = this.walletManager.GetWalletByName(context.AccountReference.WalletName);
-            ExtKey seedExtKey = this.walletManager.GetExtKey(context.AccountReference, context.WalletPassword, context.CacheSecret);
+            ExtKey seedExtKey;
+
+            try
+            {
+                seedExtKey = this.walletManager.GetExtKey(context.AccountReference, context.WalletPassword, context.CacheSecret);
+            }
+            catch (Exception)
+            {
+                throw new SecurityException("Invalid password (or invalid Network)");
+            }
 
             var signingKeys = new HashSet<ISecret>();
             var added = new HashSet<HdAddress>();

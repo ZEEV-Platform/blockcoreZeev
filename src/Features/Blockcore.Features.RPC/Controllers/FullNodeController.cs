@@ -462,7 +462,7 @@ namespace Blockcore.Features.RPC.Controllers
             var networkInfoModel = new NetworkInfoModel
             {
                 Version = this.FullNode?.Version?.ToUint() ?? 0,
-                SubVersion = this.Settings?.Agent,
+                SubVersion = string.Format("/{0}:{1}/", this.Settings?.Agent, this.FullNode?.Version?.ToString()), 
                 ProtocolVersion = this.Network.Consensus.ConsensusFactory.Protocol.ProtocolVersion,
                 IsLocalRelay = this.ConnectionManager?.Parameters?.IsRelay ?? false,
                 TimeOffset = this.ConnectionManager?.ConnectedPeers?.GetMedianTimeOffset() ?? 0,
