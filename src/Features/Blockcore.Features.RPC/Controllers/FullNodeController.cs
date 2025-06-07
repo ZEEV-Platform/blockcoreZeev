@@ -546,6 +546,42 @@ namespace Blockcore.Features.RPC.Controllers
             return blockchainInfo;
         }
 
+        /// <summary>
+        /// RPC method for returning a block statistics.
+        /// <para>
+        /// Returns json with block statistics
+        /// </para>
+        /// </summary>
+        /// <param name="hash_or_height">Hash of block to find.</param>
+        /// <param name="stats"></param>
+        /// <returns>The block according to format specified in <see cref="verbosity"/></returns>
+        [ActionName("getblockstats")]
+        [ActionDescription("Returns the block stats, given a block hash.")]
+        public object GetBlockStats(string hash_or_height, string values)
+        {
+            int height;
+            ChainedHeader chainedHeader;
+
+            if (int.TryParse(hash_or_height, out height))
+            {
+                chainedHeader = this.ChainIndexer.GetHeader(height);
+            } 
+            else
+            {
+                uint256 blockHash = uint256.Parse(hash_or_height);
+                chainedHeader = this.ChainIndexer.GetHeader(blockHash);
+            }
+
+            if (chainedHeader == null)
+                return null;
+
+            var blockStats = new GetBlockStatsModel();
+            blockStats.BlockHash = chainedHeader.HashBlock.ToString();
+            blockStats.Height = chainedHeader.Height;
+
+            return blockStats;
+        }
+
         private SoftForksBip9 CreateSoftForksBip9(ThresholdStateModel metric, ThresholdState state)
         {
             var softForksBip9 = new SoftForksBip9()
