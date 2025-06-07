@@ -586,7 +586,7 @@ namespace Blockcore.Features.RPC.Controllers
             blockStats.Time = block.Header.Time;
             blockStats.TotalSize = block.BlockSize.Value;
             blockStats.TotalWeight = block.GetBlockWeight(this.Network.Consensus);
-            blockStats.TotalFee = blockStats.TotalOut - blockStats.Subsidy;
+            blockStats.TotalOut = block.Transactions.Sum(b => b.TotalOut.ToDecimal(MoneyUnit.ZEEV));
             blockStats.MedianTime = chainedHeader.GetMedianTimePast().ToUnixTimeSeconds();
             var builder = new TransactionBuilder(this.Network);
 
@@ -631,7 +631,7 @@ namespace Blockcore.Features.RPC.Controllers
                 blockStats.MedianFee = arrFee.Select(a => a.ToUnit(MoneyUnit.ZEEV)).Median();
                 blockStats.MedianFeeRate = arrFeeRate.Select(a => a.FeePerK.ToUnit(MoneyUnit.ZEEV)).Median();
 
-                blockStats.TotalOut = arrFee.Sum(b => b.ToUnit(MoneyUnit.ZEEV));
+                blockStats.TotalFee = arrFee.Sum(b => b.ToUnit(MoneyUnit.ZEEV));
             }
 
             if (arrFeeRate.Count > 0)
