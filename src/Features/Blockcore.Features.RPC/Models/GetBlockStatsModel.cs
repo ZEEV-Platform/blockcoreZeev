@@ -27,6 +27,9 @@ namespace Blockcore.Features.RPC.Models
         [JsonProperty("outs")]
         public int Outs { get; set; }
 
+        [JsonProperty("total_out")]
+        public decimal TotalOut { get; set; } // in bytes
+
         [JsonProperty("total_size")]
         public long TotalSize { get; set; } // in bytes
 
@@ -71,12 +74,6 @@ namespace Blockcore.Features.RPC.Models
 
         [JsonProperty("mediantxsize")]
         public int MedianTxSize { get; set; } // in bytes
-
-        [JsonProperty("utxo_increase")]
-        public int UtxoIncrease { get; set; }
-
-        [JsonProperty("utxo_size_inc")]
-        public long UtxoSizeInc { get; set; } // in bytes
 
         [JsonProperty("subsidy")]
         public decimal Subsidy { get; set; } // in BTC
