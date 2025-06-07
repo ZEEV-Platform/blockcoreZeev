@@ -586,7 +586,6 @@ namespace Blockcore.Features.RPC.Controllers
             blockStats.Time = block.Header.Time;
             blockStats.TotalSize = block.BlockSize.Value;
             blockStats.TotalWeight = block.GetBlockWeight(this.Network.Consensus);
-            blockStats.TotalOut = block.Transactions.Sum(b => b.TotalOut.ToDecimal(MoneyUnit.ZEEV));
             blockStats.TotalFee = blockStats.TotalOut - blockStats.Subsidy;
             blockStats.MedianTime = chainedHeader.GetMedianTimePast().ToUnixTimeSeconds();
             var builder = new TransactionBuilder(this.Network);
@@ -617,18 +616,31 @@ namespace Blockcore.Features.RPC.Controllers
                 }
             }
 
-            blockStats.AvgFee = arrFee.Average(b => b.ToUnit(MoneyUnit.ZEEV));
-            blockStats.AvgFeeRate = arrFeeRate.Average(b => b.FeePerK.ToUnit(MoneyUnit.ZEEV));
-            blockStats.AvgTxSize = (decimal)arrSize.Average(b => b);
-            blockStats.MaxFee = arrFee.Max(b => b.ToUnit(MoneyUnit.ZEEV));
-            blockStats.MaxFeeRate = arrFeeRate.Max(b => b.FeePerK.ToUnit(MoneyUnit.ZEEV));
-            blockStats.MaxTxSize = arrSize.Max(b => b);
-            blockStats.MedianFee = arrFee.Select(a => a.ToUnit(MoneyUnit.ZEEV)).Median();
-            blockStats.MedianFeeRate = arrFeeRate.Select(a => a.FeePerK.ToUnit(MoneyUnit.ZEEV)).Median();
-            blockStats.MedianTxSize = arrSize.Median();
-            blockStats.MinFee = arrFee.Min(b => b.ToUnit(MoneyUnit.ZEEV));
-            blockStats.MinFeeRate = arrFeeRate.Min(b => b.FeePerK.ToUnit(MoneyUnit.ZEEV));
-            blockStats.MinTxSize = arrSize.Min(b => b);
+            if (arrSize.Count > 0)
+            {
+                blockStats.AvgTxSize = (decimal)arrSize.Average(b => b);
+                blockStats.MaxTxSize = arrSize.Max(b => b);
+                blockStats.MedianTxSize = arrSize.Median();
+                blockStats.MinTxSize = arrSize.Min(b => b);
+            }
+
+            if (arrFee.Count > 0)
+            {
+                blockStats.AvgFee = arrFee.Average(b => b.ToUnit(MoneyUnit.ZEEV));
+                blockStats.MaxFee = arrFee.Max(b => b.ToUnit(MoneyUnit.ZEEV));
+                blockStats.MedianFee = arrFee.Select(a => a.ToUnit(MoneyUnit.ZEEV)).Median();
+                blockStats.MedianFeeRate = arrFeeRate.Select(a => a.FeePerK.ToUnit(MoneyUnit.ZEEV)).Median();
+
+                blockStats.TotalOut = arrFee.Sum(b => b.ToUnit(MoneyUnit.ZEEV));
+            }
+
+            if (arrFeeRate.Count > 0)
+            {
+                blockStats.AvgFeeRate = arrFeeRate.Average(b => b.FeePerK.ToUnit(MoneyUnit.ZEEV));
+                blockStats.MaxFeeRate = arrFeeRate.Max(b => b.FeePerK.ToUnit(MoneyUnit.ZEEV));
+                blockStats.MinFee = arrFee.Min(b => b.ToUnit(MoneyUnit.ZEEV));
+                blockStats.MinFeeRate = arrFeeRate.Min(b => b.FeePerK.ToUnit(MoneyUnit.ZEEV));
+            }
 
             return blockStats;
         }
