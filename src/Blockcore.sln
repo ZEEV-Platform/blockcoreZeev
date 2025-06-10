@@ -92,6 +92,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TESTFalcon", "TESTFalcon\TE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TESTZEEV", "TESTZEEV\TESTZEEV.csproj", "{4CEDEF4A-EF85-4006-82AC-A11A4148FF2A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TESTLZ4Compression", "TESTCompression\TESTLZ4Compression.csproj", "{4783C878-7A1A-4B8C-85E0-497CAFE52AD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -222,6 +224,10 @@ Global
 		{4CEDEF4A-EF85-4006-82AC-A11A4148FF2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CEDEF4A-EF85-4006-82AC-A11A4148FF2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CEDEF4A-EF85-4006-82AC-A11A4148FF2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4783C878-7A1A-4B8C-85E0-497CAFE52AD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4783C878-7A1A-4B8C-85E0-497CAFE52AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4783C878-7A1A-4B8C-85E0-497CAFE52AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4783C878-7A1A-4B8C-85E0-497CAFE52AD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

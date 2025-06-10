@@ -19,7 +19,7 @@ namespace Blockcore.Features.BlockStore
         private readonly ICheckpoints checkpoints;
 
         public ProvenHeadersBlockStoreBehavior(Network network, ChainIndexer chainIndexer, IChainState chainState, ILoggerFactory loggerFactory, IConsensusManager consensusManager, ICheckpoints checkpoints, IBlockStoreQueue blockStoreQueue)
-            : base(chainIndexer, chainState, loggerFactory, consensusManager, blockStoreQueue)
+            : base(chainIndexer, chainState, loggerFactory, consensusManager, blockStoreQueue, network)
         {
             this.network = Guard.NotNull(network, nameof(network));
             this.checkpoints = Guard.NotNull(checkpoints, nameof(checkpoints));

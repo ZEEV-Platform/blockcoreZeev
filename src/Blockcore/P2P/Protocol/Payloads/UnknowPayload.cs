@@ -24,6 +24,12 @@ namespace Blockcore.P2P.Protocol.Payloads
             this.command = command;
         }
 
+        public UnknowPayload(string command, byte[] data)
+        {
+            this.command = command;
+            this.data = data;
+        }
+
         public override void ReadWriteCore(BitcoinStream stream)
         {
             stream.ReadWrite(ref this.data);

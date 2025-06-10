@@ -11,6 +11,7 @@ using Blockcore.NBitcoin;
 using Blockcore.Networks;
 using Blockcore.P2P.Peer;
 using Blockcore.P2P.Protocol;
+using Blockcore.P2P.Protocol.Compression;
 using Blockcore.P2P.Protocol.Behaviors;
 using Blockcore.P2P.Protocol.Payloads;
 using Blockcore.Signals;
@@ -345,7 +346,6 @@ namespace Blockcore.Features.MemoryPool
             foreach (InventoryVector item in getDataPayload.Inventory.Where(inv => inv.Type.HasFlag(InventoryType.MSG_TX)))
             {
                 // TODO: check if we need to add support for "not found"
-
                 TxMempoolInfo trxInfo = await this.mempoolManager.InfoAsync(item.Hash).ConfigureAwait(false);
 
                 if (trxInfo != null)
@@ -353,7 +353,8 @@ namespace Blockcore.Features.MemoryPool
                     if (peer.IsConnected)
                     {
                         this.logger.LogDebug("Sending transaction '{0}' to peer '{1}'.", item.Hash, peer.RemoteSocketEndpoint);
-                        await peer.SendMessageAsync(new TxPayload(trxInfo.Trx.WithOptions(peer.SupportedTransactionOptions, this.network.Consensus.ConsensusFactory))).ConfigureAwait(false);
+                        await peer.SendWithLZ4CompressionAsync(new TxPayload(trxInfo.Trx.WithOptions(peer.SupportedTransactionOptions, this.network.Consensus.ConsensusFactory)),
+                            this.network.Consensus.ConsensusFactory).ConfigureAwait(false);
                     }
                 }
             }

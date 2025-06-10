@@ -59,12 +59,12 @@ namespace Blockcore.Networks.ZEEV
 
             var consensusOptions = new ConsensusOptions
             {
-                MaxBlockBaseSize = 1 * 1000 * 1000,
-                MaxBlockSerializedSize = 4 * 1000 * 1000,
+                MaxBlockBaseSize = (uint)(2.5 * 1000 * 1000),
+                MaxBlockSerializedSize = 10 * 1000 * 1000,
                 MaxStandardVersion = 2,
-                MaxStandardTxWeight = (4 * 1000 * 1000) / 10,
-                MaxBlockSigopsCost = 80000,
-                MaxStandardTxSigopsCost = 80000 / 5,
+                MaxStandardTxWeight = (10 * 1000 * 1000) / 10,
+                MaxBlockSigopsCost = 650000,
+                MaxStandardTxSigopsCost = 650000 / 5,
                 WitnessScaleFactor = 4,
             };
 

@@ -48,7 +48,7 @@ namespace Blockcore.P2P.Protocol
                 return Encoders.ASCII.EncodeData(this.command);
             }
 
-            private set
+            set
             {
                 this.command = Encoders.ASCII.DecodeData(value.Trim().PadRight(12, '\0'));
             }

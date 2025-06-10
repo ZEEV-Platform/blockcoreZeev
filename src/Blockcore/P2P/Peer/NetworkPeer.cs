@@ -12,6 +12,7 @@ using Blockcore.NBitcoin.Protocol;
 using Blockcore.Networks;
 using Blockcore.P2P.Protocol;
 using Blockcore.P2P.Protocol.Behaviors;
+using Blockcore.P2P.Protocol.Compression;
 using Blockcore.P2P.Protocol.Payloads;
 using Blockcore.Utilities;
 using Microsoft.Extensions.Logging;
@@ -654,6 +655,9 @@ namespace Blockcore.P2P.Peer
         {
             this.advertize = parameters.Advertize;
             this.preferredTransactionOptions = parameters.PreferredTransactionOptions;
+
+            //compressiontest
+            this.Behaviors.Add(new CompressionBehavior(this.logger, this.Network.Consensus.ConsensusFactory));
 
             foreach (INetworkPeerBehavior behavior in parameters.TemplateBehaviors)
             {
