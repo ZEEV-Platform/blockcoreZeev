@@ -515,6 +515,11 @@ namespace Blockcore.P2P.Peer
                     case HaveWitnessPayload unused:
                         this.SupportedTransactionOptions |= TransactionOptions.Witness;
                         break;
+
+                    case CompressedPayload:
+                        var compressionProcessor = new CompressionProcessor(this.logger, this.Network.Consensus.ConsensusFactory);
+                        await compressionProcessor.DecompressDataAsync(this, message);
+                        break;
                 }
             }
             catch
