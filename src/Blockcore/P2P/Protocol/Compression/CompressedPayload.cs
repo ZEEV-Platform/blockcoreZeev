@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Blockcore.NBitcoin;
 using Blockcore.P2P.Protocol.Payloads;
 using K4os.Compression.LZ4;
+using K4os.Compression.LZ4.Streams;
 
 namespace Blockcore.P2P.Protocol.Compression
 {
@@ -40,20 +42,21 @@ namespace Blockcore.P2P.Protocol.Compression
         {
             try
             {
-                int maxCompressedSize = LZ4Codec.MaximumOutputSize(data.Length);
-                byte[] compressedBuffer = new byte[maxCompressedSize];
+                using (var inputStream = new MemoryStream(data))
+                {
+                    using (var outputStream = new MemoryStream())
+                    {
+                        using (var lz4Stream = LZ4Stream.Encode(outputStream))
+                        {
+                            inputStream.CopyTo(lz4Stream);
+                            lz4Stream.Close();
 
-                int compressedSize = LZ4Codec.Encode(
-                    data, 0, data.Length,
-                    compressedBuffer, 0, maxCompressedSize);
+                            byte[] compressedData = outputStream.ToArray();
 
-                if (compressedSize <= 0)
-                    return data;
-
-                byte[] result = new byte[compressedSize];
-                Array.Copy(compressedBuffer, 0, result, 0, compressedSize);
-
-                return result.Length < data.Length ? result : data;
+                            return compressedData.Length < data.Length ? compressedData : data;
+                        }
+                    }
+                }
             }
             catch
             {
@@ -65,16 +68,23 @@ namespace Blockcore.P2P.Protocol.Compression
         {
             try
             {
-                byte[] decompressed = new byte[this.OriginalSize];
+                using (var inputStream = new MemoryStream(this.CompressedData))
+                {
+                    using (var outputStream = new MemoryStream())
+                    {
+                        using (var lz4Stream = LZ4Stream.Decode(inputStream))
+                        {
+                            lz4Stream.CopyTo(outputStream);
 
-                int decompressedSize = LZ4Codec.Decode(
-                    this.CompressedData, 0, this.CompressedData.Length,
-                    decompressed, 0, (int)this.OriginalSize);
+                            byte[] decompressed = outputStream.ToArray();
 
-                if (decompressedSize != this.OriginalSize)
-                    return this.CompressedData;
+                            if (decompressed.Length != this.OriginalSize)
+                                return this.CompressedData;
 
-                return decompressed;
+                            return decompressed;
+                        }
+                    }
+                }
             }
             catch
             {
