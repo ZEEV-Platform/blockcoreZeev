@@ -173,7 +173,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
             }
             catch (SecurityException)
             {
-                throw new RPCServerException(RPCErrorCode.RPC_WALLET_UNLOCK_NEEDED, "Wallet unlock needed");
+                throw new RPCServerException(RPCErrorCode.RPC_WALLET_UNLOCK_NEEDED, "wallet-locked - Wallet unlock needed");
             }
             catch (WalletException exception)
             {
@@ -1171,7 +1171,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
             }
             catch (SecurityException)
             {
-                throw new RPCServerException(RPCErrorCode.RPC_WALLET_UNLOCK_NEEDED, "Wallet unlock needed");
+                throw new RPCServerException(RPCErrorCode.RPC_WALLET_UNLOCK_NEEDED, "wallet-locked - Wallet unlock needed");
             }
             catch (WalletException exception)
             {

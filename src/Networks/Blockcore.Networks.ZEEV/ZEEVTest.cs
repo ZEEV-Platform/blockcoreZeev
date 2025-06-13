@@ -120,7 +120,7 @@ namespace Blockcore.Networks.ZEEV
                 proofOfStakeLimitV2: null,
                 proofOfStakeReward: Money.Zero,
                 proofOfStakeTimestampMask: 0,
-                powTimeDelay: TimeSpan.FromSeconds(25),
+                powTimeDelay: TimeSpan.FromSeconds(20),
                 subsidityDecrease: Money.Coins((decimal)9.505)
             );
 
