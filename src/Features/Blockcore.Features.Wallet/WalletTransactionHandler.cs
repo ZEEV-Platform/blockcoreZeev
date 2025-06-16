@@ -182,6 +182,7 @@ namespace Blockcore.Features.Wallet
 
                 this.AddRecipients(context);
                 this.AddCoins(context);
+                this.SubtractFeeFromRecipients(context);
                 this.AddFee(context);
 
                 if (this.network.MinTxFee > Money.Zero)
@@ -196,6 +197,12 @@ namespace Blockcore.Features.Wallet
             }
 
             return (maxSpendableAmount - fee, fee);
+        }
+
+        protected virtual void SubtractFeeFromRecipients(TransactionBuildContext context)
+        {
+            if (context.Recipients.Any(a => a.SubtractFeeFromAmount))
+                context.TransactionBuilder.SubtractFees();
         }
 
         /// <inheritdoc />
@@ -233,6 +240,7 @@ namespace Blockcore.Features.Wallet
             this.AddOpReturnOutput(context);
             this.AddCoins(context);
             this.FindChangeAddress(context);
+            this.SubtractFeeFromRecipients(context);
             this.AddFee(context);
 
             if (context.Time.HasValue)
@@ -391,9 +399,6 @@ namespace Blockcore.Features.Wallet
         {
             if (context.Recipients.Any(a => a.Amount == Money.Zero))
                 throw new WalletException("No amount specified.");
-
-            if (context.Recipients.Any(a => a.SubtractFeeFromAmount))
-                throw new NotImplementedException("Substracting the fee from the recipient is not supported yet.");
 
             foreach (Recipient recipient in context.Recipients)
                 context.TransactionBuilder.Send(recipient.ScriptPubKey, recipient.Amount);
