@@ -34,9 +34,9 @@ namespace Blockcore.Networks.ZEEV.Rules
 
         public Target GetWorkRequired(ChainedHeader chainedHeaderToValidate, ZEEVConsensus consensus)
         {
-            ZEEVDigiShield digiShield = new ZEEVDigiShield();
+            var diffProcessor = new ZEEVLWMA();
 
-            return digiShield.GetWorkRequired(chainedHeaderToValidate, consensus);
+            return diffProcessor.GetWorkRequired(chainedHeaderToValidate, consensus);
         }
     }
 }
