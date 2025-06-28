@@ -23,9 +23,9 @@ namespace Blockcore.Networks.ZEEV.Components
         private const int DIFFICULTY_WINDOW = 60;
 
         // Burst protection constants
-        private const double MAX_DIFFICULTY_DECREASE_FACTOR = 4.0; // Maximum 4x difficulty decrease
-        private const double MAX_DIFFICULTY_INCREASE_FACTOR = 2.0; // Maximum 2x difficulty increase
-        private const long MIN_BLOCK_INTERVAL_SECONDS = 10; // Minimum 10 seconds between blocks
+        private const double MAX_DIFFICULTY_DECREASE_FACTOR = 8.0; // Maximum 4x difficulty decrease
+        private const double MAX_DIFFICULTY_INCREASE_FACTOR = 4.0; // Maximum 2x difficulty increase
+        private const long MIN_BLOCK_INTERVAL_SECONDS = 15; // Minimum 10 seconds between blocks
         private const int BURST_DETECTION_WINDOW = 6; // Number of recent blocks to check for burst
         private const double BURST_THRESHOLD_FACTOR = 0.25; // If average time < 25% of target, it's a burst
 
@@ -185,10 +185,7 @@ namespace Blockcore.Networks.ZEEV.Components
 
             // BURST PROTECTION: Detect burst mining and apply protection
             bool isBurstDetected = DetectBurstMining(pindexLast, T);
-            if (isBurstDetected)
-            {
-                nextTargetBigInt = ApplyBurstProtection(nextTargetBigInt, previousTarget, isBurstDetected);
-            }
+            nextTargetBigInt = ApplyBurstProtection(nextTargetBigInt, previousTarget, isBurstDetected);
 
             // Ensure the target doesn't exceed the proof-of-work limit
             if (nextTargetBigInt.CompareTo(powLimit) > 0)
