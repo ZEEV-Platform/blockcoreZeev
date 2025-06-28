@@ -258,13 +258,6 @@ namespace Blockcore.Features.Wallet
 
             if (this.walletSettings.IsDefaultWalletEnabled())
             {
-                // Check if it already exists, if not, create one.
-                if (!wallets.Any(w => w.Name == this.walletSettings.DefaultWalletName))
-                {
-                    var mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve);
-                    this.CreateWallet(this.walletSettings.DefaultWalletPassword, this.walletSettings.DefaultWalletName, string.Empty, mnemonic);
-                }
-
                 // Make sure both unlock is specified, and that we actually have a default wallet name specified.
                 if (this.walletSettings.UnlockDefaultWallet)
                 {
