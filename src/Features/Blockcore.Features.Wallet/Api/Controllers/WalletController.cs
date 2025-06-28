@@ -129,6 +129,10 @@ namespace Blockcore.Features.Wallet.Api.Controllers
 
             try
             {
+                var mnemonicHelper = new MnemonicHelper();
+                request.Mnemonic = mnemonicHelper.CleanMnemonicRegex(request.Mnemonic);
+                request.Passphrase = mnemonicHelper.CleanMnemonicRegex(request.Passphrase);
+
                 Mnemonic requestMnemonic = string.IsNullOrEmpty(request.Mnemonic) ? null : new Mnemonic(request.Mnemonic);
 
                 Mnemonic mnemonic = this.walletManager.CreateWallet(request.Password, request.Name, request.Passphrase, mnemonic: requestMnemonic, purpose: request.Purpose);
