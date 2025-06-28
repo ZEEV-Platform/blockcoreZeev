@@ -7,56 +7,38 @@ using Blockcore.Consensus.BlockInfo;
 using Blockcore.Consensus.Chain;
 using Blockcore.NBitcoin;
 using Blockcore.Networks.ZEEV.Consensus;
+using Blockcore.Utilities;
+using Microsoft.Extensions.Primitives;
 using Org.BouncyCastle.Math;
 
 namespace Blockcore.Networks.ZEEV.Components
 {
     /// <summary>
-    /// LWMA v3 with advanced multipool attack protection
+    /// LWMA (Linear Weighted Moving Average) difficulty adjustment algorithm implementation.
+    /// This is a C# port of the original C++ LWMA algorithm with LWMA-3 jump rule support.
+    /// Enhanced with burst protection mechanisms to prevent rapid hash rate attacks.
     /// </summary>
     public class ZEEVLWMA
     {
-        // Core parameters
         private const int DIFFICULTY_WINDOW = 60;
-        private const int BLOCK_WINDOW = 24;
-        private const decimal MAX_ADJUSTMENT_UP = 1.06m;    // +6%
-        private const decimal MAX_ADJUSTMENT_DOWN = 0.94m;  // -6%
-        private const decimal BURST_ADJUSTMENT_UP = 1.15m;  // +15% during burst
-        private const decimal ASYMMETRY_FACTOR = 1.5m;      // Faster decrease
 
-        // Multipool protection
-        private const int BURST_DETECTION_WINDOW = 10;
-        private const decimal BURST_THRESHOLD = 0.5m;       // 50% faster blocks
-        private const int TIMESTAMP_MEDIAN_WINDOW = 11;     // Time-warp protection
+        // Burst protection constants
+        private const double MAX_DIFFICULTY_DECREASE_FACTOR = 4.0; // Maximum 4x difficulty decrease
+        private const double MAX_DIFFICULTY_INCREASE_FACTOR = 2.0; // Maximum 2x difficulty increase
+        private const long MIN_BLOCK_INTERVAL_SECONDS = 10; // Minimum 10 seconds between blocks
+        private const int BURST_DETECTION_WINDOW = 6; // Number of recent blocks to check for burst
+        private const double BURST_THRESHOLD_FACTOR = 0.25; // If average time < 25% of target, it's a burst
 
-        private readonly int _targetSeconds;
-        private readonly bool _enableBurstProtection;
-        private readonly bool _enableAsymmetricAdjustment;
-
-        public ZEEVLWMA(
-            int targetSeconds = 60,
-            bool enableBurstProtection = true,
-            bool enableAsymmetricAdjustment = true)
+        public ZEEVLWMA()
         {
-            this._targetSeconds = targetSeconds;
-            this._enableBurstProtection = enableBurstProtection;
-            this._enableAsymmetricAdjustment = enableAsymmetricAdjustment;
-        }
-
-        public class BlockDifficultyInfo
-        {
-            public int Height { get; set; }
-            public uint256 Hash { get; set; }
-            public BigInteger Bits { get; set; }
-            public long BlockTimeUnixUtc { get; set; }
-            public Target Target { get; set; }
         }
 
         public Target GetWorkRequired(ChainedHeader chainedHeaderToValidate, ZEEVConsensus consensus)
         {
             var chainedHeader = chainedHeaderToValidate;
-            var blockData = new List<BlockDifficultyInfo>();
             Target proofOfWorkLimit = consensus.PowLimit;
+            var s = new StringBuilder();
+            long lastTime = 0;
 
             for (int i = 0; i < DIFFICULTY_WINDOW && chainedHeader != null; i++, chainedHeader = chainedHeader.Previous)
             {
@@ -65,394 +47,408 @@ namespace Blockcore.Networks.ZEEV.Components
                 var target = chainedHeader.Header.Bits;
                 var bitsBigInteger = target.ToBigInteger();
 
-                blockData.Add(new BlockDifficultyInfo
+                if (lastTime != 0)
                 {
-                    Height = chainedHeader.Height,
-                    Hash = chainedHeader.HashBlock,
-                    Bits = bitsBigInteger,
-                    BlockTimeUnixUtc = chainedHeader.Header.BlockTime.ToUnixTimeSeconds(),
-                    Target = target
-                });
+                    var resu = lastTime - chainedHeader.Header.BlockTime.ToUnixTimeSeconds();
+                    s.Append(resu + " - ");
+                }
+
+
+                lastTime = chainedHeader.Header.BlockTime.ToUnixTimeSeconds();
             }
 
-            blockData.Reverse();
-
-            //if (blockData.Count() < BLOCK_WINDOW) return proofOfWorkLimit;
-
-            var newTarget = CalculateNextDifficulty(blockData);
+            var newTarget = LwmaCalculateNextWorkRequired(chainedHeaderToValidate, consensus);
 
             var oldTarget = new Target(chainedHeaderToValidate.Header.Bits);
-            var finalTarget = new Target(newTarget);
-            var finalTargetxx = ConvertToNBitcoinTarget(newTarget);
-            var finalTargeTESTt = new Target(new BigInteger("32763547380948627296949453116101827902561883714452422263419321035862538"));
-            var finalTargeTESTt2 = new Target(new BigInteger("49131841303777435290677601435980379858174820122309346313085912667245328"));
-
-            var testss = ConvertToNBitcoinTarget(new BigInteger("49131841303777435290677601435980379858174820122309346313085912667245328"));
-            var testsss = ConvertToNBitcoinTarget(new BigInteger("8577107408471988062745864925407430816171552662888613931306039482777"));
+            var finalTarget = newTarget;
             Console.WriteLine("before");
             Console.WriteLine(finalTarget.Difficulty);
 
-            if (finalTargeTESTt2 > proofOfWorkLimit)
-                finalTarget = proofOfWorkLimit;
-
             Console.WriteLine(finalTarget.Difficulty);
+            Console.WriteLine(s);
 
             return finalTarget;
         }
 
         /// <summary>
-        /// Main method for difficulty calculation
+        /// Calculates the next work required using the LWMA algorithm with burst protection.
+        /// Enhanced with burst mining detection and difficulty change limits to prevent
+        /// rapid hash rate attacks and maintain network stability.
         /// </summary>
-        public BigInteger CalculateNextDifficulty(List<BlockDifficultyInfo> blockInfo)
+        /// <param name="chainedHeaderToValidate">The chained header for which to calculate the next work required.</param>
+        /// <param name="consensus">The consensus parameters containing LWMA configuration.</param>
+        /// <returns>The compact representation of the next target difficulty.</returns>
+        public Target LwmaCalculateNextWorkRequired(ChainedHeader chainedHeaderToValidate, ZEEVConsensus consensus)
         {
-            if (blockInfo.Count <= 1) return BigInteger.One;
+            Guard.NotNull(chainedHeaderToValidate, nameof(chainedHeaderToValidate));
+            Guard.NotNull(consensus, nameof(consensus));
 
-            int N = Math.Min(DIFFICULTY_WINDOW, blockInfo.Count - 1);
-
-            // 1. Timestamp validation and protection
-            var validatedTimestamps = ValidateTimestamps(blockInfo, N);
-
-            // 2. Multipool burst detection
-            bool isBurstDetected = false;
-            if (this._enableBurstProtection)
+            // Get the last block header (equivalent to pindexLast in C++)
+            ChainedHeader pindexLast = chainedHeaderToValidate.Previous;
+            if (pindexLast == null)
             {
-                isBurstDetected = DetectHashrateBurst(validatedTimestamps, blockInfo);
+                return consensus.PowLimit.ToCompact();
             }
 
-            // 3. LWMA v3 calculation with harmonic mean
-            var baseDifficulty = CalculateLWMAv3(validatedTimestamps, blockInfo, N);
+            // LWMA parameters - these should ideally come from consensus parameters
+            // For T=120, 240, 600 use approx N=100, 75, 50
+            long T = (long)consensus.TargetSpacing.TotalSeconds; // Target spacing in seconds
+            long height = pindexLast.Height;
+            long N = GetLwmaAveragingWindow(height);
+            long k = N * (N + 1) * T / 2; // LWMA constant
 
-            // 4. Apply protection mechanisms
-            var adjustedDifficulty = baseDifficulty;
+            // Convert PowLimit to arithmetic uint256 for calculations
+            var powLimit = consensus.PowLimit.ToBigInteger();
 
+            // If we don't have enough blocks, return the proof-of-work limit
+            if (height < N)
+            {
+                return consensus.PowLimit.ToCompact();
+            }
+
+            // Initialize variables for LWMA calculation
+            var sumTarget = BigInteger.Zero;
+            long thisTimestamp, previousTimestamp;
+            long t = 0, j = 0;
+
+            // LWMA-3 jump rule variables
+            var previousTarget = BigInteger.Zero;
+            long sumLast3Solvetimes = 0;
+
+            // Get the timestamp of the block N positions back
+            ChainedHeader blockPreviousTimestamp = GetAncestor(pindexLast, height - N);
+            if (blockPreviousTimestamp == null)
+            {
+                return consensus.PowLimit.ToCompact();
+            }
+
+            previousTimestamp = blockPreviousTimestamp.Header.BlockTime.ToUnixTimeSeconds();
+
+            // Loop through N most recent blocks
+            for (long i = height - N + 1; i <= height; i++)
+            {
+                ChainedHeader block = GetAncestor(pindexLast, (int)i);
+                if (block == null)
+                {
+                    break;
+                }
+
+                thisTimestamp = block.Header.BlockTime.ToUnixTimeSeconds();
+
+                // Ensure timestamp is monotonic (prevent timestamp manipulation)
+                if (thisTimestamp <= previousTimestamp)
+                {
+                    thisTimestamp = previousTimestamp + 1;
+                }
+
+                // Calculate solve time with maximum limit of 6*T
+                // BURST PROTECTION: Apply minimum block interval
+                long solvetime = Math.Min(6 * T, thisTimestamp - previousTimestamp);
+                solvetime = Math.Max(solvetime, MIN_BLOCK_INTERVAL_SECONDS);
+                previousTimestamp = thisTimestamp;
+
+                j++;
+                t += solvetime * j; // Weighted solvetime sum
+
+                // Get target from block's nBits and add to sum
+                var target = new Target(block.Header.Bits);
+                var targetBigInt = target.ToBigInteger();
+
+                // Add weighted target to sum (equivalent to target / (k * N))
+                var toAdd = targetBigInt.Divide(new BigInteger((k * N).ToString()));
+                sumTarget = sumTarget.Add(toAdd);
+
+                // LWMA-3 jump rule: collect data from last 3 blocks
+                if (i > height - 3)
+                {
+                    sumLast3Solvetimes += solvetime;
+                }
+
+                if (i == height)
+                {
+                    previousTarget = targetBigInt;
+                }
+            }
+
+            // Calculate next target using LWMA formula
+            var nextTargetBigInt = sumTarget.Multiply(new BigInteger(t.ToString()));
+
+            // LWMA-3 jump rule: Apply "memory-less" jump in difficulty
+            // This provides approximately 2x normal adjustment during rapid hashrate changes
+            if (sumLast3Solvetimes < (8 * T) / 10)
+            {
+                // Increase difficulty more aggressively when blocks are coming too fast
+                var divideValue = (100 + (N * 26) / 200);
+                nextTargetBigInt = previousTarget.Multiply(new BigInteger((100).ToString()))
+                    .Divide(new BigInteger(divideValue.ToString()));
+            }
+
+            // BURST PROTECTION: Detect burst mining and apply protection
+            bool isBurstDetected = DetectBurstMining(pindexLast, T);
             if (isBurstDetected)
             {
-                adjustedDifficulty = ApplyBurstProtection(adjustedDifficulty, blockInfo[N].Bits);
+                nextTargetBigInt = ApplyBurstProtection(nextTargetBigInt, previousTarget, isBurstDetected);
             }
 
-            if (this._enableAsymmetricAdjustment)
+            // Ensure the target doesn't exceed the proof-of-work limit
+            if (nextTargetBigInt.CompareTo(powLimit) > 0)
             {
-                adjustedDifficulty = ApplyAsymmetricAdjustment(
-                    adjustedDifficulty,
-                    validatedTimestamps,
-                    blockInfo[N].Bits
-                );
+                nextTargetBigInt = powLimit;
             }
 
-            // 5. Apply safety limits
-            return ApplySafetyLimits(adjustedDifficulty, blockInfo[N].Bits, isBurstDetected);
+            // Ensure the target is not zero or negative
+            if (nextTargetBigInt.CompareTo(BigInteger.Zero) <= 0)
+            {
+                nextTargetBigInt = powLimit;
+            }
+
+            // Convert back to compact representation
+            var nextTarget = new Target(nextTargetBigInt);
+            return nextTarget;
+        }
+
+        private static long GetLwmaAveragingWindow(long height)
+        {
+            if (height < 10)
+            {
+                return DIFFICULTY_WINDOW; //for default PowLimit
+            }
+            else if (height >= 10 && height < DIFFICULTY_WINDOW)
+            {
+                return height;
+            }
+            else
+            {
+                return DIFFICULTY_WINDOW;
+            }
         }
 
         /// <summary>
-        /// LWMA v3 with harmonic mean
+        /// Detects burst mining by analyzing recent block intervals.
         /// </summary>
-        private BigInteger CalculateLWMAv3(
-            List<long> timestamps,
-            List<BlockDifficultyInfo> blockInfo,
-            int N)
+        /// <param name="pindexLast">The last block header.</param>
+        /// <param name="targetSpacing">Target block spacing in seconds.</param>
+        /// <returns>True if burst mining is detected, false otherwise.</returns>
+        private bool DetectBurstMining(ChainedHeader pindexLast, long targetSpacing)
         {
-            long T = this._targetSeconds;
-            long k = N * (N + 1) / 2;  // Sum of weights
-
-            // Use BigDecimal for precise calculations
-            BigInteger sumNumerator = BigInteger.Zero;
-            BigInteger sumDenominator = BigInteger.Zero;
-
-            // Calculate weighted harmonic mean
-            for (int i = 1; i <= N; i++)
+            if (pindexLast == null || pindexLast.Height < BURST_DETECTION_WINDOW)
             {
-                long solveTime = timestamps[i] - timestamps[i - 1];
+                return false;
+            }
 
-                // Protection against extreme values
-                solveTime = Math.Max(solveTime, 1);
-                solveTime = Math.Min(solveTime, T * 10);
+            long totalTime = 0;
+            int validIntervals = 0;
 
-                if (solveTime <= 0)
+            // Check the last BURST_DETECTION_WINDOW blocks
+            for (int i = 0; i < BURST_DETECTION_WINDOW; i++)
+            {
+                ChainedHeader currentBlock = GetAncestor(pindexLast, pindexLast.Height - i);
+                ChainedHeader previousBlock = GetAncestor(pindexLast, pindexLast.Height - i - 1);
+
+                if (currentBlock == null || previousBlock == null)
                 {
-                    solveTime = 1;
+                    break;
                 }
 
-                BigInteger difficulty = blockInfo[i].Bits;
+                long interval = currentBlock.Header.BlockTime.ToUnixTimeSeconds() -
+                               previousBlock.Header.BlockTime.ToUnixTimeSeconds();
 
-                // Calculate weight * T * T
-                BigInteger weightedTSquared = new BigInteger((i * T * T).ToString());
+                // Ensure minimum block interval for burst protection
+                interval = Math.Max(interval, MIN_BLOCK_INTERVAL_SECONDS);
 
-                // Calculate difficulty * solveTime * solveTime
-                BigInteger denominator = difficulty
-                    .Multiply(new BigInteger(solveTime.ToString()))
-                    .Multiply(new BigInteger(solveTime.ToString()));
-
-                // For harmonic mean, we need to sum the inverses
-                // Instead of dividing, we'll cross-multiply later
-                sumNumerator = sumNumerator.Add(weightedTSquared);
-                sumDenominator = sumDenominator.Add(denominator.Divide(new BigInteger(i.ToString())));
+                totalTime += interval;
+                validIntervals++;
             }
 
-            // Calculate harmonic mean: (N * k) / sum(1/weighted_difficulties)
-            // Which is: (N * k * sumDenominator) / sumNumerator
-            BigInteger nk = new BigInteger((N * k).ToString());
-            BigInteger harmonicMeanD = nk.Multiply(sumDenominator).Divide(sumNumerator);
-
-            // Ensure minimum difficulty
-            if (harmonicMeanD.CompareTo(BigInteger.One) < 0)
+            if (validIntervals == 0)
             {
-                harmonicMeanD = BigInteger.One;
+                return false;
             }
 
-            return harmonicMeanD;
+            double averageTime = (double)totalTime / validIntervals;
+            double burstThreshold = targetSpacing * BURST_THRESHOLD_FACTOR;
+
+            return averageTime < burstThreshold;
         }
 
         /// <summary>
-        /// Timestamp validation with median-time-past protection
+        /// Applies burst protection by limiting difficulty changes.
         /// </summary>
-        private List<long> ValidateTimestamps(List<BlockDifficultyInfo> blockInfo, int N)
+        /// <param name="nextTarget">The calculated next target.</param>
+        /// <param name="previousTarget">The previous target.</param>
+        /// <param name="isBurstDetected">Whether burst mining was detected.</param>
+        /// <returns>The burst-protected target.</returns>
+        private BigInteger ApplyBurstProtection(BigInteger nextTarget, BigInteger previousTarget, bool isBurstDetected)
         {
-            var validated = new List<long>();
-
-            for (int i = 0; i <= N; i++)
+            if (previousTarget.CompareTo(BigInteger.Zero) <= 0)
             {
-                if (i < TIMESTAMP_MEDIAN_WINDOW)
-                {
-                    validated.Add(blockInfo[i].BlockTimeUnixUtc);
-                }
-                else
-                {
-                    // Use median for time-warp protection
-                    var window = new List<long>();
-                    for (int j = Math.Max(0, i - TIMESTAMP_MEDIAN_WINDOW + 1); j <= i; j++)
-                    {
-                        window.Add(blockInfo[j].BlockTimeUnixUtc);
-                    }
-                    window.Sort();
-                    validated.Add(window[window.Count / 2]);
-                }
+                return nextTarget;
             }
 
-            return validated;
-        }
-
-        /// <summary>
-        /// Detect sudden hashrate increase (multipool arrival)
-        /// </summary>
-        private bool DetectHashrateBurst(
-            List<long> timestamps,
-            List<BlockDifficultyInfo> blockInfo)
-        {
-            if (timestamps.Count < BURST_DETECTION_WINDOW + 1) return false;
-
-            // Average time of last N blocks
-            decimal recentAvgTime = 0;
-            int startIdx = timestamps.Count - BURST_DETECTION_WINDOW - 1;
-
-            for (int i = startIdx + 1; i < timestamps.Count; i++)
+            // Calculate the ratio of difficulty change
+            // Lower target = higher difficulty, so we need to invert the ratio
+            if (nextTarget.CompareTo(previousTarget) > 0)
             {
-                recentAvgTime += timestamps[i] - timestamps[i - 1];
-            }
-            recentAvgTime /= BURST_DETECTION_WINDOW;
-
-            // Compare with target time
-            if (recentAvgTime < this._targetSeconds * BURST_THRESHOLD)
-            {
-                // Additional check - growing difficulty but still fast blocks
-                var difficultyGrowth = blockInfo[timestamps.Count - 1].Bits
-                    .Divide(blockInfo[startIdx].Bits);
-
-                if (difficultyGrowth.CompareTo(BigInteger.One) > 0 &&
-                    recentAvgTime < this._targetSeconds * (decimal)0.7)
+                // Difficulty is decreasing (target increasing)
+                // Check if the increase is too large
+                var maxAllowedTarget = previousTarget.Multiply(new BigInteger(((int)MAX_DIFFICULTY_DECREASE_FACTOR).ToString()));
+                var s = new Target(maxAllowedTarget);
+                var s2 = new Target(nextTarget);
+                if (nextTarget.CompareTo(maxAllowedTarget) > 0)
                 {
-                    return true; // Definitely a burst
+                    nextTarget = maxAllowedTarget;
+                }
+            }
+            else if (nextTarget.CompareTo(previousTarget) < 0)
+            {
+                // Difficulty is increasing (target decreasing)
+                // Limit difficulty increase, but be more aggressive during burst
+                double maxIncrease = isBurstDetected ? MAX_DIFFICULTY_INCREASE_FACTOR * 1.5 : MAX_DIFFICULTY_INCREASE_FACTOR;
+
+                var minAllowedTarget = previousTarget.Divide(new BigInteger(((int)maxIncrease).ToString()));
+                if (nextTarget.CompareTo(minAllowedTarget) < 0)
+                {
+                    nextTarget = minAllowedTarget;
                 }
             }
 
-            return false;
+            return nextTarget;
         }
 
         /// <summary>
-        /// Apply burst protection (sudden multipool arrival)
+        /// Gets an ancestor block at the specified height.
+        /// This is equivalent to the GetAncestor method in the C++ implementation.
         /// </summary>
-        private BigInteger ApplyBurstProtection(
-            BigInteger baseDifficulty,
-            BigInteger previousDifficulty)
+        /// <param name="chainedHeader">The starting chained header.</param>
+        /// <param name="height">The target height.</param>
+        /// <returns>The chained header at the specified height, or null if not found.</returns>
+        private ChainedHeader GetAncestor(ChainedHeader chainedHeader, long height)
         {
-            // More aggressive increase during burst detection
-            // Convert decimal to integer percentage (115 for 1.15)
-            int burstMultiplier = (int)(BURST_ADJUSTMENT_UP * 100);
-            var burstAdjusted = baseDifficulty
-                .Multiply(new BigInteger(burstMultiplier.ToString()))
-                .Divide(new BigInteger("100"));
-
-            // Ensure minimum increase (110%)
-            var minIncrease = previousDifficulty
-                .Multiply(new BigInteger("110"))
-                .Divide(new BigInteger("100"));
-
-            if (burstAdjusted.CompareTo(minIncrease) < 0)
+            if (chainedHeader == null || height < 0 || height > chainedHeader.Height)
             {
-                burstAdjusted = minIncrease;
+                return null;
             }
 
-            return burstAdjusted;
+            // Walk backwards to find the block at the specified height
+            ChainedHeader current = chainedHeader;
+            while (current != null && current.Height > height)
+            {
+                current = current.Previous;
+            }
+
+            return current?.Height == height ? current : null;
         }
 
         /// <summary>
-        /// Asymmetric adjustment - faster decrease, slower increase
+        /// Validates LWMA parameters for consistency and security.
         /// </summary>
-        private BigInteger ApplyAsymmetricAdjustment(
-            BigInteger baseDifficulty,
-            List<long> timestamps,
-            BigInteger previousDifficulty)
+        /// <param name="targetSpacing">Target block spacing in seconds.</param>
+        /// <param name="averagingWindow">LWMA averaging window size.</param>
+        /// <returns>True if parameters are valid, false otherwise.</returns>
+        public bool ValidateLwmaParameters(long targetSpacing, long averagingWindow)
         {
-            if (timestamps.Count < 6) return baseDifficulty;
-
-            // Average time of last 5 blocks
-            double avgTime = 0;
-            for (int i = timestamps.Count - 5; i < timestamps.Count; i++)
+            // Basic sanity checks
+            if (targetSpacing <= 0 || averagingWindow <= 0)
             {
-                avgTime += timestamps[i] - timestamps[i - 1];
+                return false;
             }
-            avgTime /= 5;
 
-            BigInteger adjusted = baseDifficulty;
-
-            if (avgTime > this._targetSeconds * 1.2) // Blocks are slow
+            // Ensure reasonable bounds
+            if (targetSpacing < 10 || targetSpacing > 3600) // 10 seconds to 1 hour
             {
-                // Faster difficulty decrease
-                var decrease = previousDifficulty.Subtract(baseDifficulty);
+                return false;
+            }
 
-                // Multiply by asymmetry factor (1.5 = 150/100)
-                int asymmetryMultiplier = (int)(ASYMMETRY_FACTOR * 100);
-                decrease = decrease
-                    .Multiply(new BigInteger(asymmetryMultiplier.ToString()))
-                    .Divide(new BigInteger("100"));
+            if (averagingWindow < 10 || averagingWindow > 500) // 10 to 500 blocks
+            {
+                return false;
+            }
 
-                adjusted = previousDifficulty.Subtract(decrease);
+            return true;
+        }
 
-                // Ensure minimum decrease (96%)
-                var minDecrease = previousDifficulty
-                    .Multiply(new BigInteger("96"))
-                    .Divide(new BigInteger("100"));
+        /// <summary>
+        /// Calculates the expected difficulty adjustment ratio for monitoring purposes.
+        /// </summary>
+        /// <param name="actualTime">Actual time taken for the averaging window.</param>
+        /// <param name="targetTime">Expected time for the averaging window.</param>
+        /// <returns>The difficulty adjustment ratio.</returns>
+        public double CalculateAdjustmentRatio(long actualTime, long targetTime)
+        {
+            if (targetTime <= 0)
+            {
+                return 1.0;
+            }
 
-                if (adjusted.CompareTo(minDecrease) > 0)
+            return (double)targetTime / actualTime;
+        }
+
+        /// <summary>
+        /// Gets burst protection statistics for monitoring and debugging.
+        /// </summary>
+        /// <param name="pindexLast">The last block header.</param>
+        /// <param name="targetSpacing">Target block spacing in seconds.</param>
+        /// <returns>Burst protection statistics.</returns>
+        public BurstProtectionStats GetBurstProtectionStats(ChainedHeader pindexLast, long targetSpacing)
+        {
+            var stats = new BurstProtectionStats();
+
+            if (pindexLast == null || pindexLast.Height < BURST_DETECTION_WINDOW)
+            {
+                return stats;
+            }
+
+            long totalTime = 0;
+            int validIntervals = 0;
+            long minInterval = long.MaxValue;
+            long maxInterval = 0;
+
+            // Check the last BURST_DETECTION_WINDOW blocks
+            for (int i = 0; i < BURST_DETECTION_WINDOW; i++)
+            {
+                ChainedHeader currentBlock = GetAncestor(pindexLast, pindexLast.Height - i);
+                ChainedHeader previousBlock = GetAncestor(pindexLast, pindexLast.Height - i - 1);
+
+                if (currentBlock == null || previousBlock == null)
                 {
-                    adjusted = minDecrease;
+                    break;
                 }
+
+                long interval = currentBlock.Header.BlockTime.ToUnixTimeSeconds() -
+                               previousBlock.Header.BlockTime.ToUnixTimeSeconds();
+
+                totalTime += interval;
+                validIntervals++;
+                minInterval = Math.Min(minInterval, interval);
+                maxInterval = Math.Max(maxInterval, interval);
             }
-            else if (avgTime < this._targetSeconds * 0.8) // Blocks are fast
+
+            if (validIntervals > 0)
             {
-                // Slower difficulty increase
-                var increase = baseDifficulty.Subtract(previousDifficulty);
-
-                // Divide by asymmetry factor
-                int asymmetryDivisor = (int)(ASYMMETRY_FACTOR * 100);
-                increase = increase
-                    .Multiply(new BigInteger("100"))
-                    .Divide(new BigInteger(asymmetryDivisor.ToString()));
-
-                adjusted = previousDifficulty.Add(increase);
+                stats.AverageBlockTime = (double)totalTime / validIntervals;
+                stats.MinBlockTime = minInterval;
+                stats.MaxBlockTime = maxInterval;
+                stats.TargetBlockTime = targetSpacing;
+                stats.IsBurstDetected = stats.AverageBlockTime < (targetSpacing * BURST_THRESHOLD_FACTOR);
+                stats.BurstThreshold = targetSpacing * BURST_THRESHOLD_FACTOR;
+                stats.BlocksAnalyzed = validIntervals;
             }
-
-            return adjusted;
-        }
-
-        /// <summary>
-        /// Apply final safety limits
-        /// </summary>
-        private BigInteger ApplySafetyLimits(
-            BigInteger newDifficulty,
-            BigInteger previousDifficulty,
-            bool isBurstDetected)
-        {
-            // Different limits for normal situation and burst
-            int maxUpPercent = isBurstDetected ?
-                (int)(BURST_ADJUSTMENT_UP * 100) :
-                (int)(MAX_ADJUSTMENT_UP * 100);
-            int maxDownPercent = (int)(MAX_ADJUSTMENT_DOWN * 100);
-
-            var maxIncrease = previousDifficulty
-                .Multiply(new BigInteger(maxUpPercent.ToString()))
-                .Divide(new BigInteger("100"));
-            var maxDecrease = previousDifficulty
-                .Multiply(new BigInteger(maxDownPercent.ToString()))
-                .Divide(new BigInteger("100"));
-
-            // Apply limits
-            if (newDifficulty.CompareTo(maxIncrease) > 0)
-            {
-                newDifficulty = maxIncrease;
-            }
-            else if (newDifficulty.CompareTo(maxDecrease) < 0)
-            {
-                newDifficulty = maxDecrease;
-            }
-
-            // Absolute minimum
-            if (newDifficulty.CompareTo(BigInteger.One) < 0)
-            {
-                newDifficulty = BigInteger.One;
-            }
-
-            return newDifficulty;
-        }
-
-        /// <summary>
-        /// Helper method for network statistics analysis
-        /// </summary>
-        public NetworkStats AnalyzeNetwork(
-            List<long> timestamps,
-            List<BigInteger> difficulties,
-            int blockCount = 100)
-        {
-            if (timestamps.Count < blockCount + 1)
-                blockCount = timestamps.Count - 1;
-
-            var stats = new NetworkStats();
-            var blockTimes = new List<long>();
-
-            for (int i = timestamps.Count - blockCount; i < timestamps.Count; i++)
-            {
-                blockTimes.Add(timestamps[i] - timestamps[i - 1]);
-            }
-
-            stats.AverageBlockTime = blockTimes.Average();
-            stats.MedianBlockTime = blockTimes.OrderBy(x => x).ElementAt(blockTimes.Count / 2);
-            stats.BlockTimeVariance = CalculateVariance(blockTimes);
-            stats.CurrentDifficulty = difficulties.Last();
-
-            // Calculate growth rate
-            var oldDiff = difficulties[difficulties.Count - blockCount];
-            var newDiff = difficulties.Last();
-            // Convert to double for growth rate calculation
-            double growth = double.Parse(newDiff.ToString()) / double.Parse(oldDiff.ToString());
-            stats.DifficultyGrowthRate = growth;
 
             return stats;
-        }
-
-        private double CalculateVariance(List<long> values)
-        {
-            double avg = values.Average();
-            double sumSquares = values.Sum(v => Math.Pow(v - avg, 2));
-            return sumSquares / values.Count;
         }
     }
 
     /// <summary>
-    /// Network statistics for monitoring
+    /// Statistics for burst protection monitoring.
     /// </summary>
-    public class NetworkStats
+    public class BurstProtectionStats
     {
         public double AverageBlockTime { get; set; }
-        public long MedianBlockTime { get; set; }
-        public double BlockTimeVariance { get; set; }
-        public BigInteger CurrentDifficulty { get; set; }
-        public double DifficultyGrowthRate { get; set; }
-
-        public bool IsUnderAttack()
-        {
-            // Detect possible attack based on statistics
-            return this.BlockTimeVariance > 1000 || // High variance
-                   this.AverageBlockTime < 60 ||     // Blocks too fast
-                   this.DifficultyGrowthRate > 2;    // Growth too rapid
-        }
+        public long MinBlockTime { get; set; }
+        public long MaxBlockTime { get; set; }
+        public long TargetBlockTime { get; set; }
+        public bool IsBurstDetected { get; set; }
+        public double BurstThreshold { get; set; }
+        public int BlocksAnalyzed { get; set; }
     }
 }
