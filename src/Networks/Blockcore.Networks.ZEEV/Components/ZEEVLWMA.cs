@@ -144,7 +144,7 @@ namespace Blockcore.Networks.ZEEV.Components
                 // Calculate solve time with maximum limit of 6*T
                 // BURST PROTECTION: Apply minimum block interval
                 long solvetime = Math.Min(6 * T, thisTimestamp - previousTimestamp);
-                solvetime = Math.Max(solvetime, MIN_BLOCK_INTERVAL_SECONDS);
+                //solvetime = Math.Max(solvetime, MIN_BLOCK_INTERVAL_SECONDS);
                 previousTimestamp = thisTimestamp;
 
                 j++;
@@ -184,8 +184,8 @@ namespace Blockcore.Networks.ZEEV.Components
             }
 
             // BURST PROTECTION: Detect burst mining and apply protection
-            bool isBurstDetected = DetectBurstMining(pindexLast, T);
-            nextTargetBigInt = ApplyBurstProtection(nextTargetBigInt, previousTarget, isBurstDetected);
+            //bool isBurstDetected = DetectBurstMining(pindexLast, T);
+            //nextTargetBigInt = ApplyBurstProtection(nextTargetBigInt, previousTarget, isBurstDetected);
 
             // Ensure the target doesn't exceed the proof-of-work limit
             if (nextTargetBigInt.CompareTo(powLimit) > 0)
