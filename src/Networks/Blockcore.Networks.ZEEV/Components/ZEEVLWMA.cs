@@ -23,9 +23,9 @@ namespace Blockcore.Networks.ZEEV.Components
         private const int DIFFICULTY_WINDOW = 60;
 
         // Burst protection constants
-        private const double MAX_DIFFICULTY_DECREASE_FACTOR = 8.0; // Maximum 4x difficulty decrease
-        private const double MAX_DIFFICULTY_INCREASE_FACTOR = 4.0; // Maximum 2x difficulty increase
-        private const long MIN_BLOCK_INTERVAL_SECONDS = 15; // Minimum 10 seconds between blocks
+        private const double MAX_DIFFICULTY_DECREASE_FACTOR = 8.0; // Maximum 8x difficulty decrease
+        private const double MAX_DIFFICULTY_INCREASE_FACTOR = 8.0; // Maximum 8x difficulty increase
+        private const long MIN_BLOCK_INTERVAL_SECONDS = 5; // Minimum 10 seconds between blocks
         private const int BURST_DETECTION_WINDOW = 6; // Number of recent blocks to check for burst
         private const double BURST_THRESHOLD_FACTOR = 0.25; // If average time < 25% of target, it's a burst
 
@@ -144,7 +144,7 @@ namespace Blockcore.Networks.ZEEV.Components
                 // Calculate solve time with maximum limit of 6*T
                 // BURST PROTECTION: Apply minimum block interval
                 long solvetime = Math.Min(6 * T, thisTimestamp - previousTimestamp);
-                //solvetime = Math.Max(solvetime, MIN_BLOCK_INTERVAL_SECONDS);
+                solvetime = Math.Max(solvetime, MIN_BLOCK_INTERVAL_SECONDS);
                 previousTimestamp = thisTimestamp;
 
                 j++;
@@ -184,8 +184,8 @@ namespace Blockcore.Networks.ZEEV.Components
             }
 
             // BURST PROTECTION: Detect burst mining and apply protection
-            //bool isBurstDetected = DetectBurstMining(pindexLast, T);
-            //nextTargetBigInt = ApplyBurstProtection(nextTargetBigInt, previousTarget, isBurstDetected);
+            bool isBurstDetected = DetectBurstMining(pindexLast, T);
+            nextTargetBigInt = ApplyBurstProtection(nextTargetBigInt, previousTarget, isBurstDetected);
 
             // Ensure the target doesn't exceed the proof-of-work limit
             if (nextTargetBigInt.CompareTo(powLimit) > 0)
@@ -288,9 +288,9 @@ namespace Blockcore.Networks.ZEEV.Components
             {
                 // Difficulty is decreasing (target increasing)
                 // Check if the increase is too large
-                var maxAllowedTarget = previousTarget.Multiply(new BigInteger(((int)MAX_DIFFICULTY_DECREASE_FACTOR).ToString()));
-                var s = new Target(maxAllowedTarget);
-                var s2 = new Target(nextTarget);
+                double maxDecrease = isBurstDetected ? MAX_DIFFICULTY_DECREASE_FACTOR * 1.5 : MAX_DIFFICULTY_DECREASE_FACTOR;
+                
+                var maxAllowedTarget = previousTarget.Multiply(new BigInteger(((int)maxDecrease).ToString()));
                 if (nextTarget.CompareTo(maxAllowedTarget) > 0)
                 {
                     nextTarget = maxAllowedTarget;
