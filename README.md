@@ -9,7 +9,6 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 ### Network Specifications
 
 - **Coin Ticker**: ZEEV
-- **Genesis Block**: August 18, 2023 23:56:00 UTC
 - **Consensus Algorithm**: Proof of Work (PoW)
 - **Block Time**: 30 seconds
 - **Block Reward**: 950.5 ZEEV
@@ -23,7 +22,6 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **Default Port**: 4927
 - **RPC Port**: 31350
 - **API Port**: 30566
-- **Maximum Connections**: 16 outbound, 117 inbound
 - **Magic Bytes**: 0x7a656576 ("zeev")
 - **Bech32 Prefix**: "zv"
 
@@ -31,14 +29,12 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **Default Port**: 4927
 - **RPC Port**: 31350
 - **API Port**: 30566
-- **Maximum Connections**: 16 outbound, 117 inbound
 - **Magic Bytes**: 0x7665657a ("veez")
 - **Bech32 Prefix**: "zv"
 
 ### Block and Transaction Specifications
 
 - **Maximum Block Size**: 2.5 MB base size
-- **Maximum Block Serialized Size**: 10 MB
 - **Maximum Transaction Weight**: 1,000,000
 - **Minimum Transaction Fee**: 2,000 satoshis
 - **Maximum Transaction Fee**: 100,000,000 satoshis (1 ZEEV)
@@ -211,21 +207,6 @@ To add custom functionality:
 3. Add network-specific components in `Components/`
 4. Register new features in the node builder
 
-## Testing
-
-### Unit Tests
-Run the test suite:
-```bash
-dotnet test
-```
-
-### Integration Tests
-The project includes integration tests for:
-- Network consensus validation
-- Block generation and validation
-- Transaction processing
-- P2P communication
-
 ### Testnet
 Use the testnet for development and testing:
 ```bash
@@ -313,20 +294,6 @@ For support and questions:
 - GitHub Issues: Report bugs and feature requests
 - Documentation: Comprehensive API documentation
 - Community: Join the ZEEV community for discussions
-
-## Roadmap
-
-### Upcoming Features
-- Enhanced mining algorithms
-- Improved peer discovery
-- Performance optimizations
-- Additional API endpoints
-
-### Long-term Goals
-- Layer 2 scaling solutions
-- Smart contract support
-- Cross-chain interoperability
-- Enhanced privacy features
 
 ---
 
