@@ -226,7 +226,7 @@
 
     protected override void OnInitialized()
     {
-        this.Fee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.BTC);
+        this.Fee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV);
 
         AddressBookNotification.AddressBookChanged += AddressBookChanged;
     }
@@ -249,7 +249,7 @@
         recipients.Add(new Recipient
             {
                 ScriptPubKey = BitcoinAddress.Create(Address, this.Network).ScriptPubKey,
-                Amount = new Money(Amount, MoneyUnit.BTC)
+                Amount = new Money(Amount, MoneyUnit.ZEEV)
             });
 
         var context = new TransactionBuildContext(this.Network)
@@ -262,14 +262,14 @@
 
         try
         {
-            this.Fee = this.WalletTransactionHandler.EstimateFee(context).ToDecimal(MoneyUnit.BTC);
+            this.Fee = this.WalletTransactionHandler.EstimateFee(context).ToDecimal(MoneyUnit.ZEEV);
         }
         catch (NotEnoughFundsException nef)
         {
             if (nef.Missing is Money money)
             {
-                var minFee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.BTC);
-                this.Fee = Math.Max(minFee, money.ToDecimal(MoneyUnit.BTC));
+                var minFee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV);
+                this.Fee = Math.Max(minFee, money.ToDecimal(MoneyUnit.ZEEV));
             }
             else
             {
@@ -288,7 +288,7 @@
 
         var accountBalance = this.WalletManager.GetBalances(walletname, accountname).Single();
 
-        this.Amount = accountBalance.AmountConfirmed.ToUnit(MoneyUnit.BTC);
+        this.Amount = accountBalance.AmountConfirmed.ToUnit(MoneyUnit.ZEEV);
 
         this.EstimateFee();
 
@@ -312,7 +312,7 @@
         if (string.IsNullOrEmpty(this.Password)) { this.Alert = "Please enter a password"; return; }
         if (string.IsNullOrEmpty(this.Address)) { this.Alert = "Please enter a valid address"; return; }
         if (this.Amount == 0) { this.Alert = "Please enter the number of coins you want to send"; return; }
-        if (this.Fee < Money.Satoshis(this.ConnectionManager.Network.MinTxFee).ToDecimal(MoneyUnit.BTC)) { this.Alert = $"The fee is lower than minimum ({ Money.Satoshis(this.ConnectionManager.Network.MinTxFee).ToDecimal(MoneyUnit.BTC)})"; return; }
+        if (this.Fee < Money.Satoshis(this.ConnectionManager.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV)) { this.Alert = $"The fee is lower than minimum ({ Money.Satoshis(this.ConnectionManager.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV)})"; return; }
 
         this.Alert = string.Empty;
 
@@ -328,7 +328,7 @@
             recipients.Add(new Recipient
                 {
                     ScriptPubKey = BitcoinAddress.Create(Address, this.Network).ScriptPubKey,
-                    Amount = new Money(Amount, MoneyUnit.BTC)
+                    Amount = new Money(Amount, MoneyUnit.ZEEV)
                 });
 
             var context = new TransactionBuildContext(this.Network)
@@ -337,7 +337,7 @@
                     Shuffle = true, // We shuffle transaction outputs by default as it's better for anonymity.
                     WalletPassword = Password,
                     Recipients = recipients,
-                    TransactionFee = new Money(this.Fee, MoneyUnit.BTC)
+                    TransactionFee = new Money(this.Fee, MoneyUnit.ZEEV)
                 };
 
             Transaction transactionResult = this.WalletTransactionHandler.BuildTransaction(context);

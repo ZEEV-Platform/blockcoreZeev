@@ -16,38 +16,38 @@ namespace Blockcore.Features.Wallet.Helpers
         /// <summary>
         /// Generates an HD public key derived from an extended public key.
         /// </summary>
-        /// <param name="accountExtPubKey">The extended public key used to generate child keys.</param>
+        /// <param name="accountExtKey">The extended key used to generate child keys.</param>
         /// <param name="index">The index of the child key to generate.</param>
         /// <param name="isChange">A value indicating whether the public key to generate corresponds to a change address.</param>
         /// <param name="network">Network</param>
         /// <returns>
-        /// An HD public key derived from an extended public key.
+        /// An HD key derived from an public key.
         /// </returns>
-        public static PubKey GeneratePublicKey(string accountExtPubKey, int index, bool isChange, Network network = null)
+        public static ExtKey GenerateKey(string accountExtKey, int index, bool isChange, Network network = null)
         {
-            Guard.NotEmpty(accountExtPubKey, nameof(accountExtPubKey));
+            Guard.NotEmpty(accountExtKey, nameof(accountExtKey));
 
-            return GeneratePublicKey(ExtPubKey.Parse(accountExtPubKey), index, isChange);
+            return GenerateKey(ExtKey.Parse(accountExtKey), index, isChange);
         }
 
         /// <summary>
         /// Generates an HD public key derived from an extended public key.
         /// </summary>
-        /// <param name="accountExtPubKey">The extended public key used to generate child keys.</param>
+        /// <param name="accountExtKey">The extended key used to generate child keys.</param>
         /// <param name="index">The index of the child key to generate.</param>
         /// <param name="isChange">A value indicating whether the public key to generate corresponds to a change address.</param>
         /// <returns>
-        /// An HD public key derived from an extended public key.
+        /// An HD key derived from an extended key.
         /// </returns>
-        public static PubKey GeneratePublicKey(ExtPubKey accountExtPubKey, int index, bool isChange)
+        public static ExtKey GenerateKey(ExtKey accountExtKey, int index, bool isChange)
         {
-            Guard.NotNull(accountExtPubKey, nameof(accountExtPubKey));
+            Guard.NotNull(accountExtKey, nameof(accountExtKey));
 
             int change = isChange ? 1 : 0;
             var keyPath = new KeyPath($"{change}/{index}");
             // TODO: Should probably explicitly be passing the network into Parse
-            ExtPubKey extPubKey = accountExtPubKey.Derive(keyPath);
-            return extPubKey.PubKey;
+            ExtKey extPubKey = accountExtKey.Derive(keyPath);
+            return extPubKey;
         }
 
         /// <summary>
@@ -67,46 +67,27 @@ namespace Blockcore.Features.Wallet.Helpers
             // Get the extended key.
             var seedExtKey = new ExtKey(privateKey, chainCode);
             ExtKey addressExtKey = seedExtKey.Derive(new KeyPath(hdPath));
-            BitcoinExtKey addressPrivateKey = addressExtKey.GetWif(network);
+            ZeevExtKey addressPrivateKey = addressExtKey.GetWif(network);
             return addressPrivateKey;
         }
 
         /// <summary>
-        /// Gets the extended public key for an account.
-        /// </summary>
-        /// <param name="privateKey">The private key from which to generate the extended public key.</param>
-        /// <param name="chainCode">The chain code used in creating the extended public key.</param>
-        /// <param name="purpose">Purpose of the coin this account is in.</param>
-        /// <param name="coinType">Type of the coin of the account for which to generate an extended public key.</param>
-        /// <param name="accountIndex">Index of the account for which to generate an extended public key.</param>
-        /// <returns>The extended public key for an account, used to derive child keys.</returns>
-        public static ExtPubKey GetExtendedPublicKey(Key privateKey, byte[] chainCode, int purpose, int coinType, int accountIndex)
-        {
-            Guard.NotNull(privateKey, nameof(privateKey));
-            Guard.NotNull(chainCode, nameof(chainCode));
-
-            string accountHdPath = GetAccountHdPath(purpose, coinType, accountIndex);
-            return GetExtendedPublicKey(privateKey, chainCode, accountHdPath);
-        }
-
-        /// <summary>
-        /// Gets the extended public key corresponding to an HD path.
+        /// Gets the extended key corresponding to an HD path.
         /// </summary>
         /// <param name="privateKey">The private key from which to generate the extended public key.</param>
         /// <param name="chainCode">The chain code used in creating the extended public key.</param>
         /// <param name="hdPath">The HD path for which to get the extended public key.</param>
-        /// <returns>The extended public key, used to derive child keys.</returns>
-        public static ExtPubKey GetExtendedPublicKey(Key privateKey, byte[] chainCode, string hdPath)
+        /// <returns>The extended key, used to derive child keys.</returns>
+        public static ExtKey GetExtendedPrivateKey(Key privateKey, byte[] chainCode, string hdPath)
         {
             Guard.NotNull(privateKey, nameof(privateKey));
             Guard.NotNull(chainCode, nameof(chainCode));
             Guard.NotEmpty(hdPath, nameof(hdPath));
 
-            // get extended private key
+            // Get the extended key.
             var seedExtKey = new ExtKey(privateKey, chainCode);
             ExtKey addressExtKey = seedExtKey.Derive(new KeyPath(hdPath));
-            ExtPubKey extPubKey = addressExtKey.Neuter();
-            return extPubKey;
+            return addressExtKey;
         }
 
         /// <summary>

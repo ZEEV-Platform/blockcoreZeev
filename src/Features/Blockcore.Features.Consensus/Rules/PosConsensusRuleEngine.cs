@@ -7,7 +7,6 @@ using Blockcore.Consensus.Chain;
 using Blockcore.Consensus.Checkpoints;
 using Blockcore.Consensus.Rules;
 using Blockcore.Features.Consensus.CoinViews;
-using Blockcore.Features.Consensus.Interfaces;
 using Blockcore.Features.Consensus.ProvenBlockHeaders;
 using Blockcore.Networks;
 using Blockcore.Utilities;
@@ -26,18 +25,14 @@ namespace Blockcore.Features.Consensus.Rules
         /// <summary>Database of stake related data for the current blockchain.</summary>
         public IStakeChain StakeChain { get; }
 
-        /// <summary>Provides functionality for checking validity of PoS blocks.</summary>
-        public IStakeValidator StakeValidator { get; }
-
         public IRewindDataIndexCache RewindDataIndexCache { get; }
 
         public PosConsensusRuleEngine(Network network, ILoggerFactory loggerFactory, IDateTimeProvider dateTimeProvider, ChainIndexer chainIndexer, NodeDeployments nodeDeployments,
-            ConsensusSettings consensusSettings, ICheckpoints checkpoints, ICoinView utxoSet, IStakeChain stakeChain, IStakeValidator stakeValidator, IChainState chainState,
+            ConsensusSettings consensusSettings, ICheckpoints checkpoints, ICoinView utxoSet, IStakeChain stakeChain, IChainState chainState,
             IInvalidBlockHashStore invalidBlockHashStore, INodeStats nodeStats, IRewindDataIndexCache rewindDataIndexCache, IAsyncProvider asyncProvider, ConsensusRulesContainer consensusRulesContainer)
             : base(network, loggerFactory, dateTimeProvider, chainIndexer, nodeDeployments, consensusSettings, checkpoints, utxoSet, chainState, invalidBlockHashStore, nodeStats, asyncProvider, consensusRulesContainer)
         {
             this.StakeChain = stakeChain;
-            this.StakeValidator = stakeValidator;
             this.RewindDataIndexCache = rewindDataIndexCache;
         }
 

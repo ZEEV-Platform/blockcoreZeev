@@ -432,7 +432,7 @@ namespace Blockcore.Consensus.ScriptInfo
             return GenerateScriptSig(ops.ToArray(), redeemScript);
         }
 
-        public Script GenerateScriptSig(Network network, ECDSASignature[] signatures, Script redeemScript)
+        public Script GenerateScriptSig(Network network, FalconSignature[] signatures, Script redeemScript)
         {
             return GenerateScriptSig(network, signatures.Select(s => new TransactionSignature(s, SigHash.All)).ToArray(), redeemScript);
         }
@@ -520,7 +520,7 @@ namespace Blockcore.Consensus.ScriptInfo
             return true;
         }
 
-        public Script GenerateScriptSig(ECDSASignature signature)
+        public Script GenerateScriptSig(FalconSignature signature)
         {
             return GenerateScriptSig(new TransactionSignature(signature, SigHash.All));
         }

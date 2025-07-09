@@ -81,10 +81,10 @@ namespace Blockcore.Features.MemoryPool.Api.Controllers
         {
             var fees = new GetMemPoolEntryFeeModel
             {
-                Ancestor = entry.ModFeesWithAncestors.ToUnit(MoneyUnit.BTC),
-                Descendant = entry.ModFeesWithDescendants.ToUnit(MoneyUnit.BTC),
-                Base = entry.Fee.ToUnit(MoneyUnit.BTC),
-                Modified = new Money(entry.ModifiedFee).ToUnit(MoneyUnit.BTC)
+                Ancestor = entry.ModFeesWithAncestors.ToUnit(MoneyUnit.ZEEV),
+                Descendant = entry.ModFeesWithDescendants.ToUnit(MoneyUnit.ZEEV),
+                Base = entry.Fee.ToUnit(MoneyUnit.ZEEV),
+                Modified = new Money(entry.ModifiedFee).ToUnit(MoneyUnit.ZEEV)
             };
 
             var weight = entry.GetTxSize();
@@ -156,8 +156,8 @@ namespace Blockcore.Features.MemoryPool.Api.Controllers
                     Usage = this.MemPool.DynamicMemoryUsage(),
                     Bytes = this.MempoolManager.MempoolSize().Result,
                     Maxmempool = maxmem,
-                    MempoolMinFee = this.MemPool.GetMinFee(maxmem).FeePerK.ToUnit(MoneyUnit.BTC),
-                    MinRelayTxFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.BTC)
+                    MempoolMinFee = this.MemPool.GetMinFee(maxmem).FeePerK.ToUnit(MoneyUnit.ZEEV),
+                    MinRelayTxFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.ZEEV)
                 };
 
                 return this.Json(ResultHelper.BuildResultResponse(result));

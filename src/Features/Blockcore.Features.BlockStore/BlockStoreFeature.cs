@@ -152,7 +152,7 @@ namespace Blockcore.Features.BlockStore
             }
             else
             {
-                this.connectionManager.Parameters.TemplateBehaviors.Add(new BlockStoreBehavior(this.chainIndexer, this.chainState, this.loggerFactory, this.consensusManager, this.blockStoreQueue));
+                this.connectionManager.Parameters.TemplateBehaviors.Add(new BlockStoreBehavior(this.chainIndexer, this.chainState, this.loggerFactory, this.consensusManager, this.blockStoreQueue, this.network.Consensus.ConsensusFactory));
             }
 
             // Signal to peers that this node can serve blocks.

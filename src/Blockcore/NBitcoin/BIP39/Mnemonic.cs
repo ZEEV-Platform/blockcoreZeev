@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.BIP32;
-using Blockcore.NBitcoin.BouncyCastle.crypto.digests;
-using Blockcore.NBitcoin.BouncyCastle.crypto.macs;
-using Blockcore.NBitcoin.BouncyCastle.crypto.parameters;
+using Blockcore.NBitcoin.BIP39;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.Crypto.Cryptsharp;
+using Org.BouncyCastle.Crypto.Digests;
+using Org.BouncyCastle.Crypto.Macs;
+using Org.BouncyCastle.Crypto.Parameters;
 
 namespace Blockcore.NBitcoin.BIP39
 {
@@ -23,16 +27,16 @@ namespace Blockcore.NBitcoin.BIP39
     {
         public Mnemonic(string mnemonic, Wordlist wordlist = null)
         {
-            if(mnemonic == null)
+            if (mnemonic == null)
                 throw new ArgumentNullException("mnemonic");
             this._Mnemonic = mnemonic.Trim();
 
-            if(wordlist == null)
+            if (wordlist == null)
                 wordlist = Wordlist.AutoDetect(mnemonic) ?? Wordlist.English;
 
             string[] words = mnemonic.Split(new char[] { ' ', '　' }, StringSplitOptions.RemoveEmptyEntries);
             //if the sentence is not at least 12 characters or cleanly divisible by 3, it is bad!
-            if(!CorrectWordCount(words.Length))
+            if (!CorrectWordCount(words.Length))
             {
                 throw new FormatException("Word count should be equals to 12,15,18,21 or 24");
             }
@@ -51,15 +55,15 @@ namespace Blockcore.NBitcoin.BIP39
         {
             wordList = wordList ?? Wordlist.English;
             this._WordList = wordList;
-            if(entropy == null)
+            if (entropy == null)
                 entropy = RandomUtils.GetBytes(32);
 
             int i = Array.IndexOf(entArray, entropy.Length * 8);
-            if(i == -1)
+            if (i == -1)
                 throw new ArgumentException("The length for entropy should be : " + String.Join(",", entArray), "entropy");
 
             int cs = csArray[i];
-            byte[] checksum = Hashes.SHA256(entropy);
+            byte[] checksum = Sha3.Sha3512().ComputeHash(entropy);
             var entcsResult = new BitWriter();
 
             entcsResult.Write(entropy);
@@ -78,7 +82,7 @@ namespace Blockcore.NBitcoin.BIP39
         private static byte[] GenerateEntropy(WordCount wordCount)
         {
             int ms = (int)wordCount;
-            if(!CorrectWordCount(ms))
+            if (!CorrectWordCount(ms))
                 throw new ArgumentException("Word count should be equal to 12,15,18,21 or 24", "wordCount");
             int i = Array.IndexOf(msArray, (int)wordCount);
             return RandomUtils.GetBytes(entArray[i] / 8);
@@ -93,7 +97,7 @@ namespace Blockcore.NBitcoin.BIP39
         {
             get
             {
-                if(this._IsValidChecksum == null)
+                if (this._IsValidChecksum == null)
                 {
                     int i = Array.IndexOf(msArray, this._Indices.Length);
                     int cs = csArray[i];
@@ -103,7 +107,7 @@ namespace Blockcore.NBitcoin.BIP39
                     BitArray bits = Wordlist.ToBits(this._Indices);
                     writer.Write(bits, ent);
                     byte[] entropy = writer.ToBytes();
-                    byte[] checksum = Hashes.SHA256(entropy);
+                    byte[] checksum = Sha3.Sha3512().ComputeHash(entropy);
 
                     writer.Write(checksum, cs);
                     int[] expectedIndices = writer.ToIntegers();
@@ -150,7 +154,7 @@ namespace Blockcore.NBitcoin.BIP39
             byte[] salt = Concat(Encoding.UTF8.GetBytes("mnemonic"), Normalize(passphrase));
             byte[] bytes = Normalize(this._Mnemonic);
 
-            var mac = new HMac(new Sha512Digest());
+            var mac = new HMac(new Sha3Digest(512));
             mac.Init(new KeyParameter(bytes));
             return Pbkdf2.ComputeDerivedKey(mac, salt, 2048, 64);
         }
@@ -186,9 +190,37 @@ namespace Blockcore.NBitcoin.BIP39
         {
             return this._Mnemonic;
         }
-
-
     }
+
+    public class MnemonicHelper
+    {
+        public MnemonicHelper()
+        {
+        }
+
+        /// <summary>
+        /// Removes new lines and keeps only letters in a mnemonic string using regex.
+        /// </summary>
+        /// <param name="mnemonic">The input mnemonic string.</param>
+        /// <returns>A cleaned mnemonic string containing only letters and single spaces.</returns>
+        public string CleanMnemonicRegex(string mnemonic)
+        {
+            if (string.IsNullOrEmpty(mnemonic))
+            {
+                return string.Empty;
+            }
+
+            // Remove all characters except letters and spaces
+            string lettersAndSpaces = Regex.Replace(mnemonic, @"[^a-zA-Z\s]", "");
+
+            // Replace multiple whitespace characters (including newlines) with single space
+            string singleSpaces = Regex.Replace(lettersAndSpaces, @"\s+", " ");
+
+            // Trim leading and trailing spaces
+            return singleSpaces.Trim();
+        }
+    }
+
     public enum WordCount : int
     {
         Twelve = 12,

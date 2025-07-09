@@ -14,7 +14,6 @@ using Blockcore.Features.Miner.Interfaces;
 using Blockcore.Interfaces;
 using Blockcore.Mining;
 using Blockcore.NBitcoin;
-using Blockcore.Networks;
 using Blockcore.Utilities;
 using Microsoft.Extensions.Logging;
 

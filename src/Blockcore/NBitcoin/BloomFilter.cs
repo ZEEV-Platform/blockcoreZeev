@@ -66,7 +66,7 @@ namespace Blockcore.NBitcoin
         private uint Hash(uint nHashNum, byte[] vDataToHash)
         {
             // 0xFBA4C795 chosen as it guarantees a reasonable bit difference between nHashNum values.
-            return (uint)(Hashes.MurmurHash3(nHashNum * 0xFBA4C795 + this.nTweak, vDataToHash) % (this.vData.Length * 8));
+            return (uint)(new Hashes().MurmurHash3(nHashNum * 0xFBA4C795 + this.nTweak, vDataToHash) % (this.vData.Length * 8));
         }
 
         public void Insert(byte[] vKey)

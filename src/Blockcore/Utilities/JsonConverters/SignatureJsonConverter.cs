@@ -16,7 +16,7 @@ namespace Blockcore.Utilities.JsonConverters
         /// <inheritdoc />
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(ECDSASignature) || objectType == typeof(TransactionSignature);
+            return objectType == typeof(FalconSignature) || objectType == typeof(TransactionSignature);
         }
 
         /// <inheritdoc />
@@ -26,8 +26,8 @@ namespace Blockcore.Utilities.JsonConverters
                 return null;
             try
             {
-                if (objectType == typeof(ECDSASignature))
-                    return new ECDSASignature(Encoders.Hex.DecodeData((string)reader.Value));
+                if (objectType == typeof(FalconSignature))
+                    return new FalconSignature(Encoders.Hex.DecodeData((string)reader.Value));
 
                 if (objectType == typeof(TransactionSignature))
                     return new TransactionSignature(Encoders.Hex.DecodeData((string)reader.Value));
@@ -44,8 +44,8 @@ namespace Blockcore.Utilities.JsonConverters
         {
             if (value != null)
             {
-                if (value is ECDSASignature)
-                    writer.WriteValue(Encoders.Hex.EncodeData(((ECDSASignature)value).ToDER()));
+                if (value is FalconSignature)
+                    writer.WriteValue(Encoders.Hex.EncodeData(((FalconSignature)value).ToDER()));
                 if (value is TransactionSignature)
                     writer.WriteValue(Encoders.Hex.EncodeData(((TransactionSignature)value).ToBytes()));
             }

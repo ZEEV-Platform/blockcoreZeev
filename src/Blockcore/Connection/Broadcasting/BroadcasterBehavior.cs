@@ -7,6 +7,7 @@ using Blockcore.Networks;
 using Blockcore.P2P.Peer;
 using Blockcore.P2P.Protocol;
 using Blockcore.P2P.Protocol.Behaviors;
+using Blockcore.P2P.Protocol.Compression;
 using Blockcore.P2P.Protocol.Payloads;
 using Microsoft.Extensions.Logging;
 
@@ -115,7 +116,8 @@ namespace Blockcore.Connection.Broadcasting
                     if (txEntry.CanRespondToGetData && peer.IsConnected)
                     {
                         this.logger.LogDebug("Sending transaction '{0}' to peer '{1}'.", inv.Hash, peer.RemoteSocketEndpoint);
-                        await peer.SendMessageAsync(new TxPayload(txEntry.Transaction.WithOptions(peer.SupportedTransactionOptions, this.network.Consensus.ConsensusFactory))).ConfigureAwait(false);
+                        await peer.SendWithLZ4CompressionAsync(new TxPayload(txEntry.Transaction.WithOptions(peer.SupportedTransactionOptions, this.network.Consensus.ConsensusFactory)), 
+                            this.network.Consensus.ConsensusFactory).ConfigureAwait(false);
                     }
 
                     if (txEntry.TransactionBroadcastState == TransactionBroadcastState.ReadyToBroadcast)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Blockcore.Base.Deployments;
 using Blockcore.Consensus;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Networks.ZEEV.Consensus
 {
@@ -115,8 +115,6 @@ namespace Blockcore.Networks.ZEEV.Consensus
         /// <inheritdoc />
         public List<Type> MempoolRules { get; set; }
 
-        public TimeSpan PowTimeDelay { get; set; }
-
         public Money SubsidityDecrease { get; set; }
 
         public ZEEVConsensus(
@@ -152,7 +150,6 @@ namespace Blockcore.Networks.ZEEV.Consensus
             BigInteger proofOfStakeLimitV2,
             Money proofOfStakeReward,
             uint proofOfStakeTimestampMask,
-            TimeSpan powTimeDelay,
             Money subsidityDecrease)
         {
             this.CoinbaseMaturity = coinbaseMaturity;
@@ -189,7 +186,6 @@ namespace Blockcore.Networks.ZEEV.Consensus
             this.ConsensusRules = new ConsensusRules();
             this.MempoolRules = new List<Type>();
             this.ProofOfStakeTimestampMask = proofOfStakeTimestampMask;
-            this.PowTimeDelay = powTimeDelay;
             this.SubsidityDecrease = subsidityDecrease;
         }
     }

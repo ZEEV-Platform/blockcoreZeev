@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Consensus.ScriptInfo
 {
@@ -658,7 +658,7 @@ namespace Blockcore.Consensus.ScriptInfo
         private static readonly byte[] vchZero = new byte[0];
         private static readonly byte[] vchTrue = new byte[] { 1 };
 
-        private const int MAX_SCRIPT_ELEMENT_SIZE = 520;
+        private const int MAX_SCRIPT_ELEMENT_SIZE = 1024;
 
         public bool EvalScript(Script s, Transaction txTo, int nIn)
         {
@@ -1359,28 +1359,46 @@ namespace Blockcore.Consensus.ScriptInfo
                                 //
                                 // Crypto
                                 //
-                                case OpcodeType.OP_RIPEMD160:
-                                case OpcodeType.OP_SHA1:
-                                case OpcodeType.OP_SHA256:
                                 case OpcodeType.OP_HASH160:
                                 case OpcodeType.OP_HASH256:
+                                case OpcodeType.OP_SHA3224:
+                                case OpcodeType.OP_SHA3256:
+                                case OpcodeType.OP_SHA3384:
+                                case OpcodeType.OP_SHA3512:
+                                case OpcodeType.OP_BLAKE2B160:
+                                case OpcodeType.OP_BLAKE2B224:
+                                case OpcodeType.OP_BLAKE2B256:
+                                case OpcodeType.OP_BLAKE2B384:
+                                case OpcodeType.OP_BLAKE2B512:
                                     {
                                         // (in -- hash)
                                         if (this._stack.Count < 1)
                                             return SetError(ScriptError.InvalidStackOperation);
 
                                         byte[] vch = this._stack.Top(-1);
-                                        byte[] vchHash = null; //((opcode == OpcodeType.OP_RIPEMD160 || opcode == OpcodeType.OP_SHA1 || opcode == OpcodeType.OP_HASH160) ? 20 : 32);
-                                        if (opcode.Code == OpcodeType.OP_RIPEMD160)
-                                            vchHash = Hashes.RIPEMD160(vch, 0, vch.Length);
-                                        else if (opcode.Code == OpcodeType.OP_SHA1)
-                                            vchHash = Hashes.SHA1(vch, 0, vch.Length);
-                                        else if (opcode.Code == OpcodeType.OP_SHA256)
-                                            vchHash = Hashes.SHA256(vch, 0, vch.Length);
-                                        else if (opcode.Code == OpcodeType.OP_HASH160)
-                                            vchHash = Hashes.Hash160(vch, 0, vch.Length).ToBytes();
+                                        byte[] vchHash = null;
+                                        if (opcode.Code == OpcodeType.OP_HASH160)
+                                            vchHash = new Hashes().Hash160(vch, 0, vch.Length).ToBytes();
                                         else if (opcode.Code == OpcodeType.OP_HASH256)
-                                            vchHash = Hashes.Hash256(vch, 0, vch.Length).ToBytes();
+                                            vchHash = new Hashes().Hash256(vch, 0, vch.Length).ToBytes();
+                                        else if (opcode.Code == OpcodeType.OP_SHA3224)
+                                            vchHash = new Hashes().Sha3224(vch);
+                                        else if (opcode.Code == OpcodeType.OP_SHA3256)
+                                            vchHash = new Hashes().Sha3256(vch);
+                                        else if (opcode.Code == OpcodeType.OP_SHA3384)
+                                            vchHash = new Hashes().Sha3384(vch);
+                                        else if (opcode.Code == OpcodeType.OP_SHA3512)
+                                            vchHash = new Hashes().Sha3512(vch);
+                                        else if (opcode.Code == OpcodeType.OP_BLAKE2B160)
+                                            vchHash = new Hashes().Blake2B160(vch);
+                                        else if (opcode.Code == OpcodeType.OP_BLAKE2B224)
+                                            vchHash = new Hashes().Blake2B224(vch);
+                                        else if (opcode.Code == OpcodeType.OP_BLAKE2B256)
+                                            vchHash = new Hashes().Blake2B256(vch);
+                                        else if (opcode.Code == OpcodeType.OP_BLAKE2B384)
+                                            vchHash = new Hashes().Blake2B384(vch);
+                                        else if (opcode.Code == OpcodeType.OP_BLAKE2B512)
+                                            vchHash = new Hashes().Blake2B512(vch);
                                         this._stack.Pop();
                                         this._stack.Push(vchHash);
                                         break;
@@ -1704,16 +1722,6 @@ namespace Blockcore.Consensus.ScriptInfo
             {
                 return true;
             }
-            if ((this.ScriptVerify & (ScriptVerify.DerSig | ScriptVerify.LowS | ScriptVerify.StrictEnc)) != 0 && !IsValidSignatureEncoding(vchSig))
-            {
-                this.Error = ScriptError.SigDer;
-                return false;
-            }
-            if ((this.ScriptVerify & ScriptVerify.LowS) != 0 && !IsLowDERSignature(vchSig))
-            {
-                // serror is set
-                return false;
-            }
             if ((this.ScriptVerify & ScriptVerify.StrictEnc) != 0 && !IsDefinedHashtypeSignature(vchSig))
             {
                 this.Error = ScriptError.SigHashType;
@@ -1724,50 +1732,10 @@ namespace Blockcore.Consensus.ScriptInfo
 
         private bool CheckPubKeyEncoding(byte[] vchPubKey, int sigversion)
         {
-            if ((this.ScriptVerify & ScriptVerify.StrictEnc) != 0 && !IsCompressedOrUncompressedPubKey(vchPubKey))
-            {
-                this.Error = ScriptError.PubKeyType;
-                return false;
-            }
-            if ((this.ScriptVerify & ScriptVerify.WitnessPubkeyType) != 0 && sigversion == (int)HashVersion.Witness && !IsCompressedPubKey(vchPubKey))
+            if ((this.ScriptVerify & ScriptVerify.WitnessPubkeyType) != 0 && sigversion == (int)HashVersion.Witness)
             {
                 return SetError(ScriptError.WitnessPubkeyType);
             }
-            return true;
-        }
-
-        private static bool IsCompressedPubKey(byte[] vchPubKey)
-        {
-            if (vchPubKey.Length != 33)
-            {
-                //  Non-canonical public key: invalid length for compressed key
-                return false;
-            }
-            if (vchPubKey[0] != 0x02 && vchPubKey[0] != 0x03)
-            {
-                //  Non-canonical public key: invalid prefix for compressed key
-                return false;
-            }
-            return true;
-        }
-
-        public static bool IsLowDerSignature(byte[] vchSig, bool haveSigHash = true)
-        {
-            if (!IsValidSignatureEncoding(vchSig, haveSigHash))
-            {
-                return false;
-            }
-            int nLenR = vchSig[3];
-            int nLenS = vchSig[5 + nLenR];
-            int S = 6 + nLenR;
-            // If the S value is above the order of the curve divided by two, its
-            // complement modulo the order could have been used instead, which is
-            // one byte shorter when encoded correctly.
-            if (!CheckSignatureElement(vchSig, S, nLenS, true))
-            {
-                return false;
-            }
-
             return true;
         }
 
@@ -1782,28 +1750,6 @@ namespace Blockcore.Consensus.ScriptInfo
             byte nHashType = (byte)(vchSig[vchSig.Length - 1] & (byte)temp);
             if (nHashType < (byte)SigHash.All || nHashType > (byte)SigHash.Single)
                 return false;
-
-            return true;
-        }
-
-        public bool IsLowDERSignature(byte[] vchSig, bool haveSigHash = true)
-        {
-            if (!IsValidSignatureEncoding(vchSig, haveSigHash))
-            {
-                this.Error = ScriptError.SigDer;
-                return false;
-            }
-            int nLenR = vchSig[3];
-            int nLenS = vchSig[5 + nLenR];
-            int S = 6 + nLenR;
-            // If the S value is above the order of the curve divided by two, its
-            // complement modulo the order could have been used instead, which is
-            // one byte shorter when encoded correctly.
-            if (!CheckSignatureElement(vchSig, S, nLenS, true))
-            {
-                this.Error = ScriptError.SigHighS;
-                return false;
-            }
 
             return true;
         }
@@ -1868,86 +1814,6 @@ namespace Blockcore.Consensus.ScriptInfo
             return 0;
         }
 
-        public static bool IsValidSignatureEncoding(byte[] sig, bool haveSigHash = true)
-        {
-            // Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S] [sighash]
-            // * total-length: 1-byte length descriptor of everything that follows,
-            //   excluding the sighash byte.
-            // * R-length: 1-byte length descriptor of the R value that follows.
-            // * R: arbitrary-length big-endian encoded R value. It must use the shortest
-            //   possible encoding for a positive integers (which means no null bytes at
-            //   the start, except a single one when the next byte has its highest bit set).
-            // * S-length: 1-byte length descriptor of the S value that follows.
-            // * S: arbitrary-length big-endian encoded S value. The same rules apply.
-            // * sighash: 1-byte value indicating what data is hashed (not part of the DER
-            //   signature)
-
-            int signLen = sig.Length;
-
-            // Minimum and maximum size constraints.
-            if (signLen < 9 || signLen > 73)
-                return false;
-
-            // A signature is of type 0x30 (compound).
-            if (sig[0] != 0x30)
-                return false;
-
-            // Make sure the length covers the entire signature.
-            if (sig[1] != signLen - (haveSigHash ? 3 : 2))
-                return false;
-
-            // Extract the length of the R element.
-            uint lenR = sig[3];
-
-            // Make sure the length of the S element is still inside the signature.
-            if (5 + lenR >= signLen)
-                return false;
-
-            // Extract the length of the S element.
-            uint lenS = sig[5 + lenR];
-
-            // Verify that the length of the signature matches the sum of the length
-            // of the elements.
-            if ((lenR + lenS + (haveSigHash ? 7 : 6)) != signLen)
-                return false;
-
-            // Check whether the R element is an integer.
-            if (sig[2] != 0x02)
-                return false;
-
-            // Zero-length integers are not allowed for R.
-            if (lenR == 0)
-                return false;
-
-            // Negative numbers are not allowed for R.
-            if ((sig[4] & 0x80) != 0)
-                return false;
-
-            // Null bytes at the start of R are not allowed, unless R would
-            // otherwise be interpreted as a negative number.
-            if (lenR > 1 && (sig[4] == 0x00) && (sig[5] & 0x80) == 0)
-                return false;
-
-            // Check whether the S element is an integer.
-            if (sig[lenR + 4] != 0x02)
-                return false;
-
-            // Zero-length integers are not allowed for S.
-            if (lenS == 0)
-                return false;
-
-            // Negative numbers are not allowed for S.
-            if ((sig[lenR + 6] & 0x80) != 0)
-                return false;
-
-            // Null bytes at the start of S are not allowed, unless S would otherwise be
-            // interpreted as a negative number.
-            if (lenS > 1 && (sig[lenR + 6] == 0x00) && (sig[lenR + 7] & 0x80) == 0)
-                return false;
-
-            return true;
-        }
-
         private bool CheckMinimalPush(byte[] data, OpcodeType opcode)
         {
             if (data.Length == 0)
@@ -2007,24 +1873,9 @@ namespace Blockcore.Consensus.ScriptInfo
             }
         }
 
-        public bool CheckSig(TransactionSignature signature, PubKey pubKey, Script scriptPubKey, IndexedTxIn txIn)
-        {
-            return CheckSig(signature, pubKey, scriptPubKey, txIn.Transaction, txIn.Index);
-        }
-
-        public bool CheckSig(TransactionSignature signature, PubKey pubKey, Script scriptPubKey, Transaction txTo, uint nIn)
-        {
-            return CheckSig(signature.ToBytes(), pubKey.ToBytes(), scriptPubKey, txTo, (int)nIn);
-        }
-
         public bool CheckSig(TransactionSignature signature, PubKey pubKey, Script scriptPubKey, TransactionChecker checker, HashVersion hashVersion)
         {
             return CheckSig(signature.ToBytes(), pubKey.ToBytes(), scriptPubKey, checker, (int)hashVersion);
-        }
-
-        public bool CheckSig(byte[] vchSig, byte[] vchPubKey, Script scriptCode, Transaction txTo, int nIn)
-        {
-            return CheckSig(vchSig, vchPubKey, scriptCode, new TransactionChecker(txTo, nIn), 0);
         }
 
         private bool CheckSig(byte[] vchSig, byte[] vchPubKey, Script scriptCode, TransactionChecker checker, int sigversion)
@@ -2070,20 +1921,6 @@ namespace Blockcore.Consensus.ScriptInfo
             {
                 if ((this.ScriptVerify & ScriptVerify.StrictEnc) != 0)
                     return false;
-
-                //Replicate OpenSSL bug on 23b397edccd3740a74adb603c9756370fafcde9bcc4483eb271ecad09a94dd63 (http://r6.ca/blog/20111119T211504Z.html)
-                byte nLenR = vchSig[3];
-                byte nLenS = vchSig[5 + nLenR];
-                int R = 4;
-                int S = 6 + nLenR;
-                var newS = new BigInteger(1, vchSig, S, nLenS);
-                var newR = new BigInteger(1, vchSig, R, nLenR);
-                var sig2 = new ECDSASignature(newR, newS);
-                if (sig2.R != scriptSig.Signature.R || sig2.S != scriptSig.Signature.S)
-                {
-                    if (!pubkey.Verify(sighash, sig2))
-                        return false;
-                }
             }
 
             return true;

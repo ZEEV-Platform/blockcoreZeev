@@ -3,7 +3,6 @@ using Blockcore.Configuration;
 using Blockcore.Features.BlockStore;
 using Blockcore.Features.ColdStaking;
 using Blockcore.Features.Consensus;
-using Blockcore.Features.Consensus.Interfaces;
 using Blockcore.Features.Diagnostic;
 using Blockcore.Features.MemoryPool;
 using Blockcore.Features.Miner;
@@ -15,7 +14,6 @@ using Blockcore.Features.Miner.Interfaces;
 using Blockcore.Persistence;
 using Blockcore.Features.Notifications;
 using Blockcore.Features.WalletWatchOnly;
-using Blockcore.Networks.X1.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Blockcore.Networks.ZEEV.Components;
@@ -34,32 +32,6 @@ namespace Blockcore.Node
 
             switch (chain)
             {
-                case "BTC":
-                case "XRC":
-                    nodeBuilder.UsePowConsensus().AddMining().UseWallet();
-                    break;
-                case "X1":
-                    nodeBuilder.UseX1Consensus().UseColdStakingWallet();
-                    break;
-                case "AMS":
-                case "X42":
-                case "BCP":
-                case "CITY":
-                case "STRAT":
-                case "STRAX":
-                case "RUTA":
-                case "EXOS":
-                case "XDS":
-                case "XLR":
-                case "IMPLX":
-                case "MOL":
-                case "HOME":
-                case "SERF":
-                case "CYBITS":
-                case "SBC":
-                case "RSC":
-                    nodeBuilder.UsePosConsensus().AddPowPosMining().UseColdStakingWallet();
-                    break;
                 case "ZEEV":
                     nodeBuilder.UseZEEVConsensus().UseWallet().UseWatchOnlyWallet();
                     break;

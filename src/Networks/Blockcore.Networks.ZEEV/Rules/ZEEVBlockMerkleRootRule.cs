@@ -1,21 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Blockcore.Consensus;
 using Blockcore.Consensus.BlockInfo;
 using Blockcore.Consensus.Rules;
 using Blockcore.Consensus.ScriptInfo;
-using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks.ZEEV.Consensus;
-using Blockcore.Networks.ZEEV.Crypto.Blake2b;
 using DBreeze.Utils;
 using Microsoft.Extensions.Logging;
-using Polly;
 
 namespace Blockcore.Networks.ZEEV.Rules
 {
@@ -167,7 +161,7 @@ namespace Blockcore.Networks.ZEEV.Rules
 
                     Buffer.BlockCopy(subTreeHashes[level].ToBytes(), 0, hash, 0, 32);
                     Buffer.BlockCopy(currentLeaveHash.ToBytes(), 0, hash, 32, 32);
-                    currentLeaveHash = new uint256(Blake2B.ComputeHash(hash, new Blake2BConfig() { OutputSizeInBytes = 32 }));
+                    currentLeaveHash = new uint256(Blake2B.Blake2B256().ComputeHash(hash));
                 }
 
                 // Store the resulting hash at subTreeHashes position level.
@@ -205,7 +199,7 @@ namespace Blockcore.Networks.ZEEV.Rules
                     var rootBytes = root.ToBytes();
                     Buffer.BlockCopy(rootBytes, 0, hash, 0, 32);
                     Buffer.BlockCopy(rootBytes, 0, hash, 32, 32);
-                    root = new uint256(Blake2B.ComputeHash(hash, new Blake2BConfig() { OutputSizeInBytes = 32 }));
+                    root = new uint256(Blake2B.Blake2B256().ComputeHash(hash));
 
                     // Increment processedLeavesCount to the value it would have if two entries at this
                     // level had existed.
@@ -227,7 +221,7 @@ namespace Blockcore.Networks.ZEEV.Rules
 
                         Buffer.BlockCopy(subTreeHashes[level].ToBytes(), 0, hashh, 0, 32);
                         Buffer.BlockCopy(root.ToBytes(), 0, hashh, 32, 32);
-                        root = new uint256(Blake2B.ComputeHash(hashh, new Blake2BConfig() { OutputSizeInBytes = 32 }));
+                        root = new uint256(Blake2B.Blake2B256().ComputeHash(hashh));
 
                         level++;
                     }
@@ -236,25 +230,5 @@ namespace Blockcore.Networks.ZEEV.Rules
 
             return root;
         }
-
-        //public override Task RunAsync(RuleContext context)
-        //{
-        //    Block block = context.ValidationContext.BlockToValidate;
-
-        //    uint256 hashMerkleRoot2 = BlockMerkleRoot(block, out bool mutated);
-        //    if (block.Header.HashMerkleRoot != hashMerkleRoot2)
-        //    {
-        //        this.Logger.LogTrace("(-)[BAD_MERKLE_ROOT]");
-        //        ConsensusErrors.BadMerkleRoot.Throw();
-        //    }
-
-        //    if (mutated)
-        //    {
-        //        this.Logger.LogTrace("(-)[BAD_TX_DUP]");
-        //        ConsensusErrors.BadTransactionDuplicate.Throw();
-        //    }
-
-        //    return Task.CompletedTask;
-        //}
     }
 }

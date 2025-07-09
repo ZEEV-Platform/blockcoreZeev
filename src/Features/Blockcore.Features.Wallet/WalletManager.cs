@@ -15,11 +15,13 @@ using Blockcore.Consensus.TransactionInfo;
 using Blockcore.EventBus;
 using Blockcore.Features.BlockStore;
 using Blockcore.Features.BlockStore.Models;
+using Blockcore.Features.Wallet.Api.Models;
 using Blockcore.Features.Wallet.Database;
 using Blockcore.Features.Wallet.Exceptions;
 using Blockcore.Features.Wallet.Helpers;
 using Blockcore.Features.Wallet.Interfaces;
 using Blockcore.Features.Wallet.Types;
+using Blockcore.Features.Wallet.UI.Pages;
 using Blockcore.Interfaces;
 using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.BIP32;
@@ -256,13 +258,6 @@ namespace Blockcore.Features.Wallet
 
             if (this.walletSettings.IsDefaultWalletEnabled())
             {
-                // Check if it already exists, if not, create one.
-                if (!wallets.Any(w => w.Name == this.walletSettings.DefaultWalletName))
-                {
-                    var mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve);
-                    this.CreateWallet(this.walletSettings.DefaultWalletPassword, this.walletSettings.DefaultWalletName, string.Empty, mnemonic);
-                }
-
                 // Make sure both unlock is specified, and that we actually have a default wallet name specified.
                 if (this.walletSettings.UnlockDefaultWallet)
                 {
@@ -308,54 +303,55 @@ namespace Blockcore.Features.Wallet
             Guard.NotEmpty(mnemonic, nameof(mnemonic));
             Guard.NotNull(passphrase, nameof(passphrase));
 
-            ExtKey extendedKey = HdOperations.GetExtendedKey(mnemonic, passphrase);
+            throw new NotImplementedException("FALCON MULTISIGNATURE NOT SUPPORTED");
+            //ExtKey extendedKey = HdOperations.GetExtendedKey(mnemonic, passphrase);
 
-            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedBitcoinSecret(password, this.network).ToWif();
+            //string encryptedSeed = extendedKey.PrivateKey.GetEncryptedZeevSecret(password, this.network).ToWif();
 
-            string accountHdPath = HdOperations.GetAccountHdPath(44, (int)coinType, 0);
-            Key privateKey = HdOperations.DecryptSeed(encryptedSeed, password, this.network);
+            //string accountHdPath = HdOperations.GetAccountHdPath(44, (int)coinType, 0);
+            //Key privateKey = HdOperations.DecryptSeed(encryptedSeed, password, this.network);
 
-            ExtPubKey accountExtPubKey = HdOperations.GetExtendedPublicKey(privateKey, extendedKey.ChainCode, accountHdPath);
-  
+            //ExtPubKey accountExtPubKey = HdOperations.GetExtendedPublicKey(privateKey, extendedKey.ChainCode, accountHdPath);
 
-            cosignerXPubs.Add(accountExtPubKey.ToString(this.network));
 
-            var multisigScheme = new MultisigScheme()
-            {
-                Threashold = threashold,
-                XPubs = cosignerXPubs.ToArray()
-            };
+            //cosignerXPubs.Add(accountExtPubKey.ToString(this.network));
 
-            WalletMultisig wallet = new WalletMultisig(walletName, encryptedSeed, extendedKey.ChainCode, this.network);
+            //var multisigScheme = new MultisigScheme()
+            //{
+            //    Threashold = threashold,
+            //    XPubs = cosignerXPubs.ToArray()
+            //};
 
-            var root = new AccountRootMultisig
-            {
-                CoinType = coinType
-            };
-            wallet.AccountsRoot.Add(root);
+            //WalletMultisig wallet = new WalletMultisig(walletName, encryptedSeed, extendedKey.ChainCode, this.network);
 
-            HdAccountMultisig account = wallet.AddNewAccount(multisigScheme, coinType, this.dateTimeProvider.GetTimeOffset());
-            IEnumerable<HdAddress> newReceivingAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer);
-            IEnumerable<HdAddress> newChangeAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer, true);
-            this.UpdateKeysLookup(wallet, newReceivingAddresses.Concat(newChangeAddresses));
+            //var root = new AccountRootMultisig
+            //{
+            //    CoinType = coinType
+            //};
+            //wallet.AccountsRoot.Add(root);
 
-            // If the chain is downloaded, we set the height of the newly created wallet to it.
-            // However, if the chain is still downloading when the user creates a wallet,
-            // we wait until it is downloaded in order to set it. Otherwise, the height of the wallet will be the height of the chain at that moment.
-            if (this.ChainIndexer.IsDownloaded())
-            {
-                this.UpdateLastBlockSyncedHeight(wallet, this.ChainIndexer.Tip);
-            }
-            else
-            {
-                this.UpdateWhenChainDownloaded(new[] { wallet }, this.dateTimeProvider.GetUtcNow());
-            }
+            //HdAccountMultisig account = wallet.AddNewAccount(multisigScheme, coinType, this.dateTimeProvider.GetTimeOffset());
+            //IEnumerable<HdAddress> newReceivingAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer);
+            //IEnumerable<HdAddress> newChangeAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer, true);
+            //this.UpdateKeysLookup(wallet, newReceivingAddresses.Concat(newChangeAddresses));
 
-            wallet.walletStore = new WalletStore(this.network, this.dataFolder, wallet);
-            this.SaveWallet(wallet);
-            this.Load(wallet);
+            //// If the chain is downloaded, we set the height of the newly created wallet to it.
+            //// However, if the chain is still downloading when the user creates a wallet,
+            //// we wait until it is downloaded in order to set it. Otherwise, the height of the wallet will be the height of the chain at that moment.
+            //if (this.ChainIndexer.IsDownloaded())
+            //{
+            //    this.UpdateLastBlockSyncedHeight(wallet, this.ChainIndexer.Tip);
+            //}
+            //else
+            //{
+            //    this.UpdateWhenChainDownloaded(new[] { wallet }, this.dateTimeProvider.GetUtcNow());
+            //}
 
-            return wallet;
+            //wallet.walletStore = new WalletStore(this.network, this.dataFolder, wallet);
+            //this.SaveWallet(wallet);
+            //this.Load(wallet);
+
+            //return wallet;
         }
         private static string GetWalletFileName(WalletMultisig wallet)
         {
@@ -376,7 +372,7 @@ namespace Blockcore.Features.Wallet
             ExtKey extendedKey = HdOperations.GetExtendedKey(mnemonic, passphrase);
 
             // Create a wallet file.
-            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedBitcoinSecret(password, this.network).ToWif();
+            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedZeevSecret(password, this.network).ToWif();
             Types.Wallet wallet = this.GenerateWalletFile(name, encryptedSeed, extendedKey.ChainCode, coinType: coinType);
 
             // Generate multiple accounts and addresses from the get-go.
@@ -457,7 +453,19 @@ namespace Blockcore.Features.Wallet
             try
             {
                 BitcoinPubKeyAddress bitcoinPubKeyAddress = new BitcoinPubKeyAddress(externalAddress, this.network);
-                result = bitcoinPubKeyAddress.VerifyMessage(message, signature);
+
+                // Get wallet
+                foreach (var wallet in this.Wallets)
+                {
+                    HdAddress hdAddress = wallet.GetAddress(bitcoinPubKeyAddress.ToString());
+                    if (hdAddress != null)
+                    {
+                        Key privateKey = new ZeevExtKey(hdAddress.EncryptedKey, this.network).PrivateKey;
+                        result = privateKey.VerifyMessage(message, signature);
+
+                        break;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -479,8 +487,7 @@ namespace Blockcore.Features.Wallet
             // Check the password.
             try
             {
-                if (!wallet.IsExtPubKeyWallet)
-                    Key.Parse(wallet.EncryptedSeed, password, wallet.Network);
+                Key.Parse(wallet.EncryptedSeed, password, wallet.Network);
             }
             catch (Exception ex)
             {
@@ -559,7 +566,7 @@ namespace Blockcore.Features.Wallet
             }
 
             // Create a wallet file.
-            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedBitcoinSecret(password, this.network).ToWif();
+            string encryptedSeed = extendedKey.PrivateKey.GetEncryptedZeevSecret(password, this.network).ToWif();
             Types.Wallet wallet = this.GenerateWalletFile(name, encryptedSeed, extendedKey.ChainCode, creationTime, coinType);
 
             // Generate multiple accounts and addresses from the get-go.
@@ -596,58 +603,12 @@ namespace Blockcore.Features.Wallet
         }
 
         /// <inheritdoc />
-        public Types.Wallet RecoverWallet(string name, ExtPubKey extPubKey, int accountIndex, DateTime creationTime, int? purpose = null)
-        {
-            Guard.NotEmpty(name, nameof(name));
-            Guard.NotNull(extPubKey, nameof(extPubKey));
-            this.logger.LogDebug("({0}:'{1}',{2}:'{3}',{4}:'{5}')", nameof(name), name, nameof(extPubKey), extPubKey, nameof(accountIndex), accountIndex);
-
-            // Create a wallet file.
-            Types.Wallet wallet = this.GenerateExtPubKeyOnlyWalletFile(name, creationTime);
-
-            // Generate account
-            IHdAccount account;
-            lock (this.lockObject)
-            {
-                account = wallet.AddNewAccount(extPubKey, accountIndex, this.dateTimeProvider.GetTimeOffset(), purpose ?? this.defaultPurpose);
-            }
-
-            IEnumerable<HdAddress> newReceivingAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer);
-            IEnumerable<HdAddress> newChangeAddresses = account.CreateAddresses(this.network, this.walletSettings.UnusedAddressesBuffer, true);
-            this.UpdateKeysLookup(wallet, newReceivingAddresses.Concat(newChangeAddresses));
-
-            // If the chain is downloaded, we set the height of the recovered wallet to that of the recovery date.
-            // However, if the chain is still downloading when the user restores a wallet,
-            // we wait until it is downloaded in order to set it. Otherwise, the height of the wallet may not be known.
-            if (this.ChainIndexer.IsDownloaded())
-            {
-                int blockSyncStart = this.ChainIndexer.GetHeightAtTime(creationTime);
-                this.UpdateLastBlockSyncedHeight(wallet, this.ChainIndexer.GetHeader(blockSyncStart));
-            }
-            else
-            {
-                this.UpdateWhenChainDownloaded(new[] { wallet }, creationTime);
-            }
-
-            // Save the changes to the file and add addresses to be tracked.
-            this.SaveWallet(wallet);
-            this.Load(wallet);
-            return wallet;
-        }
-
-        /// <inheritdoc />
         public IHdAccount GetUnusedAccount(string walletName, string password, int? purpose = null)
         {
             Guard.NotEmpty(walletName, nameof(walletName));
             Guard.NotEmpty(password, nameof(password));
 
             Types.Wallet wallet = this.GetWalletByName(walletName);
-
-            if (wallet.IsExtPubKeyWallet)
-            {
-                this.logger.LogTrace("(-)[CANNOT_ADD_ACCOUNT_TO_EXTPUBKEY_WALLET]");
-                throw new CannotAddAccountToXpubKeyWalletException("Use recover-via-extpubkey instead.");
-            }
 
             IHdAccount res = this.GetUnusedAccount(wallet, password, purpose ?? this.defaultPurpose);
             return res;
@@ -682,25 +643,6 @@ namespace Blockcore.Features.Wallet
             this.SaveWallet(wallet);
 
             return account;
-        }
-
-        public string GetExtPubKey(WalletAccountReference accountReference)
-        {
-            Guard.NotNull(accountReference, nameof(accountReference));
-
-            Types.Wallet wallet = this.GetWalletByName(accountReference.WalletName);
-
-            string extPubKey;
-            lock (this.lockObject)
-            {
-                // Get the account.
-                IHdAccount account = wallet.GetAccount(accountReference.AccountName);
-                if (account == null)
-                    throw new WalletException($"No account with the name '{accountReference.AccountName}' could be found.");
-                extPubKey = account.ExtendedPubKey;
-            }
-
-            return extPubKey;
         }
 
         /// <inheritdoc />
@@ -1591,12 +1533,6 @@ namespace Blockcore.Features.Wallet
         }
 
         /// <inheritdoc />
-        public void DeleteWallet()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
         public void SaveWallets()
         {
             foreach (Types.Wallet wallet in this.Wallets)
@@ -1708,43 +1644,6 @@ namespace Blockcore.Features.Wallet
                 CreationTime = creationTime ?? this.dateTimeProvider.GetTimeOffset(),
                 Network = this.network,
                 AccountsRoot = new List<IAccountRoot> { new AccountRoot() { Accounts = new List<IHdAccount>(), CoinType = coinType ?? this.coinType, LastBlockSyncedHeight = 0, LastBlockSyncedHash = this.network.GenesisHash } },
-            };
-
-            walletFile.walletStore = new WalletStore(this.network, this.dataFolder, walletFile);
-
-            // Create a folder if none exists and persist the file.
-            this.SaveWallet(walletFile);
-
-            return walletFile;
-        }
-
-        /// <summary>
-        /// Generates the wallet file without private key and chain code.
-        /// For use with only the extended public key.
-        /// </summary>
-        /// <param name="name">The name of the wallet.</param>
-        /// <param name="creationTime">The time this wallet was created.</param>
-        /// <returns>The wallet object that was saved into the file system.</returns>
-        /// <exception cref="WalletException">Thrown if wallet cannot be created.</exception>
-        private Types.Wallet GenerateExtPubKeyOnlyWalletFile(string name, DateTimeOffset? creationTime = null)
-        {
-            Guard.NotEmpty(name, nameof(name));
-
-            // Check if any wallet file already exists, with case insensitive comparison.
-            if (this.Wallets.Any(w => string.Equals(w.Name, name, StringComparison.OrdinalIgnoreCase)))
-            {
-                this.logger.LogTrace("(-)[WALLET_ALREADY_EXISTS]");
-                throw new WalletException($"Wallet with name '{name}' already exists.");
-            }
-
-            var walletFile = new Types.Wallet
-            {
-                Version = 2,
-                Name = name,
-                IsExtPubKeyWallet = true,
-                CreationTime = creationTime ?? this.dateTimeProvider.GetTimeOffset(),
-                Network = this.network,
-                AccountsRoot = new List<IAccountRoot> { new AccountRoot() { Accounts = new List<IHdAccount>(), CoinType = this.coinType, LastBlockSyncedHeight = 0, LastBlockSyncedHash = this.network.GenesisHash } },
             };
 
             walletFile.walletStore = new WalletStore(this.network, this.dataFolder, walletFile);
@@ -2324,6 +2223,11 @@ namespace Blockcore.Features.Wallet
 
             // Reset the builder and related state, as we are now creating a fresh transaction.
             builder = new TransactionBuilder(this.network);
+        }
+
+        public void DeleteWallet()
+        {
+            throw new NotImplementedException();
         }
     }
 }

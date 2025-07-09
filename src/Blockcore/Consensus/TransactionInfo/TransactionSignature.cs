@@ -1,16 +1,16 @@
 ﻿using System;
 using Blockcore.Consensus.ScriptInfo;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.DataEncoders;
 using Blockcore.Networks;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Consensus.TransactionInfo
 {
     public class TransactionSignature
     {
-        private static readonly TransactionSignature _Empty = new TransactionSignature(new ECDSASignature(BigInteger.ValueOf(0), BigInteger.ValueOf(0)), SigHash.All);
+        private static readonly TransactionSignature _Empty = new TransactionSignature(new FalconSignature(), SigHash.All);
         public static TransactionSignature Empty
         {
             get
@@ -62,31 +62,35 @@ namespace Blockcore.Consensus.TransactionInfo
             }
             return true;
         }
-        public TransactionSignature(ECDSASignature signature, SigHash sigHash)
+        public TransactionSignature(FalconSignature signature, SigHash sigHash)
         {
             if(sigHash == SigHash.Undefined)
                 throw new ArgumentException("sigHash should not be Undefined");
             this._SigHash = sigHash;
             this._Signature = signature;
         }
-        public TransactionSignature(ECDSASignature signature)
+        public TransactionSignature(FalconSignature signature)
             : this(signature, SigHash.All)
         {
 
         }
         public TransactionSignature(byte[] sigSigHash)
         {
-            this._Signature = ECDSASignature.FromDER(sigSigHash);
+            //we have to remove last byte (sigHash)
+            var sig = new byte[sigSigHash.Length - 1];
+            Array.Copy(sigSigHash, 0, sig, 0, sig.Length);
+
+            this._Signature = FalconSignature.FromDER(sig);
             this._SigHash = (SigHash)sigSigHash[sigSigHash.Length - 1];
         }
         public TransactionSignature(byte[] sig, SigHash sigHash)
         {
-            this._Signature = ECDSASignature.FromDER(sig);
+            this._Signature = FalconSignature.FromDER(sig);
             this._SigHash = sigHash;
         }
 
-        private readonly ECDSASignature _Signature;
-        public ECDSASignature Signature
+        private readonly FalconSignature _Signature;
+        public FalconSignature Signature
         {
             get
             {
@@ -114,20 +118,6 @@ namespace Blockcore.Consensus.TransactionInfo
         public static bool ValidLength(int length)
         {
             return (67 <= length && length <= 80) || length == 9; //9 = Empty signature
-        }
-
-        public bool Check(Network network, PubKey pubKey, Script scriptPubKey, IndexedTxIn txIn, ScriptVerify verify = ScriptVerify.Standard)
-        {
-            return Check(network, pubKey, scriptPubKey, txIn.Transaction, txIn.Index, verify);
-        }
-
-        public bool Check(Network network, PubKey pubKey, Script scriptPubKey, Transaction tx, uint nIndex, ScriptVerify verify = ScriptVerify.Standard)
-        {
-            return new ScriptEvaluationContext(network)
-            {
-                ScriptVerify = verify,
-                SigHash = this.SigHash
-            }.CheckSig(this, pubKey, scriptPubKey, tx, nIndex);
         }
 
         private string _Id;
@@ -169,25 +159,6 @@ namespace Blockcore.Consensus.TransactionInfo
         public override string ToString()
         {
             return Encoders.Hex.EncodeData(ToBytes());
-        }
-
-        public bool IsLowS
-        {
-            get
-            {
-                return this.Signature.IsLowS;
-            }
-        }
-
-
-        /// <summary>
-        /// Enforce LowS on the signature
-        /// </summary>
-        public TransactionSignature MakeCanonical()
-        {
-            if(this.IsLowS)
-                return this;
-            return new TransactionSignature(this.Signature.MakeCanonical(), this.SigHash);
         }
     }
 }

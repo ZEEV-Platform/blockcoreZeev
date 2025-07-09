@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Blockcore.Consensus.ScriptInfo;
+using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.DataEncoders;
 using Blockcore.Networks;
@@ -14,19 +15,17 @@ namespace Blockcore.NBitcoin.BIP32
     {
         public static ExtPubKey Parse(string wif, Network expectedNetwork = null)
         {
-            return Network.Parse<BitcoinExtPubKey>(wif, expectedNetwork).ExtPubKey;
+            return Network.Parse<ZeevExtPubKey>(wif, expectedNetwork).ExtPubKey;
         }
 
         private const int FingerprintLength = 4;
         private const int ChainCodeLength = 32;
 
-        private static readonly byte[] validPubKey = Encoders.Hex.DecodeData("0374ef3990e387b5a2992797f14c031a64efd80e5cb843d7c1d4a0274a9bc75e55");
         internal byte nDepth;
         internal byte[] vchFingerprint = new byte[FingerprintLength];
         internal uint nChild;
 
-        //
-        internal PubKey pubkey = new PubKey(validPubKey);
+        internal PubKey pubkey;
         internal byte[] vchChainCode = new byte[ChainCodeLength];
 
         public byte Depth
@@ -136,36 +135,9 @@ namespace Blockcore.NBitcoin.BIP32
             }
         }
 
-        public ExtPubKey Derive(uint index)
+        public ZeevExtPubKey GetWif(Network network)
         {
-            var result = new ExtPubKey
-            {
-                nDepth = (byte)(this.nDepth + 1),
-                vchFingerprint = CalculateChildFingerprint(),
-                nChild = index
-            };
-            result.pubkey = this.pubkey.Derivate(this.vchChainCode, index, out result.vchChainCode);
-            return result;
-        }
-
-        public ExtPubKey Derive(KeyPath derivation)
-        {
-            ExtPubKey result = this;
-            return derivation.Indexes.Aggregate(result, (current, index) => current.Derive(index));
-        }
-
-        public ExtPubKey Derive(int index, bool hardened)
-        {
-            if(index < 0)
-                throw new ArgumentOutOfRangeException("index", "the index can't be negative");
-            uint realIndex = (uint)index;
-            realIndex = hardened ? realIndex | 0x80000000u : realIndex;
-            return Derive(realIndex);
-        }
-
-        public BitcoinExtPubKey GetWif(Network network)
-        {
-            return new BitcoinExtPubKey(this, network);
+            return new ZeevExtPubKey(this, network);
         }
 
         #region IBitcoinSerializable Members
@@ -181,13 +153,11 @@ namespace Blockcore.NBitcoin.BIP32
                 stream.ReadWrite(ref this.pubkey);
             }
         }
-
-
         private uint256 Hash
         {
             get
             {
-                return Hashes.Hash256(this.ToBytes());
+                return new Hashes().Hash256(this.ToBytes());
             }
         }
 
@@ -220,7 +190,7 @@ namespace Blockcore.NBitcoin.BIP32
 
         public string ToString(Network network)
         {
-            return new BitcoinExtPubKey(this, network).ToString();
+            return new ZeevExtPubKey(this, network).ToString();
         }
 
         #region IDestination Members

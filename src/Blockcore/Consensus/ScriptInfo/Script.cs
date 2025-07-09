@@ -312,10 +312,6 @@ namespace Blockcore.Consensus.ScriptInfo
         OP_WITHIN = 0xa5,
 
         // crypto
-        OP_RIPEMD160 = 0xa6,
-
-        OP_SHA1 = 0xa7,
-        OP_SHA256 = 0xa8,
         OP_HASH160 = 0xa9,
         OP_HASH256 = 0xaa,
         OP_CODESEPARATOR = 0xab,
@@ -339,7 +335,17 @@ namespace Blockcore.Consensus.ScriptInfo
         OP_NOP7 = 0xb6,
         OP_NOP8 = 0xb7,
         OP_NOP9 = 0xb8,
-        OP_NOP10 = 0xb9
+        OP_NOP10 = 0xb9,
+
+        OP_SHA3224 = 0xc0,
+        OP_SHA3256 = 0xc1,
+        OP_SHA3384 = 0xc2,
+        OP_SHA3512 = 0xc3,
+        OP_BLAKE2B160 = 0xc4,
+        OP_BLAKE2B224 = 0xc5,
+        OP_BLAKE2B256 = 0xc6,
+        OP_BLAKE2B384 = 0xc7,
+        OP_BLAKE2B512 = 0xc8,
     };
 
     public enum HashVersion

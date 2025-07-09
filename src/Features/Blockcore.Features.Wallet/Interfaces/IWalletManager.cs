@@ -155,17 +155,6 @@ namespace Blockcore.Features.Wallet.Interfaces
         Types.Wallet RecoverWallet(string password, string name, string mnemonic, DateTime creationTime, string passphrase = null, int? purpose = null, int? coinType = null, bool? isColdStakingWallet = false);
 
         /// <summary>
-        /// Recovers a wallet using extended public key and account index.
-        /// </summary>
-        /// <param name="name">The name of the wallet.</param>
-        /// <param name="extPubKey">The extended public key.</param>
-        /// <param name="accountIndex">The account number.</param>
-        /// <param name="creationTime">The date and time this wallet was created.</param>
-        /// <param name="purpose">An optional BIP44 purpose (also used in BIP84 and BIP49), this means specifying BIP84 to create a segwit wallet.</param>
-        /// <returns></returns>
-        Types.Wallet RecoverWallet(string name, ExtPubKey extPubKey, int accountIndex, DateTime creationTime, int? purpose = null);
-
-        /// <summary>
         /// Deletes a wallet.
         /// </summary>
         void DeleteWallet();
@@ -377,13 +366,6 @@ namespace Blockcore.Features.Wallet.Interfaces
         /// </summary>
         /// <returns>Whether any wallet files are loaded.</returns>
         bool ContainsWallets { get; }
-
-        /// <summary>
-        /// Gets the extended public key of an account.
-        /// </summary>
-        /// <param name="accountReference">The account.</param>
-        /// <returns>The extended public key.</returns>
-        string GetExtPubKey(WalletAccountReference accountReference);
 
         /// <summary>
         /// Gets the extended private key of an account.

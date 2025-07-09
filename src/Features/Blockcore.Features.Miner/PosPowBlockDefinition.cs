@@ -4,7 +4,6 @@ using Blockcore.Consensus.BlockInfo;
 using Blockcore.Consensus.Chain;
 using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Features.Consensus;
-using Blockcore.Features.Consensus.Interfaces;
 using Blockcore.Features.Consensus.Rules.CommonRules;
 using Blockcore.Features.MemoryPool;
 using Blockcore.Features.MemoryPool.Interfaces;
@@ -26,9 +25,6 @@ namespace Blockcore.Features.Miner
         /// <summary>Database of stake related data for the current blockchain.</summary>
         private readonly IStakeChain stakeChain;
 
-        /// <summary>Provides functionality for checking validity of PoS blocks.</summary>
-        private readonly IStakeValidator stakeValidator;
-
         /// <summary>
         /// The POS rule to determine the allowed drift in time between nodes.
         /// </summary>
@@ -43,13 +39,11 @@ namespace Blockcore.Features.Miner
             Network network,
             MinerSettings minerSettings,
             IStakeChain stakeChain,
-            IStakeValidator stakeValidator,
             NodeDeployments nodeDeployments)
             : base(consensusManager, dateTimeProvider, loggerFactory, mempool, mempoolLock, minerSettings, network, nodeDeployments)
         {
             this.logger = loggerFactory.CreateLogger(this.GetType().FullName);
             this.stakeChain = stakeChain;
-            this.stakeValidator = stakeValidator;
         }
 
         /// <inheritdoc/>
@@ -72,8 +66,6 @@ namespace Blockcore.Features.Miner
         public override void UpdateHeaders()
         {
             base.UpdateBaseHeaders();
-
-            this.block.Header.Bits = this.stakeValidator.GetNextTargetRequired(this.stakeChain, this.ChainTip, this.Network.Consensus, false);
         }
 
         /// <inheritdoc/>

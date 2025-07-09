@@ -10,11 +10,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Blockcore.Consensus.BlockInfo;
 using Blockcore.Interfaces;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.NBitcoin.DataEncoders;
 using Blockcore.NBitcoin.Protocol;
 using Blockcore.Networks;
 using Blockcore.P2P;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.NBitcoin
 {

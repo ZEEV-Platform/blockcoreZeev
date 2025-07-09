@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Asp.Versioning;
@@ -276,7 +277,7 @@ namespace Blockcore.Features.RPC.Controllers
                 Proxy = string.Empty,
                 Difficulty = this.GetNetworkDifficulty()?.Difficulty ?? 0,
                 Testnet = this.Network.IsTest(),
-                RelayFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.BTC) ?? 0,
+                RelayFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.ZEEV) ?? 0,
                 Errors = string.Empty,
 
                 //TODO: Wallet related infos: walletversion, balance, keypNetwoololdest, keypoolsize, unlocked_until, paytxfee
@@ -462,14 +463,14 @@ namespace Blockcore.Features.RPC.Controllers
             var networkInfoModel = new NetworkInfoModel
             {
                 Version = this.FullNode?.Version?.ToUint() ?? 0,
-                SubVersion = this.Settings?.Agent,
+                SubVersion = string.Format("/{0}:{1}/", this.Settings?.Agent, this.FullNode?.Version?.ToString()), 
                 ProtocolVersion = this.Network.Consensus.ConsensusFactory.Protocol.ProtocolVersion,
                 IsLocalRelay = this.ConnectionManager?.Parameters?.IsRelay ?? false,
                 TimeOffset = this.ConnectionManager?.ConnectedPeers?.GetMedianTimeOffset() ?? 0,
                 Connections = this.ConnectionManager?.ConnectedPeers?.Count(),
                 IsNetworkActive = true,
-                RelayFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.BTC) ?? 0,
-                IncrementalFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.BTC) ?? 0 // set to same as min relay fee
+                RelayFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.ZEEV) ?? 0,
+                IncrementalFee = this.Settings?.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.ZEEV) ?? 0 // set to same as min relay fee
             };
 
             var services = this.ConnectionManager?.Parameters?.Services;
@@ -544,6 +545,104 @@ namespace Blockcore.Features.RPC.Controllers
 
             // TODO: Implement blockchainInfo.warnings
             return blockchainInfo;
+        }
+
+        /// <summary>
+        /// RPC method for returning a block statistics.
+        /// <para>
+        /// Returns json with block statistics
+        /// </para>
+        /// </summary>
+        /// <param name="hash_or_height">Hash of block to find.</param>
+        /// <param name="stats"></param>
+        /// <returns>The block according to format specified in <see cref="verbosity"/></returns>
+        [ActionName("getblockstats")]
+        [ActionDescription("Returns the block stats, given a block hash.")]
+        public object GetBlockStats(string hash_or_height, string values)
+        {
+            int height;
+            ChainedHeader chainedHeader;
+
+            if (int.TryParse(hash_or_height, out height))
+            {
+                chainedHeader = this.ChainIndexer.GetHeader(height);
+            }
+            else
+            {
+                uint256 blockHash = uint256.Parse(hash_or_height);
+                chainedHeader = this.ChainIndexer.GetHeader(blockHash);
+            }
+
+            if (chainedHeader == null)
+                return null;
+
+            var blockStats = new GetBlockStatsModel();
+            blockStats.BlockHash = chainedHeader.HashBlock.ToString();
+            blockStats.Height = chainedHeader.Height;
+
+            var block = this.blockStore.GetBlock(chainedHeader.HashBlock);
+            blockStats.Subsidy = block.Transactions.First(b => b.IsCoinBase).TotalOut.ToDecimal(MoneyUnit.ZEEV);
+            blockStats.Txs = block.Transactions.Count();
+            blockStats.Time = block.Header.Time;
+            blockStats.TotalSize = block.BlockSize.Value;
+            blockStats.TotalWeight = block.GetBlockWeight(this.Network.Consensus);
+            blockStats.TotalOut = block.Transactions.Sum(b => b.TotalOut.ToDecimal(MoneyUnit.ZEEV));
+            blockStats.MedianTime = chainedHeader.GetMedianTimePast().ToUnixTimeSeconds();
+            var builder = new TransactionBuilder(this.Network);
+
+            var arrSize = new List<int>();
+            var arrFee = new List<Money>();
+            var arrFeeRate = new List<FeeRate>();
+
+            foreach (var itemTx in block.Transactions)
+            {
+                blockStats.Ins += itemTx.Inputs.Count;
+                blockStats.Outs += itemTx.Outputs.Count;
+
+                arrSize.Add(itemTx.GetSerializedSize(this.Network.Consensus.ConsensusFactory));
+
+                if (!itemTx.IsCoinBase)
+                {
+                    var spendCoins = new List<ICoin>();
+
+                    foreach (var input in itemTx.Inputs)
+                    {
+                        var prevOutTx = this.blockStore.GetTransactionById(input.PrevOut.Hash);
+                        spendCoins.Add(new Coin(prevOutTx, input.PrevOut.N));
+                    }
+
+                    arrFee.Add(itemTx.GetFee(spendCoins.ToArray()));
+                    arrFeeRate.Add(itemTx.GetFeeRate(this.Network.Consensus.Options.WitnessScaleFactor, spendCoins.ToArray()));
+                }
+            }
+
+            if (arrSize.Count > 0)
+            {
+                blockStats.AvgTxSize = (decimal)arrSize.Average(b => b);
+                blockStats.MaxTxSize = arrSize.Max(b => b);
+                blockStats.MedianTxSize = arrSize.Median();
+                blockStats.MinTxSize = arrSize.Min(b => b);
+            }
+
+            if (arrFee.Count > 0)
+            {
+                blockStats.AvgFee = arrFee.Average(b => b.ToUnit(MoneyUnit.ZEEV));
+                blockStats.MaxFee = arrFee.Max(b => b.ToUnit(MoneyUnit.ZEEV));
+                blockStats.MedianFee = arrFee.Select(a => a.ToUnit(MoneyUnit.ZEEV)).Median();
+                blockStats.MedianFeeRate = arrFeeRate.Select(a => a.FeePerK.ToUnit(MoneyUnit.ZEEV)).Median();
+
+                blockStats.TotalFee = arrFee.Sum(b => b.ToUnit(MoneyUnit.ZEEV));
+            }
+
+            if (arrFeeRate.Count > 0)
+            {
+                blockStats.AvgFeeRate = arrFeeRate.Average(b => b.FeePerK.ToUnit(MoneyUnit.ZEEV));
+                blockStats.MaxFeeRate = arrFeeRate.Max(b => b.FeePerK.ToUnit(MoneyUnit.ZEEV));
+                blockStats.MinFee = arrFee.Min(b => b.ToUnit(MoneyUnit.ZEEV));
+                blockStats.MinFeeRate = arrFeeRate.Min(b => b.FeePerK.ToUnit(MoneyUnit.ZEEV));
+            }
+
+            return blockStats;
         }
 
         private SoftForksBip9 CreateSoftForksBip9(ThresholdStateModel metric, ThresholdState state)

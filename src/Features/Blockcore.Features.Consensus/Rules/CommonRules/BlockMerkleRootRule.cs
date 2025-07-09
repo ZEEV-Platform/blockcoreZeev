@@ -124,7 +124,7 @@ namespace Blockcore.Features.Consensus.Rules.CommonRules
                     
                     Buffer.BlockCopy(subTreeHashes[level].ToBytes(), 0, hash, 0, 32);
                     Buffer.BlockCopy(currentLeaveHash.ToBytes(), 0, hash, 32, 32);
-                    currentLeaveHash = Hashes.Hash256(hash);
+                    currentLeaveHash = new Hashes().Hash256(hash);
                 }
 
                 // Store the resulting hash at subTreeHashes position level.
@@ -162,7 +162,7 @@ namespace Blockcore.Features.Consensus.Rules.CommonRules
                     var rootBytes = root.ToBytes(); 
                     Buffer.BlockCopy(rootBytes, 0, hash, 0, 32);
                     Buffer.BlockCopy(rootBytes, 0, hash, 32, 32);
-                    root = Hashes.Hash256(hash);
+                    root = new Hashes().Hash256(hash);
 
                     // Increment processedLeavesCount to the value it would have if two entries at this
                     // level had existed.
@@ -184,7 +184,7 @@ namespace Blockcore.Features.Consensus.Rules.CommonRules
 
                         Buffer.BlockCopy(subTreeHashes[level].ToBytes(), 0, hashh, 0, 32);
                         Buffer.BlockCopy(root.ToBytes(), 0, hashh, 32, 32);
-                        root = Hashes.Hash256(hashh);
+                        root = new Hashes().Hash256(hashh);
 
                         level++;
                     }

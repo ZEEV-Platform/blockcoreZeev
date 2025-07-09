@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Consensus.TransactionInfo;
@@ -181,6 +182,7 @@ namespace Blockcore.Features.Wallet
 
                 this.AddRecipients(context);
                 this.AddCoins(context);
+                this.SubtractFeeFromRecipients(context);
                 this.AddFee(context);
 
                 if (this.network.MinTxFee > Money.Zero)
@@ -195,6 +197,12 @@ namespace Blockcore.Features.Wallet
             }
 
             return (maxSpendableAmount - fee, fee);
+        }
+
+        protected virtual void SubtractFeeFromRecipients(TransactionBuildContext context)
+        {
+            if (context.Recipients.Any(a => a.SubtractFeeFromAmount))
+                context.TransactionBuilder.SubtractFees();
         }
 
         /// <inheritdoc />
@@ -232,6 +240,7 @@ namespace Blockcore.Features.Wallet
             this.AddOpReturnOutput(context);
             this.AddCoins(context);
             this.FindChangeAddress(context);
+            this.SubtractFeeFromRecipients(context);
             this.AddFee(context);
 
             if (context.Time.HasValue)
@@ -249,7 +258,16 @@ namespace Blockcore.Features.Wallet
                 return;
 
             Types.Wallet wallet = this.walletManager.GetWalletByName(context.AccountReference.WalletName);
-            ExtKey seedExtKey = this.walletManager.GetExtKey(context.AccountReference, context.WalletPassword, context.CacheSecret);
+            ExtKey seedExtKey;
+
+            try
+            {
+                seedExtKey = this.walletManager.GetExtKey(context.AccountReference, context.WalletPassword, context.CacheSecret);
+            }
+            catch (Exception)
+            {
+                throw new SecurityException("Invalid password (or invalid Network)");
+            }
 
             var signingKeys = new HashSet<ISecret>();
             var added = new HashSet<HdAddress>();
@@ -262,7 +280,7 @@ namespace Blockcore.Features.Wallet
                     continue;
 
                 ExtKey addressExtKey = seedExtKey.Derive(new KeyPath(address.HdPath));
-                BitcoinExtKey addressPrivateKey = addressExtKey.GetWif(wallet.Network);
+                ZeevExtKey addressPrivateKey = addressExtKey.GetWif(wallet.Network);
                 signingKeys.Add(addressPrivateKey);
                 added.Add(address);
             }
@@ -303,7 +321,8 @@ namespace Blockcore.Features.Wallet
             long balance = context.UnspentOutputs.Sum(t => t.Transaction.Amount);
             long totalToSend = context.Recipients.Sum(s => s.Amount) + (context.OpReturnAmount ?? Money.Zero);
             if (balance < totalToSend)
-                throw new WalletException("Not enough funds.");
+                throw new WalletException(string.Format("Not enough funds. Maximum amount confirmed available: {0}", 
+                    new Money(balance).ToUnit(MoneyUnit.ZEEV)));
 
             Money sum = 0;
             var coins = new List<Coin>();
@@ -381,9 +400,6 @@ namespace Blockcore.Features.Wallet
             if (context.Recipients.Any(a => a.Amount == Money.Zero))
                 throw new WalletException("No amount specified.");
 
-            if (context.Recipients.Any(a => a.SubtractFeeFromAmount))
-                throw new NotImplementedException("Substracting the fee from the recipient is not supported yet.");
-
             foreach (Recipient recipient in context.Recipients)
                 context.TransactionBuilder.Send(recipient.ScriptPubKey, recipient.Amount);
         }
@@ -395,7 +411,7 @@ namespace Blockcore.Features.Wallet
         protected void AddFee(TransactionBuildContext context)
         {
             Money fee;
-            Money minTrxFee = new Money(this.network.MinTxFee, MoneyUnit.Satoshi);
+            Money minTrxFee = new Money(this.network.MinTxFee, MoneyUnit.Planck);
 
             // If the fee hasn't been set manually, calculate it based on the fee type that was chosen.
             if (context.TransactionFee == null)

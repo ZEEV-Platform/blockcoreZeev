@@ -80,12 +80,6 @@ namespace Blockcore.NBitcoin
             return null;
         }
 
-        public bool VerifyMessage(string message, string signature)
-        {
-            PubKey key = PubKey.RecoverFromMessage(message, signature);
-            return key.WitHash == this.Hash;
-        }
-
         private WitKeyId _Hash;
         public WitKeyId Hash
         {

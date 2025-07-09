@@ -10,11 +10,8 @@ using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
-using Blockcore.Networks;
 using Blockcore.Networks.ZEEV.Consensus;
-using Blockcore.Networks.ZEEV.Crypto.Blake2b;
 using Blockcore.P2P.Protocol.Payloads;
-using HashLib;
 using Microsoft.Extensions.Logging;
 
 namespace Blockcore.Networks.ZEEV.Rules
@@ -74,7 +71,7 @@ namespace Blockcore.Networks.ZEEV.Rules
                     var hashed = new byte[64];
                     Buffer.BlockCopy(hashWitness.ToBytes(), 0, hashed, 0, 32);
                     Buffer.BlockCopy(witness.Pushes.First(), 0, hashed, 32, 32);
-                    hashWitness = new uint256(Blake2B.ComputeHash(hashed, new Blake2BConfig() { OutputSizeInBytes = 32 }));
+                    hashWitness = new uint256(Blake2B.Blake2B256().ComputeHash(hashed));
 
                     if (!this.EqualsArray(hashWitness.ToBytes(), commitment.ToBytes(true).Skip(6).ToArray(), 32))
                     {
@@ -208,7 +205,7 @@ namespace Blockcore.Networks.ZEEV.Rules
             Buffer.BlockCopy(witnessReservedValue, 0, dataToHash, 32, 32);
 
             // 32-byte - Commitment hash: Double-SHA256(witness root hash|witness reserved value)
-            byte[] commitmentHash = Blake2B.ComputeHash(dataToHash, new Blake2BConfig() { OutputSizeInBytes = 32 });
+            byte[] commitmentHash = Blake2B.Blake2B256().ComputeHash(dataToHash);
 
             // The commitment is recorded in a scriptPubKey of the coinbase trasaction.
             var coinbaseScriptPubKeyFiledBytes = new byte[38];   // It must be at least 38 bytes, with the first 6-byte of 0x6a24aa21a9ed.

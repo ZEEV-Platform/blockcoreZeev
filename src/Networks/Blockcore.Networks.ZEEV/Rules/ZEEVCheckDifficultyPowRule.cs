@@ -2,10 +2,10 @@
 using Blockcore.Consensus.Chain;
 using Blockcore.Consensus.Rules;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
 using Blockcore.Networks.ZEEV.Components;
 using Blockcore.Networks.ZEEV.Consensus;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Networks.ZEEV.Rules
 {
@@ -34,9 +34,9 @@ namespace Blockcore.Networks.ZEEV.Rules
 
         public Target GetWorkRequired(ChainedHeader chainedHeaderToValidate, ZEEVConsensus consensus)
         {
-            ZEEVDigiShield digiShield = new ZEEVDigiShield();
+            var diffProcessor = new ZEEVLWMA();
 
-            return digiShield.GetWorkRequired(chainedHeaderToValidate, consensus);
+            return diffProcessor.GetWorkRequired(chainedHeaderToValidate, consensus);
         }
     }
 }

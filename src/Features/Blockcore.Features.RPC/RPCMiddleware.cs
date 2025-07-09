@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Blockcore.Configuration;
+using Blockcore.Consensus;
 using Blockcore.Features.Consensus;
 using Blockcore.Features.RPC.Exceptions;
 using Blockcore.NBitcoin.DataEncoders;
@@ -170,9 +172,10 @@ namespace Blockcore.Features.RPC
             }
             else if (httpContext.Response?.StatusCode == 500 || ex != null)
             {
-                JObject response = CreateError(RPCErrorCode.RPC_INTERNAL_ERROR, "Internal error");
+                var message = string.Format("Internal error - {0}", ex != null ? ex.Message : "Unknown");
+                JObject response = CreateError(RPCErrorCode.RPC_INTERNAL_ERROR, message);
                 httpContext.Response.ContentType = this.ContentType;
-                this.logger.LogError(new EventId(0), ex, "Internal error while calling RPC Method");
+                this.logger.LogError(new EventId(0), ex, message);
                 await httpContext.Response.WriteAsync(response.ToString(Formatting.Indented));
             }
         }
@@ -224,6 +227,8 @@ namespace Blockcore.Features.RPC
 
             contextFeatures.Set<IHttpRequestLifetimeFeature>(new HttpRequestLifetimeFeature());
 
+            this.logger.LogDebug("======================================================================RPC request:");
+
             var context = this.httpContextFactory.Create(contextFeatures);
             JObject response;
             try
@@ -238,7 +243,7 @@ namespace Blockcore.Features.RPC
                     response = new JObject();
                     response.Add("result", null);
                     response.Add("error", null);
-                } 
+                }
                 else
                 {
                     responseMemoryStream.Position = 0;
@@ -253,7 +258,15 @@ namespace Blockcore.Features.RPC
             }
             catch (Exception ex)
             {
-                this.logger.LogDebug("RPC request: {0} {1}", ex.Message, ex.StackTrace);
+                if (ex.Message.Contains(ConsensusErrors.TimeTooNew.Code) ||
+                   ex.Message.Contains("wallet-locked"))
+                {
+                    this.logger.LogDebug("RPC request: {0}", ex.Message);
+                } 
+                else
+                {
+                    this.logger.LogDebug("RPC request: {0} {1}", ex.Message, ex.StackTrace);
+                }
 
                 await this.HandleRpcInvokeExceptionAsync(context, ex);
 

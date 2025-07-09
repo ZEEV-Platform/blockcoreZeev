@@ -16,11 +16,11 @@ namespace Blockcore.Networks.ZEEV.Rules
             ZEEVConsensus consensus = (ZEEVConsensus)this.Parent.Network.Consensus;
 
             // Mining attack protection.
-            if (chainedHeader.Header.BlockTime < (chainedHeader.Previous.Header.BlockTime + consensus.PowTimeDelay))
-            {
-                this.Logger.LogTrace("(-)[TIME_TOO_NEW]");
-                ConsensusErrors.TimeTooNew.Throw();
-            }
+            //if (chainedHeader.Header.BlockTime < (chainedHeader.Previous.Header.BlockTime + consensus.PowTimeDelay))
+            //{
+            //    this.Logger.LogTrace("(-)[TIME_TOO_NEW]");
+            //    ConsensusErrors.TimeTooNew.Throw();
+            //}
         }
     }
 }

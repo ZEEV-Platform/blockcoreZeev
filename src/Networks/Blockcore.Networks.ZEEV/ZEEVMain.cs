@@ -40,7 +40,7 @@ namespace Blockcore.Networks.ZEEV
             this.DefaultAPIPort = 30566; //wf 7766 = decimal 30566
             this.MaxTimeOffsetSeconds = 25 * 60;
             this.MaxTipAge = 48 * 60 * 60;
-            this.MinTxFee = 1000;
+            this.MinTxFee = 2000;
             this.MaxTxFee = Money.Coins(1).Satoshi;
             this.FallbackFee = 20000;
             this.MinRelayTxFee = 1000;
@@ -59,12 +59,12 @@ namespace Blockcore.Networks.ZEEV
 
             var consensusOptions = new ConsensusOptions
             {
-                MaxBlockBaseSize = 1 * 1000 * 1000,
-                MaxBlockSerializedSize = 4 * 1000 * 1000,
+                MaxBlockBaseSize = (uint)(2.5 * 1000 * 1000),
+                MaxBlockSerializedSize = 10 * 1000 * 1000,
                 MaxStandardVersion = 2,
-                MaxStandardTxWeight = (4 * 1000 * 1000) / 10,
-                MaxBlockSigopsCost = 80000,
-                MaxStandardTxSigopsCost = 80000 / 5,
+                MaxStandardTxWeight = (10 * 1000 * 1000) / 10,
+                MaxBlockSigopsCost = 650000,
+                MaxStandardTxSigopsCost = 650000 / 5,
                 WitnessScaleFactor = 4,
             };
 
@@ -120,7 +120,6 @@ namespace Blockcore.Networks.ZEEV
                 proofOfStakeLimitV2: null,
                 proofOfStakeReward: Money.Zero,
                 proofOfStakeTimestampMask: 0,
-                powTimeDelay: TimeSpan.FromSeconds(25),
                 subsidityDecrease: Money.Coins((decimal)9.505)
             );
 

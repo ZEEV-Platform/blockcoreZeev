@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Blockcore.Consensus;
 using Blockcore.Consensus.BlockInfo;
 using Blockcore.Consensus.Chain;
@@ -11,13 +8,7 @@ using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.Networks.ZEEV.Components;
 using Blockcore.Networks.ZEEV.Crypto;
-using Blockcore.Networks.ZEEV.Crypto.Blake2b;
 using DBreeze.Utils;
-using HashLib;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
-using Polly;
-using static System.Net.Mime.MediaTypeNames;
-using static Blockcore.Features.Consensus.CoinViews.Coindb.FasterCoindb;
 
 namespace Blockcore.Networks.ZEEV.Consensus
 {
@@ -169,9 +160,9 @@ namespace Blockcore.Networks.ZEEV.Consensus
 
         public Target GetWorkRequired(ChainedHeader chainedHeaderToValidate, ZEEVConsensus consensus)
         {
-            ZEEVDigiShield digiShield = new ZEEVDigiShield();
+            var diffProcessor = new ZEEVLWMA();
 
-            return digiShield.GetWorkRequired(chainedHeaderToValidate, consensus);
+            return diffProcessor.GetWorkRequired(chainedHeaderToValidate, consensus);
         }
 
         /*
@@ -395,7 +386,7 @@ size:   data:
 
         private byte[] maskHash(byte[] prevBlockHash)
         {
-            return Blake2B.ComputeHash(prevBlockHash.Concat(new byte[32]).ToArray(), new Blake2BConfig() { OutputSizeInBytes = 32 });
+            return Blake2B.Blake2B256().ComputeHash(prevBlockHash.Concat(new byte[32]).ToArray());
         }
 
         private byte[] subHash()
@@ -422,13 +413,13 @@ size:   data:
                 var bytes = ms.GetBuffer();
                 Array.Resize(ref bytes, (int)ms.Length);
 
-                return Blake2B.ComputeHash(bytes, new Blake2BConfig() { OutputSizeInBytes = 32 });
+                return Blake2B.Blake2B256().ComputeHash(bytes);
             }
         }
 
         private byte[] commitHash(byte[] prevBlockHash)
         {
-            return Blake2B.ComputeHash(subHash().Concat(maskHash(prevBlockHash)), new Blake2BConfig() { OutputSizeInBytes = 32 });
+            return Blake2B.Blake2B256().ComputeHash(subHash().Concat(maskHash(prevBlockHash)));
         }
 
         private byte[] padding(int size, byte[] prevBlock, byte[] treeRoot)

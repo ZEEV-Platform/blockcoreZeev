@@ -71,7 +71,7 @@ namespace Blockcore.Features.Consensus.Rules.CommonRules
                     var hashed = new byte[64];
                     Buffer.BlockCopy(hashWitness.ToBytes(), 0, hashed, 0, 32);
                     Buffer.BlockCopy(witness.Pushes.First(), 0, hashed, 32, 32);
-                    hashWitness = Hashes.Hash256(hashed);
+                    hashWitness = new Hashes().Hash256(hashed);
 
                     if (!this.EqualsArray(hashWitness.ToBytes(), commitment.ToBytes(true).Skip(6).ToArray(), 32))
                     {
@@ -205,7 +205,7 @@ namespace Blockcore.Features.Consensus.Rules.CommonRules
             Buffer.BlockCopy(witnessReservedValue, 0, dataToHash, 32, 32);
 
             // 32-byte - Commitment hash: Double-SHA256(witness root hash|witness reserved value)
-            byte[] commitmentHash = Hashes.Hash256(dataToHash).ToBytes();
+            byte[] commitmentHash = new Hashes().Hash256(dataToHash).ToBytes();
 
             // The commitment is recorded in a scriptPubKey of the coinbase transaction.
             var coinbaseScriptPubKeyFiledBytes = new byte[38];   // It must be at least 38 bytes, with the first 6-byte of 0x6a24aa21a9ed.

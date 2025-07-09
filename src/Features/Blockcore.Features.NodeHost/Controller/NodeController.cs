@@ -162,7 +162,7 @@ namespace Blockcore.Controllers
                 ConsensusHeight = this.chainState.ConsensusTip?.Height,
                 DataDirectoryPath = this.nodeSettings.DataDir,
                 Testnet = this.network.IsTest(),
-                RelayFee = this.nodeSettings.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.BTC) ?? 0,
+                RelayFee = this.nodeSettings.MinRelayTxFeeRate?.FeePerK?.ToUnit(MoneyUnit.ZEEV) ?? 0,
                 RunningTime = this.dateTimeProvider.GetUtcNow() - this.fullNode.StartTime,
                 CoinTicker = this.network.CoinTicker,
                 State = this.fullNode.State.ToString(),

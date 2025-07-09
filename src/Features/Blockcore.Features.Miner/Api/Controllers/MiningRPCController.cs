@@ -273,7 +273,7 @@ namespace Blockcore.Features.Miner.Api.Controllers
                                 foreach (TxOut txout in item.Outputs)
                                     nSigOps += txout.ScriptPubKey.GetSigOpCount(false);
 
-                                transaction.Fee = (long)pblockTemplate.TotalFee.ToUnit(MoneyUnit.Satoshi);
+                                transaction.Fee = (long)pblockTemplate.TotalFee.ToUnit(MoneyUnit.Planck);
                                 transaction.Sigops = nSigOps;
                                 transaction.Weight = item.GetVirtualSize(this.Network.Consensus.Options.WitnessScaleFactor);
 
@@ -428,10 +428,10 @@ namespace Blockcore.Features.Miner.Api.Controllers
             var estimation = this.txMempool.EstimateSmartFee(nblocks, out foundAtBlock, height, isConservative);
 
             result.Blocks = foundAtBlock;
-            result.FeeRate = estimation.FeePerK.ToUnit(MoneyUnit.BTC);
+            result.FeeRate = estimation.FeePerK.ToUnit(MoneyUnit.ZEEV);
             if (result.FeeRate.Equals(0))
             {
-                result.FeeRate = new Money(10).ToUnit(MoneyUnit.BTC);
+                result.FeeRate = new Money(10).ToUnit(MoneyUnit.ZEEV);
             }
 
             return result;

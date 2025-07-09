@@ -213,7 +213,7 @@ namespace Blockcore.Base
 
             connectionParameters.TemplateBehaviors.Add(new PingPongBehavior());
             connectionParameters.TemplateBehaviors.Add(new EnforcePeerVersionCheckBehavior(this.chainIndexer, this.nodeSettings, this.network, this.loggerFactory));
-            connectionParameters.TemplateBehaviors.Add(new ConsensusManagerBehavior(this.chainIndexer, this.initialBlockDownloadState, this.consensusManager, this.peerBanning, this.loggerFactory));
+            connectionParameters.TemplateBehaviors.Add(new ConsensusManagerBehavior(this.chainIndexer, this.initialBlockDownloadState, this.consensusManager, this.peerBanning, this.loggerFactory, this.network));
 
             // TODO: Once a proper rate limiting strategy has been implemented, this check will be removed.
             if (!this.network.IsRegTest())

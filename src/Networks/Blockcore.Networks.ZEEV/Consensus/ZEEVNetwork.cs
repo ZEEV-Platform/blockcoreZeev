@@ -10,7 +10,6 @@ using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.DataEncoders;
-using DBreeze.Utils;
 
 namespace Blockcore.Networks.ZEEV.Consensus
 {

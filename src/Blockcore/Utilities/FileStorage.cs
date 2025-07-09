@@ -139,6 +139,18 @@ namespace Blockcore.Utilities
         }
 
         /// <summary>
+        /// Delete file from folder.
+        /// </summary>
+        /// <param name="fileName">The name of the file to look for.</param>
+        public void Delete(string fileName)
+        {
+            Guard.NotEmpty(fileName, nameof(fileName));
+
+            string filePath = Path.Combine(this.FolderPath, fileName);
+            File.Delete(filePath);
+        }
+
+        /// <summary>
         /// Checks whether a file with the specified name exists in the folder.
         /// </summary>
         /// <param name="fileName">The name of the file to look for.</param>

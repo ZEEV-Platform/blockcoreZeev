@@ -254,7 +254,7 @@ namespace Blockcore.NBitcoin
         }
 
         public ScriptId(Script script)
-            : this(Hashes.Hash160(script._Script))
+            : this(new Hashes().Hash160(script._Script))
         {
         }
 

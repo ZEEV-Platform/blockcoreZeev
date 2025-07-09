@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Blockcore.Base.Deployments;
 using Blockcore.NBitcoin;
-using Blockcore.NBitcoin.BouncyCastle.math;
+using Org.BouncyCastle.Math;
 
 namespace Blockcore.Consensus
 {

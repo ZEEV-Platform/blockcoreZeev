@@ -65,5 +65,34 @@ namespace Blockcore.Utilities
             else
                 return ordered.ElementAt(midpoint);
         }
+
+        /// <summary>
+        /// Calculates the median of a sequence of <see cref="decimal"/> values.
+        /// </summary>
+        /// <param name="source">A sequence of <see cref="decimal"/> values to calculate the median of.</param>
+        /// <returns>The median of the sequence, or null if the source sequence is empty.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the source is null.</exception>
+        public static decimal Median(this IEnumerable<decimal> source)
+        {
+            int count = source.Count();
+            if (count == 0)
+                return 0;
+
+            // Order the elements and convert to a list for indexed access
+            var sortedList = source.OrderBy(n => n).ToList();
+            int countList = sortedList.Count;
+            int mid = countList / 2;
+
+            if (countList % 2 == 0) // Even number of elements
+            {
+                // Median is the average of the two middle elements
+                return (sortedList[mid - 1] + sortedList[mid]) / 2m; // Use 'm' for decimal literal
+            }
+            else // Odd number of elements
+            {
+                // Median is the middle element
+                return sortedList[mid];
+            }
+        }
     }
 }

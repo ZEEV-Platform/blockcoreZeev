@@ -153,7 +153,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
         [ActionDescription("Sends money to an address. Requires wallet to be unlocked using walletpassphrase.")]
         public async Task<uint256> SendToAddressAsync(BitcoinAddress address, decimal amount, string commentTx, string commentDest, decimal? fee = null)
         {
-            decimal transactionFee = fee ?? Money.Satoshis(this.FullNode.Network.MinTxFee).ToDecimal(MoneyUnit.BTC);
+            decimal transactionFee = fee ?? Money.Satoshis(this.FullNode.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV);
 
             TransactionBuildContext context = new TransactionBuildContext(this.FullNode.Network)
             {
@@ -173,7 +173,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
             }
             catch (SecurityException)
             {
-                throw new RPCServerException(RPCErrorCode.RPC_WALLET_UNLOCK_NEEDED, "Wallet unlock needed");
+                throw new RPCServerException(RPCErrorCode.RPC_WALLET_UNLOCK_NEEDED, "wallet-locked - Wallet unlock needed");
             }
             catch (WalletException exception)
             {
@@ -238,7 +238,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                     if (!isValid) throw new Exception(string.Format("Output address {0} is invalid.", entry.Key));
 
                     var destination = BitcoinAddress.Create(entry.Key, this.Network).ScriptPubKey;
-                    transaction.AddOutput(new TxOut(new Money(entry.Value, MoneyUnit.BTC), destination));
+                    transaction.AddOutput(new TxOut(new Money(entry.Value, MoneyUnit.ZEEV), destination));
                 }
 
                 var response = new TransactionHexModel()
@@ -600,7 +600,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
             WalletAccountReference account = this.GetWalletAccountReference();
 
             Money balance = this.walletManager.GetSpendableTransactionsInAccount(account, minConfirmations).Sum(x => x.Transaction.Amount);
-            return balance?.ToUnit(MoneyUnit.BTC) ?? 0;
+            return balance?.ToUnit(MoneyUnit.ZEEV) ?? 0;
         }
 
         [ActionName("listsinceblock")]
@@ -791,8 +791,8 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                     {
                         Address = paymentDetail.DestinationAddress,
                         Category = GetTransactionDetailsCategoryModel.Send,
-                        Amount = -paymentDetail.Amount.ToDecimal(MoneyUnit.BTC),
-                        Fee = -feeSent.ToDecimal(MoneyUnit.BTC),
+                        Amount = -paymentDetail.Amount.ToDecimal(MoneyUnit.ZEEV),
+                        Fee = -feeSent.ToDecimal(MoneyUnit.ZEEV),
                         OutputIndex = paymentDetail.OutputIndex
                     });
                 }
@@ -827,7 +827,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                 {
                     Address = trxInWallet.Address,
                     Category = category,
-                    Amount = trxInWallet.Amount.ToDecimal(MoneyUnit.BTC),
+                    Amount = trxInWallet.Amount.ToDecimal(MoneyUnit.ZEEV),
                     OutputIndex = trxInWallet.Index
                 });
             }
@@ -1171,7 +1171,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
             }
             catch (SecurityException)
             {
-                throw new RPCServerException(RPCErrorCode.RPC_WALLET_UNLOCK_NEEDED, "Wallet unlock needed");
+                throw new RPCServerException(RPCErrorCode.RPC_WALLET_UNLOCK_NEEDED, "wallet-locked - Wallet unlock needed");
             }
             catch (WalletException exception)
             {
@@ -1197,7 +1197,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
             WalletBalanceResult result = wallet.walletStore.GetBalanceForAccount(account.Index, account.IsNormalAccount());
 
             var balance = Money.Coins(GetBalance(string.Empty));
-            var immature = Money.Coins(balance.ToDecimal(MoneyUnit.BTC) - GetBalance(string.Empty, (int)this.FullNode.Network.Consensus.CoinbaseMaturity)); // Balance - Balance(AtHeight)
+            var immature = Money.Coins(balance.ToDecimal(MoneyUnit.ZEEV) - GetBalance(string.Empty, (int)this.FullNode.Network.Consensus.CoinbaseMaturity)); // Balance - Balance(AtHeight)
 
             var model = new GetWalletInfoModel
             {

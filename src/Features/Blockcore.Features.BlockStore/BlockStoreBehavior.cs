@@ -10,10 +10,12 @@ using Blockcore.Interfaces;
 using Blockcore.NBitcoin;
 using Blockcore.P2P.Peer;
 using Blockcore.P2P.Protocol;
+using Blockcore.P2P.Protocol.Compression;
 using Blockcore.P2P.Protocol.Behaviors;
 using Blockcore.P2P.Protocol.Payloads;
 using Blockcore.Utilities;
 using Microsoft.Extensions.Logging;
+using Blockcore.Networks;
 
 namespace Blockcore.Features.BlockStore
 {
@@ -72,12 +74,21 @@ namespace Blockcore.Features.BlockStore
 
         protected readonly IChainState chainState;
 
-        public BlockStoreBehavior(ChainIndexer chainIndexer, IChainState chainState, ILoggerFactory loggerFactory, IConsensusManager consensusManager, IBlockStoreQueue blockStoreQueue)
+        private ConsensusFactory ConsensusFactory { get; set; }
+
+        public BlockStoreBehavior(ChainIndexer chainIndexer, IChainState chainState, ILoggerFactory loggerFactory, IConsensusManager consensusManager, IBlockStoreQueue blockStoreQueue, Network network)
+            :this(chainIndexer, chainState, loggerFactory, consensusManager, blockStoreQueue, network.Consensus.ConsensusFactory)
+        {
+
+        }
+
+        public BlockStoreBehavior(ChainIndexer chainIndexer, IChainState chainState, ILoggerFactory loggerFactory, IConsensusManager consensusManager, IBlockStoreQueue blockStoreQueue, ConsensusFactory consensusFactory)
         {
             Guard.NotNull(chainIndexer, nameof(chainIndexer));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
             Guard.NotNull(consensusManager, nameof(consensusManager));
             Guard.NotNull(blockStoreQueue, nameof(blockStoreQueue));
+            Guard.NotNull(consensusFactory, nameof(consensusFactory));
 
             this.ChainIndexer = chainIndexer;
             this.chainState = chainState;
@@ -91,6 +102,8 @@ namespace Blockcore.Features.BlockStore
 
             this.PreferHeaders = false;
             this.preferHeaderAndIDs = false;
+
+            this.ConsensusFactory = consensusFactory;
         }
 
         protected override void AttachCore()
@@ -287,8 +300,8 @@ namespace Blockcore.Features.BlockStore
                 {
                     this.logger.LogDebug("Sending block '{0}' to peer '{1}'.", chainedHeaderBlock.ChainedHeader, peer.RemoteSocketEndpoint);
 
-                    //TODO strip block of witness if node does not support
-                    await peer.SendMessageAsync(new BlockPayload(chainedHeaderBlock.Block.WithOptions(this.ChainIndexer.Network.Consensus.ConsensusFactory, peer.SupportedTransactionOptions))).ConfigureAwait(false);
+                    await peer.SendWithLZ4CompressionAsync(new BlockPayload(chainedHeaderBlock.Block.WithOptions(this.ChainIndexer.Network.Consensus.ConsensusFactory, peer.SupportedTransactionOptions)), 
+                        this.ConsensusFactory).ConfigureAwait(false);
                 }
                 else
                 {
@@ -373,7 +386,7 @@ namespace Blockcore.Features.BlockStore
                     // We expect peer to answer with getheaders message.
                     if (bestSentHeader == null)
                     {
-                        await peer.SendMessageAsync(this.BuildHeadersAnnouncePayload(new[] { blocksToAnnounce.Last() })).ConfigureAwait(false);
+                        await peer.SendWithLZ4CompressionAsync(this.BuildHeadersAnnouncePayload(new[] { blocksToAnnounce.Last() }), this.ConsensusFactory).ConfigureAwait(false);
 
                         this.logger.LogTrace("(-)[SENT_SINGLE_HEADER]");
                         return;
@@ -427,7 +440,7 @@ namespace Blockcore.Features.BlockStore
                         this.lastSentHeader = bestIndex;
                         this.consensusManagerBehavior.UpdateBestSentHeader(this.lastSentHeader);
 
-                        await peer.SendMessageAsync(this.BuildHeadersAnnouncePayload(headers)).ConfigureAwait(false);
+                        await peer.SendWithLZ4CompressionAsync(this.BuildHeadersAnnouncePayload(headers), this.ConsensusFactory).ConfigureAwait(false);
                         this.logger.LogTrace("(-)[SEND_HEADERS_PAYLOAD]");
                         return;
                     }
@@ -487,7 +500,7 @@ namespace Blockcore.Features.BlockStore
 
         public override object Clone()
         {
-            var res = new BlockStoreBehavior(this.ChainIndexer, this.chainState, this.loggerFactory, this.consensusManager, this.blockStoreQueue)
+            var res = new BlockStoreBehavior(this.ChainIndexer, this.chainState, this.loggerFactory, this.consensusManager, this.blockStoreQueue, this.ConsensusFactory)
             {
                 CanRespondToGetBlocksPayload = this.CanRespondToGetBlocksPayload,
                 CanRespondToGetDataPayload = this.CanRespondToGetDataPayload

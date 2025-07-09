@@ -8,9 +8,11 @@ using Blockcore.Consensus.BlockInfo;
 using Blockcore.Consensus.Chain;
 using Blockcore.Interfaces;
 using Blockcore.NBitcoin;
+using Blockcore.Networks;
 using Blockcore.P2P.Peer;
 using Blockcore.P2P.Protocol;
 using Blockcore.P2P.Protocol.Behaviors;
+using Blockcore.P2P.Protocol.Compression;
 using Blockcore.P2P.Protocol.Payloads;
 using Blockcore.Utilities;
 using Blockcore.Utilities.Extensions;
@@ -74,7 +76,14 @@ namespace Blockcore.Consensus
         /// <summary>Protects write access to the <see cref="BestSentHeader"/>.</summary>
         private readonly object bestSentHeaderLock;
 
-        public ConsensusManagerBehavior(ChainIndexer chainIndexer, IInitialBlockDownloadState initialBlockDownloadState, IConsensusManager consensusManager, IPeerBanning peerBanning, ILoggerFactory loggerFactory)
+        private ConsensusFactory ConsensusFactory { get; set; }
+
+        public ConsensusManagerBehavior(ChainIndexer chainIndexer, IInitialBlockDownloadState initialBlockDownloadState, IConsensusManager consensusManager, IPeerBanning peerBanning, ILoggerFactory loggerFactory, Network network)
+            : this(chainIndexer, initialBlockDownloadState, consensusManager, peerBanning, loggerFactory, network.Consensus.ConsensusFactory)
+        {
+        }
+
+        public ConsensusManagerBehavior(ChainIndexer chainIndexer, IInitialBlockDownloadState initialBlockDownloadState, IConsensusManager consensusManager, IPeerBanning peerBanning, ILoggerFactory loggerFactory, ConsensusFactory consensusFactory)
         {
             this.LoggerFactory = loggerFactory;
             this.InitialBlockDownloadState = initialBlockDownloadState;
@@ -87,6 +96,8 @@ namespace Blockcore.Consensus
             this.bestSentHeaderLock = new object();
 
             this.logger = loggerFactory.CreateLogger(this.GetType().FullName);
+
+            this.ConsensusFactory = consensusFactory;
         }
 
         /// <summary>Presents cached headers to <see cref="Consensus.ConsensusManager"/> from the cache if any and removes consumed from the cache.</summary>
@@ -200,7 +211,7 @@ namespace Blockcore.Consensus
             {
                 try
                 {
-                    await peer.SendMessageAsync(headersPayload).ConfigureAwait(false);
+                    await peer.SendWithLZ4CompressionAsync(headersPayload, this.ConsensusFactory).ConfigureAwait(false);
 
                     // Do not set best sent header if no new headers were sent.
                     if (lastHeader != null)
@@ -713,7 +724,7 @@ namespace Blockcore.Consensus
         /// <inheritdoc />
         public override object Clone()
         {
-            return new ConsensusManagerBehavior(this.ChainIndexer, this.InitialBlockDownloadState, this.ConsensusManager, this.PeerBanning, this.LoggerFactory);
+            return new ConsensusManagerBehavior(this.ChainIndexer, this.InitialBlockDownloadState, this.ConsensusManager, this.PeerBanning, this.LoggerFactory, this.ConsensusFactory);
         }
 
         internal int GetCachedItemsCount()

@@ -452,7 +452,7 @@ namespace Blockcore.Features.Consensus.CoinViews.Coindb
                     var bytes = System.Text.Encoding.UTF8.GetBytes(key.tableType);
                     byte[] b = bytes.ToArray().Concat(key.key).ToArray();
 
-                    var hash256 = Hashes.Hash256(b);
+                    var hash256 = new Hashes().Hash256(b);
 
                     long res = 0;
                     foreach (byte bt in hash256.ToBytes())
