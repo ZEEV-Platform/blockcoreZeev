@@ -122,11 +122,8 @@ namespace Blockcore.Networks.ZEEV.Consensus
             ConsensusOptions consensusOptions,
             int coinType,
             uint256 hashGenesisBlock,
-            int subsidyHalvingInterval,
-            int majorityEnforceBlockUpgrade,
-            int majorityRejectBlockOutdated,
-            int majorityWindow,
-            BuriedDeploymentsArray buriedDeployments,
+            int subsidyInterval,
+             BuriedDeploymentsArray buriedDeployments,
             IBIP9DeploymentsArray bip9Deployments,
             uint256 bip34Hash,
             int minerConfirmationWindow,
@@ -137,55 +134,34 @@ namespace Blockcore.Networks.ZEEV.Consensus
             long premineHeight,
             Money premineReward,
             Money proofOfWorkReward,
-            TimeSpan targetTimespan,
             TimeSpan targetSpacing,
             bool powAllowMinDifficultyBlocks,
-            bool posNoRetargeting,
-            bool powNoRetargeting,
             Target powLimit,
             uint256 minimumChainWork,
-            bool isProofOfStake,
-            int lastPowBlock,
-            BigInteger proofOfStakeLimit,
-            BigInteger proofOfStakeLimitV2,
-            Money proofOfStakeReward,
-            uint proofOfStakeTimestampMask,
             Money subsidityDecrease)
         {
             this.CoinbaseMaturity = coinbaseMaturity;
             this.PremineReward = premineReward;
             this.PremineHeight = premineHeight;
             this.ProofOfWorkReward = proofOfWorkReward;
-            this.ProofOfStakeReward = proofOfStakeReward;
             this.MaxReorgLength = maxReorgLength;
             this.MaxMoney = maxMoney;
             this.Options = consensusOptions;
             this.BuriedDeployments = buriedDeployments;
             this.BIP9Deployments = bip9Deployments;
-            this.SubsidyHalvingInterval = subsidyHalvingInterval;
-            this.MajorityEnforceBlockUpgrade = majorityEnforceBlockUpgrade;
-            this.MajorityRejectBlockOutdated = majorityRejectBlockOutdated;
-            this.MajorityWindow = majorityWindow;
+            this.SubsidyHalvingInterval = subsidyInterval;
             this.BIP34Hash = bip34Hash;
             this.PowLimit = powLimit;
-            this.TargetTimespan = targetTimespan;
             this.TargetSpacing = targetSpacing;
             this.PowAllowMinDifficultyBlocks = powAllowMinDifficultyBlocks;
-            this.PosNoRetargeting = posNoRetargeting;
-            this.PowNoRetargeting = powNoRetargeting;
             this.HashGenesisBlock = hashGenesisBlock;
             this.MinimumChainWork = minimumChainWork;
             this.MinerConfirmationWindow = minerConfirmationWindow;
             this.CoinType = coinType;
-            this.ProofOfStakeLimit = proofOfStakeLimit;
-            this.ProofOfStakeLimitV2 = proofOfStakeLimitV2;
-            this.LastPOWBlock = lastPowBlock;
-            this.IsProofOfStake = isProofOfStake;
             this.DefaultAssumeValid = defaultAssumeValid;
             this.ConsensusFactory = consensusFactory;
             this.ConsensusRules = new ConsensusRules();
             this.MempoolRules = new List<Type>();
-            this.ProofOfStakeTimestampMask = proofOfStakeTimestampMask;
             this.SubsidityDecrease = subsidityDecrease;
         }
     }

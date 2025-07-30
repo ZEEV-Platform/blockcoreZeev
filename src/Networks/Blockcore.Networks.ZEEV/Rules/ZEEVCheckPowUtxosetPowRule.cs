@@ -50,7 +50,7 @@ namespace Blockcore.Networks.ZEEV.Rules
         int halvings = height / this.consensus.SubsidyHalvingInterval;
 
         // Force block reward to zero when right shift is undefined.
-        if (halvings >= 101)
+        if (halvings >= 401)
             return 0;
 
         Money subsidy = this.consensus.ProofOfWorkReward;
