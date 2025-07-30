@@ -134,6 +134,7 @@ namespace Blockcore.Networks.ZEEV.Consensus
             long premineHeight,
             Money premineReward,
             Money proofOfWorkReward,
+            TimeSpan targetTimespan,
             TimeSpan targetSpacing,
             bool powAllowMinDifficultyBlocks,
             Target powLimit,
@@ -152,6 +153,7 @@ namespace Blockcore.Networks.ZEEV.Consensus
             this.SubsidyHalvingInterval = subsidyInterval;
             this.BIP34Hash = bip34Hash;
             this.PowLimit = powLimit;
+            this.TargetTimespan = targetTimespan;
             this.TargetSpacing = targetSpacing;
             this.PowAllowMinDifficultyBlocks = powAllowMinDifficultyBlocks;
             this.HashGenesisBlock = hashGenesisBlock;
