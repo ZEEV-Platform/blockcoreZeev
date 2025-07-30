@@ -90,37 +90,25 @@ namespace Blockcore.Networks.ZEEV
             this.Consensus = new ZEEVConsensus(
                 consensusFactory: consensusFactory,
                 consensusOptions: consensusOptions,
-                coinType: 0,
+                coinType: (int)ZEEVCoinType.CoinTypes.ZEEVMain,
                 hashGenesisBlock: genesisBlock.GetHash(),
-                subsidyHalvingInterval: 26980,
-                majorityEnforceBlockUpgrade: 750,
-                majorityRejectBlockOutdated: 950,
-                majorityWindow: 1000,
+                subsidyInterval: 262980,
                 buriedDeployments: buriedDeployments,
                 bip9Deployments: bip9Deployments,
                 bip34Hash: genesisBlock.GetHash(),
-                minerConfirmationWindow: 2016, // nPowTargetTimespan / nPowTargetSpacing
+                minerConfirmationWindow: 40320,
                 maxReorgLength: 0,
                 defaultAssumeValid: uint256.Zero,
-                maxMoney: 1000000000 * Money.COIN,
-                coinbaseMaturity: 25,
+                maxMoney: 1054600000 * Money.COIN,
+                coinbaseMaturity: 1000,
                 premineHeight: 0,
                 premineReward: Money.Zero,
-                proofOfWorkReward: Money.Coins((decimal)950.5),
-                targetTimespan: TimeSpan.FromSeconds(14 * 24 * 60 * 60), // two weeks
+                proofOfWorkReward: Money.Coins(20),
                 targetSpacing: TimeSpan.FromSeconds(30),
                 powAllowMinDifficultyBlocks: false,
-                posNoRetargeting: false,
-                powNoRetargeting: false,
-                powLimit: new Target(new uint256("0000000000ffff00000000000000000000000000000000000000000000000000")),
-                minimumChainWork: new uint256("00000000000000000000000000000000000000000000000075b5a2b7bf522d45"),
-                isProofOfStake: false,
-                lastPowBlock: default(int),
-                proofOfStakeLimit: null,
-                proofOfStakeLimitV2: null,
-                proofOfStakeReward: Money.Zero,
-                proofOfStakeTimestampMask: 0,
-                subsidityDecrease: Money.Coins((decimal)9.505)
+                powLimit: new Target(new uint256("00000000ffff0000000000000000000000000000000000000000000000000000")),
+                minimumChainWork: uint256.Zero,
+                subsidityDecrease: Money.Coins((decimal)0.05)
             );
 
             this.Base58Prefixes = new byte[12][];

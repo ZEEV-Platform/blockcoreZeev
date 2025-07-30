@@ -11,10 +11,11 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **Coin Ticker**: ZEEV
 - **Consensus Algorithm**: Proof of Work (PoW)
 - **Block Time**: 30 seconds
-- **Block Reward**: 950.5 ZEEV
-- **Maximum Supply**: 1,000,000,000 ZEEV
-- **Subsidy Decrease**: 9.505 ZEEV per halving
-- **Halving Interval**: 26,980 blocks
+- **Block Reward**: 20 ZEEV
+- **Maximum Supply**: 1,054,600,000 ZEEV
+- **Subsidy Decrease**: 0,05 ZEEV per subsidity decrease (every quarter)
+- **Subsidy Interval**: 262980 blocks
+- **Target Difficult Time**: 60 blocks
 
 ### Network Parameters
 
@@ -24,6 +25,8 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **API Port**: 30566
 - **Magic Bytes**: 0x7a656576 ("zeev")
 - **Bech32 Prefix**: "zv"
+- **Coinbase Maturity**: 1000
+- **Confirmation Window**: 40320
 
 #### Testnet (ZEEVTest)
 - **Default Port**: 4927
@@ -31,6 +34,8 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **API Port**: 30566
 - **Magic Bytes**: 0x7665657a ("veez")
 - **Bech32 Prefix**: "zv"
+- **Coinbase Maturity**: 1
+- **Confirmation Window**: 403
 
 ### Block and Transaction Specifications
 
@@ -40,7 +45,6 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **Maximum Transaction Fee**: 100,000,000 satoshis (1 ZEEV)
 - **Fallback Fee**: 20,000 satoshis
 - **Minimum Relay Fee**: 1,000 satoshis
-- **Coinbase Maturity**: 25 blocks
 
 ### Address Formats
 
@@ -64,8 +68,6 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **ZEEVConsensus**: Custom consensus implementation
 - **ZEEVConsensusFactory**: Factory for creating consensus-specific objects
 - **ZEEVLWMA**: Linear Weighted Moving Average difficulty adjustment
-- **Target Time**: 14 days retarget window
-- **Miner Confirmation Window**: 2016 blocks
 
 #### 2. Network Layer
 - **P2P Protocol**: Based on Blockcore's P2P implementation
