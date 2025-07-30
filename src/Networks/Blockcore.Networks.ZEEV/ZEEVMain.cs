@@ -104,6 +104,7 @@ namespace Blockcore.Networks.ZEEV
                 premineHeight: 0,
                 premineReward: Money.Zero,
                 proofOfWorkReward: Money.Coins(20),
+                targetTimespan: TimeSpan.FromSeconds(60 * 30),
                 targetSpacing: TimeSpan.FromSeconds(30),
                 powAllowMinDifficultyBlocks: false,
                 powLimit: new Target(new uint256("00000000ffff0000000000000000000000000000000000000000000000000000")),
