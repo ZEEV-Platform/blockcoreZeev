@@ -808,7 +808,7 @@ namespace TESTZEEVTPS
         public int Size { get; set; }
         public int VirtualSize { get; set; }
         public Money Fee { get; set; } = Money.Zero;
-        public decimal FeeRate { get; set; } // satoshi per vbyte
+        public decimal FeeRate { get; set; } // plancks per vbyte
         public Money TotalInputAmount { get; set; } = Money.Zero;
         public Money TotalOutputAmount { get; set; } = Money.Zero;
         public bool HasChangeOutput { get; set; }

@@ -19,7 +19,7 @@ namespace TESTZEEVTPS
 
         public static async Task Main(string[] args)
         {
-            args = new string[] { "real" };
+            args = new string[] { "" };
 
             Console.WriteLine("=== Blockcore TPS Performance Tests ===");
             Console.WriteLine($"Blockchain Parameters: {BLOCK_TIME_SECONDS}s blocks, {BLOCK_SIZE_BYTES / 1_048_576.0:F1}MB block size");
@@ -133,7 +133,7 @@ namespace TESTZEEVTPS
                 Console.WriteLine($"• Best single-thread TPS: {result1.TPS:F2}");
                 Console.WriteLine($"• Best parallel TPS: {result2.TPS:F2}");
                 Console.WriteLine($"• Average transaction size: {result1.AverageTransactionSize} bytes");
-                Console.WriteLine($"• Average fees: {result1.FeesPerTransaction:F0} satoshi/tx");
+                Console.WriteLine($"• Average fees: {result1.FeesPerTransaction:F0} plancks/tx");
                 Console.WriteLine($"• Generation success rate: {result1.SuccessRate:P1}");
                 
                 // Block constraint analysis

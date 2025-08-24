@@ -41,10 +41,10 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 
 - **Maximum Block Size**: 2.5 MB base size
 - **Maximum Transaction Weight**: 1,000,000
-- **Minimum Transaction Fee**: 2,000 satoshis
-- **Maximum Transaction Fee**: 100,000,000 satoshis (1 ZEEV)
-- **Fallback Fee**: 20,000 satoshis
-- **Minimum Relay Fee**: 1,000 satoshis
+- **Minimum Transaction Fee**: 2,000 plancks
+- **Maximum Transaction Fee**: 100,000,000 plancks (1 ZEEV)
+- **Fallback Fee**: 20,000 plancks
+- **Minimum Relay Fee**: 1,000 plancks
 
 ### Address Formats
 
