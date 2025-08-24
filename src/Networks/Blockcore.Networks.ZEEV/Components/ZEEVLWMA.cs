@@ -47,13 +47,6 @@ namespace Blockcore.Networks.ZEEV.Components
                 var target = chainedHeader.Header.Bits;
                 var bitsBigInteger = target.ToBigInteger();
 
-                if (lastTime != 0)
-                {
-                    var resu = lastTime - chainedHeader.Header.BlockTime.ToUnixTimeSeconds();
-                    s.Append(resu + " - ");
-                }
-
-
                 lastTime = chainedHeader.Header.BlockTime.ToUnixTimeSeconds();
             }
 
@@ -61,11 +54,6 @@ namespace Blockcore.Networks.ZEEV.Components
 
             var oldTarget = new Target(chainedHeaderToValidate.Header.Bits);
             var finalTarget = newTarget;
-            Console.WriteLine("before");
-            Console.WriteLine(finalTarget.Difficulty);
-
-            Console.WriteLine(finalTarget.Difficulty);
-            Console.WriteLine(s);
 
             return finalTarget;
         }

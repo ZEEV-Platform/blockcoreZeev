@@ -27,6 +27,8 @@ namespace FalconTest
             var passphase = "Extra Seed Words";
 
             TestFalcon();
+
+            Console.ReadKey();
         }
 
         public static string ByteArrayToString(byte[] bytes)

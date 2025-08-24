@@ -31,6 +31,8 @@ namespace TestLZ4Compression
                 Console.WriteLine(ex.StackTrace);
                 Environment.Exit(1);
             }
+
+            Console.ReadKey();
         }
 
         private static async Task RunAllTestsAsync(ILogger<CompressionBehavior> logger, Mock<ConsensusFactory> mockFactory)

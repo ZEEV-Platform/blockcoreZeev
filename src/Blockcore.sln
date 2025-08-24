@@ -1,4 +1,3 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
@@ -93,6 +92,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TESTZEEV", "TESTZEEV\TESTZEEV.csproj", "{4CEDEF4A-EF85-4006-82AC-A11A4148FF2A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TESTLZ4Compression", "TESTCompression\TESTLZ4Compression.csproj", "{4783C878-7A1A-4B8C-85E0-497CAFE52AD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TESTZEEVTPS", "TESTZEEVTPS\TESTZEEVTPS.csproj", "{AF9F8CD4-088E-4D10-A083-7E59681B0D45}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -228,6 +229,10 @@ Global
 		{4783C878-7A1A-4B8C-85E0-497CAFE52AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4783C878-7A1A-4B8C-85E0-497CAFE52AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4783C878-7A1A-4B8C-85E0-497CAFE52AD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF9F8CD4-088E-4D10-A083-7E59681B0D45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF9F8CD4-088E-4D10-A083-7E59681B0D45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF9F8CD4-088E-4D10-A083-7E59681B0D45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF9F8CD4-088E-4D10-A083-7E59681B0D45}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
