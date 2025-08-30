@@ -20,7 +20,7 @@ namespace Blockcore.Networks.ZEEV.Components
     /// </summary>
     public class ZEEVLWMA
     {
-        private const int DIFFICULTY_WINDOW = 60;
+        private const int DIFFICULTY_WINDOW = 90;
 
         // Burst protection constants
         private const double MAX_DIFFICULTY_DECREASE_FACTOR = 8.0; // Maximum 8x difficulty decrease

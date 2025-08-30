@@ -6,6 +6,7 @@ using Blockcore.Consensus.TransactionInfo;
 using Blockcore.NBitcoin;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.DataEncoders;
+using Blockcore.NBitcoin.Policy;
 using Blockcore.Networks;
 using Blockcore.Networks.ZEEV.Consensus;
 
@@ -100,6 +101,10 @@ namespace TESTZEEVTPS
                 {
                     validationResult = ValidateTransactionSignatures(signedTx, selectedCoins);
                 }
+
+                // 9. Validate Tx
+                builder.Verify(signedTx);
+
 
                 var endTime = DateTime.UtcNow;
 
@@ -473,8 +478,8 @@ namespace TESTZEEVTPS
         /// </summary>
         public BlockConstraintAnalysis AnalyzeBlockConstraints(TransactionAnalysis transaction)
         {
-            const int BLOCK_TIME_SECONDS = 30;
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            const int BLOCK_TIME_SECONDS = 20;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2MB
 
             var maxTxPerBlock = BLOCK_SIZE_BYTES / transaction.Size;
             var theoreticalTPS = maxTxPerBlock / (double)BLOCK_TIME_SECONDS;
@@ -497,9 +502,9 @@ namespace TESTZEEVTPS
         /// <summary>
         /// Simulates block generation with transaction constraints
         /// </summary>
-        public BlockGenerationResult SimulateBlockGeneration(int maxTransactions = 1000, int timeoutSeconds = 30)
+        public BlockGenerationResult SimulateBlockGeneration(int maxTransactions = 1000, int timeoutSeconds = 20)
         {
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
             var startTime = DateTime.UtcNow;
             var transactions = new List<SignedTransactionData>();
             var totalSize = 0;
@@ -579,7 +584,7 @@ namespace TESTZEEVTPS
             int targetBlockUtilization = 90, // Percentage
             Money? targetFeeRate = null)
         {
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2.0 MB
             var targetSize = BLOCK_SIZE_BYTES * targetBlockUtilization / 100;
             var currentSize = 0;
             var transactions = new List<SignedTransactionData>();

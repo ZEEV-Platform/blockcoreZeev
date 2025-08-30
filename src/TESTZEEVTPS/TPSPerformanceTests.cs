@@ -161,10 +161,10 @@ namespace TESTZEEVTPS
         public async Task MeasureTPSUnderBlockConstraints()
         {
             output.WriteLine("=== TPS Test under blockchain constraints ===");
-            output.WriteLine("Block parameters: 30s blocks, 2.5MB block size\n");
+            output.WriteLine("Block parameters: 20s blocks, 2MB block size\n");
 
-            const int BLOCK_TIME_SECONDS = 30;
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            const int BLOCK_TIME_SECONDS = 20;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
             const int AVERAGE_TX_SIZE = 500; // bytes
 
             var theoreticalMaxTPS = BLOCK_SIZE_BYTES / (double)(AVERAGE_TX_SIZE * BLOCK_TIME_SECONDS);
@@ -228,8 +228,8 @@ namespace TESTZEEVTPS
         {
             output.WriteLine("=== Block Fill Simulation ===");
 
-            const int BLOCK_TIME_SECONDS = 30;
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            const int BLOCK_TIME_SECONDS = 20;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
             const int AVERAGE_TX_SIZE = 500; // bytes
 
             var maxTransactionsPerBlock = BLOCK_SIZE_BYTES / AVERAGE_TX_SIZE;
@@ -286,8 +286,8 @@ namespace TESTZEEVTPS
         {
             output.WriteLine("=== TPS with variable transaction sizes ===");
 
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
-            const int BLOCK_TIME_SECONDS = 30;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2MB
+            const int BLOCK_TIME_SECONDS = 20;
 
             var transactionSizes = new[] { 250, 500, 750, 1000, 1500 };
             var results = new Dictionary<int, TPSResult>();
@@ -338,7 +338,7 @@ namespace TESTZEEVTPS
         private async Task TestSustainedBlockPerformance(int optimalBatchSize)
         {
             const int numberOfBlocks = 5;
-            const int BLOCK_TIME_SECONDS = 30;
+            const int BLOCK_TIME_SECONDS = 20;
 
             output.WriteLine($"Testing sustained performance over {numberOfBlocks} simulated blocks:");
 

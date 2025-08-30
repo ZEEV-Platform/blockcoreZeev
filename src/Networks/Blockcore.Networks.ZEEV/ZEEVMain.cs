@@ -40,7 +40,7 @@ namespace Blockcore.Networks.ZEEV
             this.DefaultAPIPort = 30566; //wf 7766 = decimal 30566
             this.MaxTimeOffsetSeconds = 25 * 60;
             this.MaxTipAge = 48 * 60 * 60;
-            this.MinTxFee = 2000;
+            this.MinTxFee = 1000;
             this.MaxTxFee = Money.Coins(1).Satoshi;
             this.FallbackFee = 20000;
             this.MinRelayTxFee = 1000;
@@ -59,10 +59,10 @@ namespace Blockcore.Networks.ZEEV
 
             var consensusOptions = new ConsensusOptions
             {
-                MaxBlockBaseSize = (uint)(2.5 * 1000 * 1000),
-                MaxBlockSerializedSize = 10 * 1000 * 1000,
+                MaxBlockBaseSize = (uint)(2 * 1000 * 1000),
+                MaxBlockSerializedSize = 8 * 1000 * 1000,
                 MaxStandardVersion = 2,
-                MaxStandardTxWeight = (10 * 1000 * 1000) / 10,
+                MaxStandardTxWeight = (8 * 1000 * 1000) / 10,
                 MaxBlockSigopsCost = 650000,
                 MaxStandardTxSigopsCost = 650000 / 5,
                 WitnessScaleFactor = 4,
@@ -96,16 +96,16 @@ namespace Blockcore.Networks.ZEEV
                 buriedDeployments: buriedDeployments,
                 bip9Deployments: bip9Deployments,
                 bip34Hash: genesisBlock.GetHash(),
-                minerConfirmationWindow: 40320,
+                minerConfirmationWindow: 262980 / 2,
                 maxReorgLength: 0,
                 defaultAssumeValid: uint256.Zero,
-                maxMoney: 1054600000 * Money.COIN,
-                coinbaseMaturity: 1000,
+                maxMoney: 1013000000 * Money.COIN,
+                coinbaseMaturity: 3000,
                 premineHeight: 0,
                 premineReward: Money.Zero,
-                proofOfWorkReward: Money.Coins(20),
-                targetTimespan: TimeSpan.FromSeconds(60 * 30),
-                targetSpacing: TimeSpan.FromSeconds(30),
+                proofOfWorkReward: Money.Coins(16),
+                targetTimespan: TimeSpan.FromSeconds(60 * 20),
+                targetSpacing: TimeSpan.FromSeconds(20),
                 powAllowMinDifficultyBlocks: false,
                 powLimit: new Target(new uint256("00000000ffff0000000000000000000000000000000000000000000000000000")),
                 minimumChainWork: uint256.Zero,

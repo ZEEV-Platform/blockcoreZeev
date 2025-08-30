@@ -230,8 +230,8 @@ namespace TESTZEEVTPS
         {
             output.WriteLine("=== Block Constraint Compliance Test ===");
 
-            const int BLOCK_TIME_SECONDS = 30;
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            const int BLOCK_TIME_SECONDS = 20;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
 
             output.WriteLine($"Blockchain Parameters:");
             output.WriteLine($"  Block time: {BLOCK_TIME_SECONDS} seconds");
@@ -288,7 +288,7 @@ namespace TESTZEEVTPS
                     .ToList();
 
                 var totalSize = optimizedTransactions.Sum(t => t.Size);
-                var actualUtilization = totalSize / 2_621_440.0; // 2.5 MB
+                var actualUtilization = totalSize / 2_097_152; // 2 MB
                 var avgTxSize = optimizedTransactions.Count > 0 ? totalSize / optimizedTransactions.Count : 0;
                 var totalFees = optimizedTransactions.Sum(t => t.Fee.Satoshi);
 
@@ -321,8 +321,8 @@ namespace TESTZEEVTPS
             output.WriteLine("=== Real Transaction TPS with Block Analysis ===");
 
             const int testTransactionCount = 500;
-            const int BLOCK_TIME_SECONDS = 30;
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            const int BLOCK_TIME_SECONDS = 20;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
 
             var result = await ProcessRealTransactionBatch(testTransactionCount, "BlockAnalysis", true);
 
@@ -410,9 +410,9 @@ namespace TESTZEEVTPS
                 results[name] = result;
 
                 // Block analysis
-                var transactionsPerBlock = result.TPS * 30; // 30-second blocks
+                var transactionsPerBlock = result.TPS * 20; // 20-second blocks
                 var estimatedBlockSize = result.AverageTransactionSize * transactionsPerBlock;
-                var blockUtilization = Math.Min(1.0, estimatedBlockSize / 2_621_440.0); // 2.5 MB
+                var blockUtilization = Math.Min(1.0, estimatedBlockSize / 2_097_152); // 2MB
 
                 output.WriteLine($"  TPS: {result.TPS:F2}");
                 output.WriteLine($"  Success rate: {result.SuccessRate:P1}");
@@ -446,8 +446,8 @@ namespace TESTZEEVTPS
         {
             output.WriteLine("=== Network Congestion Simulation ===");
 
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
-            const int BLOCK_TIME_SECONDS = 30;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
+            const int BLOCK_TIME_SECONDS = 20;
 
             var congestionLevels = new[]
             {

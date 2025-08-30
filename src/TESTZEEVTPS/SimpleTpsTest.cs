@@ -8,7 +8,7 @@ namespace TESTZEEVTPS
 {
     /// <summary>
     /// Simple TPS test with real transactions and blockchain constraints
-    /// Block parameters: 30s blocks, 2.5MB block size
+    /// Block parameters: 20s blocks, 2MB block size
     /// </summary>
     public class SimpleTpsTest
     {
@@ -16,8 +16,8 @@ namespace TESTZEEVTPS
         private readonly RealTransactionGenerator? realTransactionGenerator;
 
         // Blockchain constants from Program
-        public const int BLOCK_TIME_SECONDS = 30;
-        public const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+        public const int BLOCK_TIME_SECONDS = 20;
+        public const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
         public const int AVERAGE_TX_SIZE_BYTES = 500; // Conservative estimate
         public const double THEORETICAL_MAX_TPS = BLOCK_SIZE_BYTES / (double)(AVERAGE_TX_SIZE_BYTES * BLOCK_TIME_SECONDS);
 
