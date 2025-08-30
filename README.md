@@ -10,7 +10,7 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 
 - **Coin Ticker**: ZEEV
 - **Consensus Algorithm**: Proof of Work (PoW)
-- **Block Time**: 20 seconds (as implemented in tests)
+- **Block Time**: 20 seconds
 - **Block Size**: 2 MB maximum
 - **Block Reward**: 20 ZEEV
 - **Maximum Supply**: 1,013,000,000 ZEEV
@@ -42,10 +42,10 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 
 - **Maximum Block Size**: 2 MB
 - **Maximum Transaction Weight**: 1,000,000
-- **Minimum Transaction Fee**: 2,000 plancks
-- **Maximum Transaction Fee**: 100,000,000 plancks (1 ZEEV)
-- **Fallback Fee**: 20,000 plancks
-- **Minimum Relay Fee**: 1,000 plancks
+- **Minimum Transaction Fee**: 2,000 planck
+- **Maximum Transaction Fee**: 100,000,000 planck (1 ZEEV)
+- **Fallback Fee**: 20,000 planck
+- **Minimum Relay Fee**: 1,000 planck
 - **Theoretical Max TPS**: ~62.5 TPS (based on 2MB blocks, 20s block time, ~1680 bytes per transaction)
 
 ### Address Formats
@@ -61,6 +61,12 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **Prefix**: "zv"
 - **Witness Public Key**: Supported
 - **Witness Script**: Supported
+
+### Money Unit
+- **ZEEV**: 100000000 (Full coin)
+- **Photon**: 100000 (0.001 ZEEV)
+- **Pulse**: 100 (0.000001 ZEEV)
+- **Planck**: 1 (0.00000001 ZEEV)
 
 ## Architecture
 

@@ -133,7 +133,7 @@ namespace TESTZEEVTPS
                 Console.WriteLine($"• Best single-thread TPS: {result1.TPS:F2}");
                 Console.WriteLine($"• Best parallel TPS: {result2.TPS:F2}");
                 Console.WriteLine($"• Average transaction size: {result1.AverageTransactionSize} bytes");
-                Console.WriteLine($"• Average fees: {result1.FeesPerTransaction:F0} plancks/tx");
+                Console.WriteLine($"• Average fees: {result1.FeesPerTransaction:F0} planck/tx");
                 Console.WriteLine($"• Generation success rate: {result1.SuccessRate:P1}");
                 
                 // Block constraint analysis
