@@ -1558,7 +1558,7 @@ namespace Blockcore.Consensus.TransactionInfo
                 if (coin == null)
                     throw CoinNotFound(txin);
                 EstimateScriptSigSize(coin, ref witSize, ref baseSize);
-                baseSize += 41;
+                baseSize += 51;
             }
 
             return (virtualSize ? witSize / this.Network.Consensus.Options.WitnessScaleFactor + baseSize : witSize + baseSize);

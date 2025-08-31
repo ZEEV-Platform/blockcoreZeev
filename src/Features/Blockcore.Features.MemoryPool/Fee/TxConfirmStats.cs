@@ -272,7 +272,11 @@ namespace Blockcore.Features.MemoryPool.Fee
                 nConf += this.confAvg[confTarget - 1][bucket];
                 totalNum += this.txCtAvg[bucket];
                 for (int confct = confTarget; confct < this.GetMaxConfirms(); confct++)
-                    extraNum += this.unconfTxs[(nBlockHeight - confct) % bins][bucket];
+                {
+                    var index = (nBlockHeight - confct) % bins;
+                    if ((index > 0) && (index < this.unconfTxs.Count))
+                        extraNum += this.unconfTxs[index][bucket];
+                }
                 extraNum += this.oldUnconfTxs[bucket];
                 // If we have enough transaction data points in this range of buckets,
                 // we can test for success

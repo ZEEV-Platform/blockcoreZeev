@@ -93,7 +93,7 @@ namespace Blockcore.Features.MemoryPool.FeeFilter
                             var currentFilter = feeRate.FeePerK;
 
                             // We always have a fee filter of at least minRelayTxFee
-                            Money filterToSend = Math.Max(currentFilter, new FeeRate(this.network.MinRelayTxFee).FeePerK);
+                            Money filterToSend = Math.Max(currentFilter, new FeeRate(this.network.MinRelayTxFeeRate).FeePerK);
 
                             if (filterToSend != this.lastSendFilter)
                             {

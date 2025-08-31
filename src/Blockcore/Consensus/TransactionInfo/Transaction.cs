@@ -1918,8 +1918,8 @@ namespace Blockcore.Consensus.TransactionInfo
             }
         }
 
-        private static readonly uint MAX_BLOCK_SIZE = 1000000;
-        private static readonly ulong MAX_MONEY = long.MaxValue; // 21000000ul * Money.COIN;
+        private static readonly uint MAX_BLOCK_SIZE = 2 * 1000 * 1000;
+        private static readonly ulong MAX_MONEY = 1013000000 * Money.COIN;
 
         /// <summary>
         /// Context free transaction check

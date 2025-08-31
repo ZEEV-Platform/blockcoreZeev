@@ -153,14 +153,12 @@ namespace Blockcore.Features.Wallet.Api.Controllers
         [ActionDescription("Sends money to an address. Requires wallet to be unlocked using walletpassphrase.")]
         public async Task<uint256> SendToAddressAsync(BitcoinAddress address, decimal amount, string commentTx, string commentDest, decimal? fee = null)
         {
-            decimal transactionFee = fee ?? Money.Satoshis(this.FullNode.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV);
-
             TransactionBuildContext context = new TransactionBuildContext(this.FullNode.Network)
             {
                 AccountReference = this.GetWalletAccountReference(),
                 Recipients = new[] { new Recipient { Amount = Money.Coins(amount), ScriptPubKey = address.ScriptPubKey } }.ToList(),
                 CacheSecret = false,
-                TransactionFee = Money.Coins(transactionFee),
+                TransactionFee = fee.HasValue ? Money.Coins(fee.Value) : null,
             };
 
             try

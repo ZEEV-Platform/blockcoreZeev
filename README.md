@@ -41,11 +41,12 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 ### Block and Transaction Specifications
 
 - **Maximum Block Size**: 2 MB
-- **Maximum Transaction Weight**: 1,000,000
-- **Minimum Transaction Fee**: 2,000 planck
+- **Maximum Block Weigh**: 8 MB
+- **Maximum Transaction Weight**: 0.8 MB
+- **Minimum Transaction Fee Rate**: 200 planck
 - **Maximum Transaction Fee**: 100,000,000 planck (1 ZEEV)
-- **Fallback Fee**: 20,000 planck
-- **Minimum Relay Fee**: 1,000 planck
+- **Minimum Relay Fee Rate**: 200 planck
+- **Minimum Block Fee Rate**: 200 planck
 - **Theoretical Max TPS**: ~62.5 TPS (based on 2MB blocks, 20s block time, ~1680 bytes per transaction)
 
 ### Address Formats

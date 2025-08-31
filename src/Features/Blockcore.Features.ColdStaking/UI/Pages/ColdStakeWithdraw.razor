@@ -171,7 +171,7 @@
     {
         ColdStakingManager = this.WalletManager as ColdStakingManager;
 
-        this.Fee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV);
+        this.Fee = new Money(this.Network.MinTxFeeRate).ToDecimal(MoneyUnit.ZEEV);
 
         return Task.CompletedTask;
     }

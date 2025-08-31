@@ -62,6 +62,7 @@ namespace Blockcore.Consensus
 
         /// <summary>The minimum protocol version which should be used from block height defined in <see cref="EnforceMinProtocolVersionAtBlockHeight"/></summary>
         public uint? EnforcedMinProtocolVersion { get; set; }
+        public uint MinBlockSize { get; set; } = 1000;
     }
 
     /// <summary>

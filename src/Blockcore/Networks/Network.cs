@@ -103,11 +103,11 @@ namespace Blockcore.Networks
         /// 1-satoshi-fee transactions. It should be set above the real cost to you of processing a transaction.
         /// </summary>
         /// <remarks>
-        /// The <see cref="MinRelayTxFee"/> and <see cref="MinTxFee"/> are typically the same value to prevent dos attacks on the network.
-        /// If <see cref="MinRelayTxFee"/> is less than <see cref="MinTxFee"/>, an attacker can broadcast a lot of transactions with fees between these two values,
+        /// The <see cref="MinRelayTxFeeRate"/> and <see cref="MinTxFeeRate"/> are typically the same value to prevent dos attacks on the network.
+        /// If <see cref="MinRelayTxFeeRate"/> is less than <see cref="MinTxFeeRate"/>, an attacker can broadcast a lot of transactions with fees between these two values,
         /// which will lead to transactions filling the mempool without ever being mined.
         /// </remarks>
-        public long MinTxFee { get; protected set; }
+        public long MinTxFeeRate { get; protected set; }
 
         /// <summary>
         /// A fee rate that will be used when fee estimation has insufficient data.
@@ -118,11 +118,11 @@ namespace Blockcore.Networks
         /// The minimum fee under which transactions may be rejected from being relayed.
         /// </summary>
         /// <remarks>
-        /// The <see cref="MinRelayTxFee"/> and <see cref="MinTxFee"/> are typically the same value to prevent dos attacks on the network.
-        /// If <see cref="MinRelayTxFee"/> is less than <see cref="MinTxFee"/>, an attacker can broadcast a lot of transactions with fees between these two values,
+        /// The <see cref="MinRelayTxFeeRate"/> and <see cref="MinTxFeeRate"/> are typically the same value to prevent dos attacks on the network.
+        /// If <see cref="MinRelayTxFeeRate"/> is less than <see cref="MinTxFeeRate"/>, an attacker can broadcast a lot of transactions with fees between these two values,
         /// which will lead to transactions filling the mempool without ever being mined.
         /// </remarks>
-        public long MinRelayTxFee { get; protected set; }
+        public long MinRelayTxFeeRate { get; protected set; }
 
         /// <summary>
         /// Port on which to listen for incoming RPC connections.

@@ -40,10 +40,10 @@ namespace Blockcore.Networks.ZEEV
             this.DefaultAPIPort = 30566; //wf 7766 = decimal 30566
             this.MaxTimeOffsetSeconds = 25 * 60;
             this.MaxTipAge = 48 * 60 * 60;
-            this.MinTxFee = 1000;
+            this.MinTxFeeRate = 200;
             this.MaxTxFee = Money.Coins(1).Satoshi;
-            this.FallbackFee = 20000;
-            this.MinRelayTxFee = 1000;
+            this.FallbackFee = 4000;
+            this.MinRelayTxFeeRate = 200;
             this.DefaultBanTimeSeconds = 60 * 60 * 24; // 500 (MaxReorg) * 64 (TargetSpacing) / 2 = 4 hours, 26 minutes and 40 seconds
 
             var consensusFactory = new ZEEVConsensusFactory();
@@ -66,6 +66,9 @@ namespace Blockcore.Networks.ZEEV
                 MaxBlockSigopsCost = 650000,             
                 MaxStandardTxSigopsCost = 650000 / 5,
                 WitnessScaleFactor = 4,
+                MaxBlockWeight = 8 * 1000 * 1000,
+                MinBlockFeeRate = this.MinRelayTxFeeRate,
+                MinBlockSize = 1000
             };
 
             var buriedDeployments = new BuriedDeploymentsArray

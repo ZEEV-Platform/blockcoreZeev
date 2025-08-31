@@ -59,7 +59,7 @@ namespace Blockcore.NBitcoin.Policy
             this.ScriptVerify = Blockcore.Consensus.ScriptInfo.ScriptVerify.Standard;
             this.MaxTransactionSize = 100000;
             this.MaxTxFee = new FeeRate(Money.Satoshis(network.MaxTxFee));
-            this.MinRelayTxFee = new FeeRate(Money.Satoshis(network.MinRelayTxFee));
+            this.MinRelayTxFee = new FeeRate(Money.Satoshis(network.MinRelayTxFeeRate));
             this.CheckFee = true;
             this.CheckScriptPubKey = true;
         }
