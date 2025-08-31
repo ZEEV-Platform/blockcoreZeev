@@ -417,7 +417,7 @@ namespace Blockcore.Features.Wallet
             if (context.TransactionFee == null)
             {
                 FeeRate feeRate = context.OverrideFeeRate ?? this.walletFeePolicy.GetFeeRate(context.FeeType.ToConfirmations());
-                fee = context.TransactionBuilder.EstimateFees(feeRate);
+                fee = context.TransactionBuilder.EstimateFees(feeRate.FeePerK < minTrxFee ? new FeeRate(minTrxFee): feeRate);
 
                 // Make sure that the fee is at least the minimum transaction fee.
                 fee = Math.Max(fee, minTrxFee);
