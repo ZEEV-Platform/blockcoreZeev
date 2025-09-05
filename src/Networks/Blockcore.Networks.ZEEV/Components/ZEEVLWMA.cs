@@ -20,14 +20,14 @@ namespace Blockcore.Networks.ZEEV.Components
     /// </summary>
     public class ZEEVLWMA
     {
-        private const int DIFFICULTY_WINDOW = 90;
+        private const int DIFFICULTY_WINDOW = 144;
 
         // Burst protection constants
         private const double MAX_DIFFICULTY_DECREASE_FACTOR = 8.0; // Maximum 8x difficulty decrease
         private const double MAX_DIFFICULTY_INCREASE_FACTOR = 8.0; // Maximum 8x difficulty increase
-        private const long MIN_BLOCK_INTERVAL_SECONDS = 5; // Minimum 10 seconds between blocks
-        private const int BURST_DETECTION_WINDOW = 6; // Number of recent blocks to check for burst
-        private const double BURST_THRESHOLD_FACTOR = 0.25; // If average time < 25% of target, it's a burst
+        private const long MIN_BLOCK_INTERVAL_SECONDS = 5; // Minimum 5 seconds between blocks
+        private const int BURST_DETECTION_WINDOW = 15; // Number of recent blocks to check for burst
+        private const double BURST_THRESHOLD_FACTOR = 0.4; // If average time < 40% of target, it's a burst
 
         public ZEEVLWMA()
         {
@@ -79,7 +79,6 @@ namespace Blockcore.Networks.ZEEV.Components
             }
 
             // LWMA parameters - these should ideally come from consensus parameters
-            // For T=120, 240, 600 use approx N=100, 75, 50
             long T = (long)consensus.TargetSpacing.TotalSeconds; // Target spacing in seconds
             long height = pindexLast.Height;
             long N = GetLwmaAveragingWindow(height);
@@ -129,9 +128,9 @@ namespace Blockcore.Networks.ZEEV.Components
                     thisTimestamp = previousTimestamp + 1;
                 }
 
-                // Calculate solve time with maximum limit of 6*T
+                // Calculate solve time with maximum limit of 5*T
                 // BURST PROTECTION: Apply minimum block interval
-                long solvetime = Math.Min(6 * T, thisTimestamp - previousTimestamp);
+                long solvetime = Math.Min(5 * T, thisTimestamp - previousTimestamp);
                 solvetime = Math.Max(solvetime, MIN_BLOCK_INTERVAL_SECONDS);
                 previousTimestamp = thisTimestamp;
 
@@ -223,6 +222,7 @@ namespace Blockcore.Networks.ZEEV.Components
 
             long totalTime = 0;
             int validIntervals = 0;
+            int veryFastBlocks = 0;
 
             // Check the last BURST_DETECTION_WINDOW blocks
             for (int i = 0; i < BURST_DETECTION_WINDOW; i++)
@@ -237,6 +237,11 @@ namespace Blockcore.Networks.ZEEV.Components
 
                 long interval = currentBlock.Header.BlockTime.ToUnixTimeSeconds() -
                                previousBlock.Header.BlockTime.ToUnixTimeSeconds();
+
+                if (interval < 5)
+                {
+                    veryFastBlocks++;
+                }
 
                 // Ensure minimum block interval for burst protection
                 interval = Math.Max(interval, MIN_BLOCK_INTERVAL_SECONDS);
@@ -253,7 +258,7 @@ namespace Blockcore.Networks.ZEEV.Components
             double averageTime = (double)totalTime / validIntervals;
             double burstThreshold = targetSpacing * BURST_THRESHOLD_FACTOR;
 
-            return averageTime < burstThreshold;
+            return averageTime < burstThreshold || veryFastBlocks >= (BURST_DETECTION_WINDOW / 3);
         }
 
         /// <summary>
@@ -276,7 +281,7 @@ namespace Blockcore.Networks.ZEEV.Components
             {
                 // Difficulty is decreasing (target increasing)
                 // Check if the increase is too large
-                double maxDecrease = isBurstDetected ? MAX_DIFFICULTY_DECREASE_FACTOR * 1.5 : MAX_DIFFICULTY_DECREASE_FACTOR;
+                double maxDecrease = isBurstDetected ? MAX_DIFFICULTY_DECREASE_FACTOR * 1.1 : MAX_DIFFICULTY_DECREASE_FACTOR;
                 
                 var maxAllowedTarget = previousTarget.Multiply(new BigInteger(((int)maxDecrease).ToString()));
                 if (nextTarget.CompareTo(maxAllowedTarget) > 0)
