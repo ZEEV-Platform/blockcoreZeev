@@ -694,8 +694,10 @@ namespace Blockcore.Features.Wallet.Api.Controllers
 
             // Get the transaction from the wallet by looking into received and send transactions.
             List<HdAddress> addresses = account.GetCombinedAddresses().ToList();
-            List<TransactionOutputData> receivedTransactions = addresses.Where(r => !r.IsChangeAddress()).SelectMany(a => wallet.walletStore.GetForAddress(a.Address).Where(t => t.Id == trxid)).ToList();
-            List<TransactionOutputData> sendTransactions = addresses.SelectMany(a => wallet.walletStore.GetForAddress(a.Address).Where(t => t.SpendingDetails != null && t.SpendingDetails.TransactionId == trxid)).ToList();
+
+            var transactions = wallet.walletStore.GetForTransaction(txid);
+            List<TransactionOutputData> receivedTransactions = transactions.Where(t => t.Id == trxid).ToList();
+            List<TransactionOutputData> sendTransactions = transactions.Where(t => t.SpendingDetails != null && t.SpendingDetails.TransactionId == trxid).ToList();
 
             if (!receivedTransactions.Any() && !sendTransactions.Any())
                 throw new RPCServerException(RPCErrorCode.RPC_INVALID_ADDRESS_OR_KEY, "Invalid or non-wallet transaction id.");
