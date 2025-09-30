@@ -75,7 +75,7 @@ namespace Blockcore.Consensus.TransactionInfo
             if (target.CompareTo(zero) == 0)
                 return result;
 
-            var orderedCoinGroups = coins.GroupBy(c => this.GroupByScriptPubKey ? c.TxOut.ScriptPubKey : new Key().ScriptPubKey)
+            var orderedCoinGroups = coins.GroupBy(c => this.GroupByScriptPubKey ? c.TxOut.ScriptPubKey : new Script(Op.GetPushOp(RandomUtils.GetBytes(32))))
                                     .Select(scriptPubKeyCoins => new
                                     {
                                         Amount = scriptPubKeyCoins.Select(c => c.Amount).Sum(zero),
@@ -84,6 +84,7 @@ namespace Blockcore.Consensus.TransactionInfo
 
             var targetCoin = orderedCoinGroups
                             .FirstOrDefault(c => c.Amount.CompareTo(target) == 0);
+
             //If any of your UTXO² matches the Target¹ it will be used.
             if (targetCoin != null)
                 return targetCoin.Coins;
