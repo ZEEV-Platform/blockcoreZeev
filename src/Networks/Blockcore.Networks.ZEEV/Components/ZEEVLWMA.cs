@@ -23,8 +23,8 @@ namespace Blockcore.Networks.ZEEV.Components
         private const int DIFFICULTY_WINDOW = 144;
 
         // Burst protection constants
-        private const double MAX_DIFFICULTY_DECREASE_FACTOR = 8.0; // Maximum 8x difficulty decrease
-        private const double MAX_DIFFICULTY_INCREASE_FACTOR = 8.0; // Maximum 8x difficulty increase
+        private const double MAX_DIFFICULTY_DECREASE_FACTOR = 4.0; // Maximum 4x difficulty decrease
+        private const double MAX_DIFFICULTY_INCREASE_FACTOR = 4.0; // Maximum 4x difficulty increase
         private const long MIN_BLOCK_INTERVAL_SECONDS = 5; // Minimum 5 seconds between blocks
         private const int BURST_DETECTION_WINDOW = 15; // Number of recent blocks to check for burst
         private const double BURST_THRESHOLD_FACTOR = 0.4; // If average time < 40% of target, it's a burst
@@ -281,7 +281,7 @@ namespace Blockcore.Networks.ZEEV.Components
             {
                 // Difficulty is decreasing (target increasing)
                 // Check if the increase is too large
-                double maxDecrease = isBurstDetected ? MAX_DIFFICULTY_DECREASE_FACTOR * 1.1 : MAX_DIFFICULTY_DECREASE_FACTOR;
+                double maxDecrease = isBurstDetected ? MAX_DIFFICULTY_DECREASE_FACTOR * 1.2 : MAX_DIFFICULTY_DECREASE_FACTOR;
                 
                 var maxAllowedTarget = previousTarget.Multiply(new BigInteger(((int)maxDecrease).ToString()));
                 if (nextTarget.CompareTo(maxAllowedTarget) > 0)
@@ -293,7 +293,7 @@ namespace Blockcore.Networks.ZEEV.Components
             {
                 // Difficulty is increasing (target decreasing)
                 // Limit difficulty increase, but be more aggressive during burst
-                double maxIncrease = isBurstDetected ? MAX_DIFFICULTY_INCREASE_FACTOR * 1.5 : MAX_DIFFICULTY_INCREASE_FACTOR;
+                double maxIncrease = isBurstDetected ? MAX_DIFFICULTY_INCREASE_FACTOR * 1.25 : MAX_DIFFICULTY_INCREASE_FACTOR;
 
                 var minAllowedTarget = previousTarget.Divide(new BigInteger(((int)maxIncrease).ToString()));
                 if (nextTarget.CompareTo(minAllowedTarget) < 0)

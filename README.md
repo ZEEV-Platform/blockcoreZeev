@@ -16,7 +16,7 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **Maximum Supply**: 1,013,000,000 ZEEV
 - **Subsidy Decrease**: 0.05 ZEEV per subsidy decrease (every quarter)
 - **Subsidy Interval**: 262980 blocks
-- **Target Difficulty Time**: 90 blocks
+- **Target Difficulty Time**: 48 minutes (144 blocks)
 
 ### Network Parameters
 
