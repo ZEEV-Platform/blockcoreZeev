@@ -51,6 +51,7 @@ namespace Blockcore.Configuration.Logging
                     .AddFilter("Microsoft", LogLevel.Warning)
                     .AddFilter("Microsoft.AspNetCore", LogLevel.Error)
                     .AddFilter<ConsoleLoggerProvider>($"{nameof(Blockcore)}.*", LogLevel.Information)
+                    .AddNLog()
                     .AddConsole();
 
                 builder.SetMinimumLevel(LogLevel.Debug);
@@ -125,7 +126,7 @@ namespace Blockcore.Configuration.Logging
             if (LogManager.Configuration == null) LogManager.Configuration = new NLog.Config.LoggingConfiguration();
 
             // Installs handler to be called when NLog's configuration file is changed on disk.
-            LogManager.ConfigurationReloaded += NLogConfigurationReloaded;
+            LogManager.ConfigurationChanged += NLogConfigurationChanged;
         }
 
         /// <summary>Loads the NLog.config file from the <see cref="DataFolder"/>, if it exists.</summary>
@@ -135,8 +136,12 @@ namespace Blockcore.Configuration.Logging
                 return;
 
             string configPath = Path.Combine(dataFolder.RootPath, NLogConfigFileName);
+
             if (File.Exists(configPath))
-                loggerFactory.ConfigureNLog(configPath);
+            {
+                var config = new XmlLoggingConfiguration(configPath);
+                LogManager.Configuration = config;
+            }
         }
 
         /// <summary>
@@ -144,7 +149,7 @@ namespace Blockcore.Configuration.Logging
         /// </summary>
         /// <param name="sender">Not used.</param>
         /// <param name="e">Not used.</param>
-        public static void NLogConfigurationReloaded(object sender, LoggingConfigurationReloadedEventArgs e)
+        public static void NLogConfigurationChanged(object sender, LoggingConfigurationChangedEventArgs e)
         {
             AddFilters(logSettings, folder);
         }
@@ -195,7 +200,7 @@ namespace Blockcore.Configuration.Logging
                 Name = "main",
                 FileName = Path.Combine(folder.LogPath, "node.txt"),
                 ArchiveFileName = Path.Combine(folder.LogPath, "node-${date:universalTime=true:format=yyyy-MM-dd}.txt"),
-                ArchiveNumbering = ArchiveNumberingMode.Sequence,
+                ArchiveSuffixFormat = "_{#}",
                 ArchiveEvery = FileArchivePeriod.Day,
                 MaxArchiveFiles = 7,
                 Layout = "[${longdate:universalTime=true} ${threadid}${mdlc:item=id}] ${level:uppercase=true}: ${callsite} ${message}",

@@ -10,7 +10,7 @@ namespace TESTZEEVTPS
     /// <summary>
     /// Benchmark tests for precise TPS measurement using BenchmarkDotNet
     /// </summary>
-    [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net90)]
     [Orderer(SummaryOrderPolicy.FastestToSlowest)]
     [MemoryDiagnoser]
     [HardwareCounters]

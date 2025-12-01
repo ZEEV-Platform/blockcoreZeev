@@ -224,7 +224,10 @@ namespace Bitcoin.Cli
 
             // Get the response.
             Console.WriteLine($"Sending API 'GET' command to {urlWithArgs}.");
-            return urlWithArgs.GetAsync().GetAwaiter().GetResult();
+
+            IFlurlResponse flurlResponse = urlWithArgs.GetAsync().GetAwaiter().GetResult();
+
+            return flurlResponse.ResponseMessage;
         }
 
         private static HttpResponseMessage CallApiPost(string url, object commandArgObj)
@@ -232,16 +235,21 @@ namespace Bitcoin.Cli
             string json = JObject.FromObject(commandArgObj).ToString();
 
             Console.WriteLine($"Sending API 'POST' command to {url}. Post body is '{json}'.");
-            return url.PostJsonAsync(commandArgObj).GetAwaiter().GetResult();
+
+            IFlurlResponse flurlResponse = json.GetAsync().GetAwaiter().GetResult();
+
+            return flurlResponse.ResponseMessage;
         }
 
         private static HttpResponseMessage CallApiDelete(string url, object commandArgObj)
         {
             string urlWithArgs = url.SetQueryParams(commandArgObj);
 
-            // Get the response.
             Console.WriteLine($"Sending API 'DELETE' command to {urlWithArgs}.");
-            return urlWithArgs.DeleteAsync().GetAwaiter().GetResult();
+
+            IFlurlResponse flurlResponse = urlWithArgs.GetAsync().GetAwaiter().GetResult();
+
+            return flurlResponse.ResponseMessage;
         }
 
         /// <summary>

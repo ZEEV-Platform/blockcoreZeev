@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using BlazorModal;
@@ -23,6 +22,7 @@ using Blockcore.Features.NodeHost.Authorization;
 using Blockcore.Features.NodeHost.Settings;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using System.Text.Json.Serialization;
+using Microsoft.OpenApi;
 
 namespace Blockcore.Features.NodeHost
 {
@@ -165,24 +165,6 @@ namespace Blockcore.Features.NodeHost
                             In = ParameterLocation.Header,
                             Name = ApiKeyConstants.HeaderName,
                             Type = SecuritySchemeType.ApiKey
-                        });
-
-                        options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                        {
-                            {
-                                new OpenApiSecurityScheme
-                                {
-                                    Name = ApiKeyConstants.HeaderName,
-                                    Type = SecuritySchemeType.ApiKey,
-                                    In = ParameterLocation.Header,
-                                    Reference = new OpenApiReference
-                                    {
-                                        Type = ReferenceType.SecurityScheme,
-                                        Id = ApiKeyConstants.HeaderName
-                                    },
-                                 },
-                                 new string[] {}
-                             }
                         });
                     }
 
