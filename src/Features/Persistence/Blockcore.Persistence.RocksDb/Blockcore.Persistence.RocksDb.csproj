@@ -10,7 +10,7 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-	  <PackageReference Include="RocksDB" Version="8.11.3.46984" />
+	  <PackageReference Include="RocksDB" Version="10.4.2.62659" />
 	  <PackageReference Include="System.Net.Http" Version="4.3.4" />
 	  <PackageReference Include="System.Text.Json" Version="10.0.0" />
 	  <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
