@@ -45,7 +45,7 @@ namespace Blockcore.Features.Wallet.Types
             switch (fee)
             {
                 case FeeType.Low:
-                    return 50;
+                    return 40;
 
                 case FeeType.Medium:
                     return 20;

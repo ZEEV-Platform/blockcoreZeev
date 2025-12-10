@@ -1459,7 +1459,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
 
                             // Due to how the code works the line below is probably never used.
                             var transactionSize = transaction.GetSerializedSize();
-                            transactionFee = new FeeRate(this.network.MinTxFee).GetFee(transactionSize);
+                            transactionFee = new FeeRate(this.network.MinTxFeeRate).GetFee(transactionSize);
                         }
                         catch (NotEnoughFundsException ex)
                         {
@@ -1467,8 +1467,8 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                             transactionFee = (Money)ex.Missing;
                         }
 
-                        if (transactionFee < this.network.MinTxFee)
-                            transactionFee = new Money(this.network.MinTxFee);
+                        if (transactionFee < this.network.MinTxFeeRate)
+                            transactionFee = new Money(this.network.MinTxFeeRate);
 
                         transferAmount = (transactionTransferAmount - transactionFee) / recipients.Count;
                         recipients.ForEach(r => r.Amount = transferAmount);

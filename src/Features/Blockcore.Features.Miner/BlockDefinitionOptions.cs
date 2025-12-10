@@ -9,14 +9,14 @@ namespace Blockcore.Features.Miner
     /// </summary>
     public sealed class BlockDefinitionOptions
     {
-        /// <summary>Minimum block size in bytes. Could be set per network in future.</summary>
-        private const uint MinBlockSize = 1000;
-
         /// <summary>Maximum block weight (in weight units) for the blocks created by miner.</summary>
         public uint BlockMaxWeight { get; private set; }
 
         /// <summary>Maximum block size (in bytes) for the blocks created by miner.</summary>
         public uint BlockMaxSize { get; private set; }
+
+        /// <summary>Minimum block size (in bytes) for the blocks created by miner.</summary>
+        public uint BlockMinSize { get; private set; }
 
         /// <summary>Minimum fee rate for transactions to be included in blocks created by miner.</summary>
         public FeeRate BlockMinFeeRate { get; private set; }
@@ -34,9 +34,10 @@ namespace Blockcore.Features.Miner
         /// </summary>
         public BlockDefinitionOptions RestrictForNetwork(Network network)
         {
-            uint minAllowedBlockWeight = MinBlockSize * (uint) network.Consensus.Options.WitnessScaleFactor;
+            this.BlockMinSize = (uint) network.Consensus.Options.MinBlockSize;
+            uint minAllowedBlockWeight = this.BlockMinSize * (uint) network.Consensus.Options.WitnessScaleFactor;
             this.BlockMaxWeight = Math.Max(minAllowedBlockWeight, Math.Min(network.Consensus.Options.MaxBlockWeight, this.BlockMaxWeight));
-            this.BlockMaxSize = Math.Max(MinBlockSize, Math.Min(network.Consensus.Options.MaxBlockSerializedSize, this.BlockMaxSize));
+            this.BlockMaxSize = Math.Max(this.BlockMinSize, Math.Min(network.Consensus.Options.MaxBlockSerializedSize, this.BlockMaxSize));
             this.BlockMinFeeRate = new FeeRate(Math.Max(network.Consensus.Options.MinBlockFeeRate, this.BlockMinFeeRate.FeePerK));
 
             return this;

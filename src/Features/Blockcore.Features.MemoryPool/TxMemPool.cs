@@ -317,12 +317,6 @@ namespace Blockcore.Features.MemoryPool
         }
 
         /// <inheritdoc />
-        public double EstimateSmartPriority(int nBlocks, out int answerFoundAtBlocks)
-        {
-            return this.MinerPolicyEstimator.EstimateSmartPriority(nBlocks, this, out answerFoundAtBlocks);
-        }
-
-        /// <inheritdoc />
         public void SetSanityCheck(double dFrequency = 1.0)
         {
             this.checkFrequency = dFrequency * 4294967295.0;

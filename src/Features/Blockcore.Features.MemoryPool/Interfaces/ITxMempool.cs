@@ -141,14 +141,6 @@ namespace Blockcore.Features.MemoryPool.Interfaces
         FeeRate EstimateSmartFee(int nBlocks, out int answerFoundAtBlocks, int? currentHeight = null, bool requireGreater = true);
 
         /// <summary>
-        /// Estimates the smart priority using <see cref="MinerPolicyEstimator"/>.
-        /// </summary>
-        /// <param name="nBlocks">The confirmation target blocks.</param>
-        /// <param name="answerFoundAtBlocks">The block where the priority was found.</param>
-        /// <returns>The estimated priority.</returns>
-        double EstimateSmartPriority(int nBlocks, out int answerFoundAtBlocks);
-
-        /// <summary>
         /// Whether the transaction hash exists in the memory pool.
         /// </summary>
         /// <param name="hash">Transaction hash.</param>

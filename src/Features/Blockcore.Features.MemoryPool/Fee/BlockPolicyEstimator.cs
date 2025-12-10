@@ -84,16 +84,13 @@ namespace Blockcore.Features.MemoryPool.Fee
         private const double FeeSpacing = 1.1;
 
         /// <summary>Track confirm delays up to 25 blocks, can't estimate beyond that.</summary>
-        private const int MaxBlockConfirms = 25;
+        private const int MaxBlockConfirms = 50;
 
         /// <summary>Decay of .998 is a half-life of 346 blocks or about 2.4 days.</summary>
         private const double DefaultDecay = .998;
 
-        /// <summary>Value for infinite priority.</summary>
-        public const double InfPriority = 1e9 * 21000000ul * Money.COIN;
-
         /// <summary>Maximum money value.</summary>
-        private static readonly Money MaxMoney = new Money(21000000 * Money.COIN);
+        private static readonly Money MaxMoney = new Money(1013000000 * Money.COIN);
 
         /// <summary>Value for infinite fee rate.</summary>
         private static readonly double InfFeeRate = MaxMoney.Satoshi;
@@ -363,25 +360,6 @@ namespace Blockcore.Features.MemoryPool.Fee
         /// <remarks>TODO: Implement priority estimation</remarks>
         public double EstimatePriority(int confTarget)
         {
-            return -1;
-        }
-
-        /// <summary>
-        /// Return an estimated smart priority.
-        /// </summary>
-        /// <param name="confTarget">The desired number of confirmations to be included in a block.</param>
-        /// <param name="pool">Memory pool transactions.</param>
-        /// <param name="answerFoundAtTarget">Block height where answer was found.</param>
-        /// <returns>The smart priority.</returns>
-        public double EstimateSmartPriority(int confTarget, ITxMempool pool, out int answerFoundAtTarget)
-        {
-            answerFoundAtTarget = confTarget;
-
-            // If mempool is limiting txs, no priority txs are allowed
-            Money minPoolFee = pool.GetMinFee(this.mempoolSettings.MaxMempool * 1000000).FeePerK;
-            if (minPoolFee > 0)
-                return InfPriority;
-
             return -1;
         }
 

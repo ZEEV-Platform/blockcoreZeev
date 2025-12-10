@@ -215,8 +215,8 @@ namespace Blockcore.Configuration
             // Attempt to load NLog configuration from the DataFolder.
             this.Log = new LogSettings();
             this.Log.Load(this.ConfigReader);
+
             this.LoggerFactory = ExtendedLoggerFactory.Create(this.Log);
-            this.LoggerFactory.AddNLog();
             this.LoggerFactory.LoadNLogConfiguration(this.DataFolder);
             this.Logger = this.LoggerFactory.CreateLogger(typeof(NodeSettings).FullName);
 
@@ -309,9 +309,9 @@ namespace Blockcore.Configuration
         {
             TextFileConfiguration config = this.ConfigReader;
 
-            this.MinTxFeeRate = new FeeRate(config.GetOrDefault("mintxfee", this.Network.MinTxFee, this.Logger));
+            this.MinTxFeeRate = new FeeRate(config.GetOrDefault("mintxfee", this.Network.MinTxFeeRate, this.Logger));
             this.FallbackTxFeeRate = new FeeRate(config.GetOrDefault("fallbackfee", this.Network.FallbackFee, this.Logger));
-            this.MinRelayTxFeeRate = new FeeRate(config.GetOrDefault("minrelaytxfee", this.Network.MinRelayTxFee, this.Logger));
+            this.MinRelayTxFeeRate = new FeeRate(config.GetOrDefault("minrelaytxfee", this.Network.MinRelayTxFeeRate, this.Logger));
             this.MaxTxFeeRate = new FeeRate(config.GetOrDefault("maxtxfee", this.Network.MaxTxFee, this.Logger));
         }
 
@@ -388,9 +388,9 @@ namespace Blockcore.Configuration
             // Can be overridden in configuration file.
             builder.AppendLine($"-testnet                  Use the testnet chain.");
             builder.AppendLine($"-regtest                  Use the regtestnet chain.");
-            builder.AppendLine($"-mintxfee=<number>        Minimum fee rate. Defaults to {network.MinTxFee}.");
+            builder.AppendLine($"-mintxfee=<number>        Minimum fee rate. Defaults to {network.MinTxFeeRate}.");
             builder.AppendLine($"-fallbackfee=<number>     Fallback fee rate. Defaults to {network.FallbackFee}.");
-            builder.AppendLine($"-minrelaytxfee=<number>   Minimum relay fee rate. Defaults to {network.MinRelayTxFee}.");
+            builder.AppendLine($"-minrelaytxfee=<number>   Minimum relay fee rate. Defaults to {network.MinRelayTxFeeRate}.");
 
             builder.AppendLine($"-dbtype=<name>            Which db to use. Defaults to {fullNodeBuilder.PersistenceProviderManager.GetDefaultProvider()}. Available options: {string.Join(", ", fullNodeBuilder.PersistenceProviderManager.GetAvailableProviders())}.");
 
@@ -412,13 +412,13 @@ namespace Blockcore.Configuration
             builder.AppendLine($"testnet={((network.IsTest() && !network.IsRegTest()) ? 1 : 0)}");
             builder.AppendLine($"#Regression test network. Defaults to 0.");
             builder.AppendLine($"regtest={(network.IsRegTest() ? 1 : 0)}");
-            builder.AppendLine($"#Minimum fee rate. Defaults to {network.MinTxFee}.");
-            builder.AppendLine($"#mintxfee={network.MinTxFee}");
+            builder.AppendLine($"#Minimum fee rate. Defaults to {network.MinTxFeeRate}.");
+            builder.AppendLine($"#mintxfee={network.MinTxFeeRate}");
             builder.AppendLine($"#maxtxfee={network.MaxTxFee}");
             builder.AppendLine($"#Fallback fee rate. Defaults to {network.FallbackFee}.");
             builder.AppendLine($"#fallbackfee={network.FallbackFee}");
-            builder.AppendLine($"#Minimum relay fee rate. Defaults to {network.MinRelayTxFee}.");
-            builder.AppendLine($"#minrelaytxfee={network.MinRelayTxFee}");
+            builder.AppendLine($"#Minimum relay fee rate. Defaults to {network.MinRelayTxFeeRate}.");
+            builder.AppendLine($"#minrelaytxfee={network.MinRelayTxFeeRate}");
             builder.AppendLine();
             builder.AppendLine($"#Which db to use. Defaults to {fullNodeBuilder.PersistenceProviderManager.GetDefaultProvider()}. Available options: {string.Join(", ", fullNodeBuilder.PersistenceProviderManager.GetAvailableProviders())}.");
             builder.AppendLine($"#dbtype=<name>");

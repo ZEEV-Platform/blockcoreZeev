@@ -185,7 +185,7 @@ namespace Blockcore.Features.Wallet
                 this.SubtractFeeFromRecipients(context);
                 this.AddFee(context);
 
-                if (this.network.MinTxFee > Money.Zero)
+                if (this.network.MinTxFeeRate > Money.Zero)
                 {
                     // Throw an exception if this code is reached, as building a transaction without any funds for the fee should always throw an exception.
                     throw new WalletException("This should be unreachable; please find and fix the bug that caused this to be reached.");
@@ -411,13 +411,13 @@ namespace Blockcore.Features.Wallet
         protected void AddFee(TransactionBuildContext context)
         {
             Money fee;
-            Money minTrxFee = new Money(this.network.MinTxFee, MoneyUnit.Planck);
+            Money minTrxFee = new Money(this.network.MinTxFeeRate, MoneyUnit.Planck);
 
             // If the fee hasn't been set manually, calculate it based on the fee type that was chosen.
             if (context.TransactionFee == null)
             {
                 FeeRate feeRate = context.OverrideFeeRate ?? this.walletFeePolicy.GetFeeRate(context.FeeType.ToConfirmations());
-                fee = context.TransactionBuilder.EstimateFees(feeRate);
+                fee = context.TransactionBuilder.EstimateFees(feeRate.FeePerK < minTrxFee ? new FeeRate(minTrxFee): feeRate);
 
                 // Make sure that the fee is at least the minimum transaction fee.
                 fee = Math.Max(fee, minTrxFee);

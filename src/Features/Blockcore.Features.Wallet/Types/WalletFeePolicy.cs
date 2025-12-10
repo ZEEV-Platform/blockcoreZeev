@@ -1,5 +1,7 @@
 ﻿using System;
 using Blockcore.Configuration;
+using Blockcore.Features.MemoryPool.Fee;
+using Blockcore.Features.MemoryPool.Interfaces;
 using Blockcore.Features.Wallet.Interfaces;
 using Blockcore.NBitcoin;
 
@@ -33,17 +35,27 @@ namespace Blockcore.Features.Wallet.Types
         /// </summary>
         private readonly FeeRate minRelayTxFee;
 
+        /// <summary>Gets the miner policy estimator.</summary>
+        private BlockPolicyEstimator blockPolicyEstimator { get; }
+
+        /// <summary>
+        ///  Actual mempool.
+        /// </summary>
+        private ITxMempool memPool { get; }
+
         /// <summary>
         /// Constructs a wallet fee policy.
         /// </summary>
         /// <param name="nodeSettings">Settings for the the node.</param>
-        public WalletFeePolicy(NodeSettings nodeSettings)
+        public WalletFeePolicy(NodeSettings nodeSettings, BlockPolicyEstimator blockPolicyEstimator, ITxMempool mempool)
         {
             this.minTxFee = nodeSettings.MinTxFeeRate;
             this.fallbackFee = nodeSettings.FallbackTxFeeRate;
             this.payTxFee = new FeeRate(0);
             this.maxTxFee = new Money(0.1M, MoneyUnit.ZEEV);
             this.minRelayTxFee = nodeSettings.MinRelayTxFeeRate;
+            this.blockPolicyEstimator = blockPolicyEstimator;
+            this.memPool = mempool;
         }
 
         /// <inheritdoc />
@@ -80,9 +92,7 @@ namespace Blockcore.Features.Wallet.Types
             {
                 int estimateFoundTarget = confirmTarget;
 
-                // TODO: the fee estimation is not ready for release for now use the fall back fee
-                //nFeeNeeded = this.blockPolicyEstimator.EstimateSmartFee(confirmTarget, this.mempool, out estimateFoundTarget).GetFee(txBytes);
-                // ... unless we don't have enough mempool data for estimatefee, then use fallbackFee
+                nFeeNeeded = this.blockPolicyEstimator.EstimateSmartFee(confirmTarget, this.memPool, out estimateFoundTarget).GetFee(txBytes);
                 if (nFeeNeeded == 0)
                     nFeeNeeded = this.fallbackFee.GetFee(txBytes);
             }
@@ -97,8 +107,9 @@ namespace Blockcore.Features.Wallet.Types
         /// <inheritdoc />
         public FeeRate GetFeeRate(int confirmTarget)
         {
-            //this.blockPolicyEstimator.EstimateSmartFee(confirmTarget, this.mempool, out estimateFoundTarget).GetFee(txBytes);
-            return this.fallbackFee;
+            int estimateFoundTarget = 0;
+
+            return this.blockPolicyEstimator.EstimateSmartFee(confirmTarget, this.memPool, out estimateFoundTarget);
         }
     }
 }

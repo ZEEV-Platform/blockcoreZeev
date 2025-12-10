@@ -9,6 +9,7 @@ using Blockcore.NBitcoin.BuilderExtensions;
 using Blockcore.NBitcoin.Crypto;
 using Blockcore.NBitcoin.OpenAsset;
 using Blockcore.NBitcoin.Policy;
+using Blockcore.NBitcoin.Protocol;
 using Blockcore.Networks;
 
 namespace Blockcore.Consensus.TransactionInfo
@@ -75,7 +76,9 @@ namespace Blockcore.Consensus.TransactionInfo
             if (target.CompareTo(zero) == 0)
                 return result;
 
-            var orderedCoinGroups = coins.GroupBy(c => this.GroupByScriptPubKey ? c.TxOut.ScriptPubKey : new Key().ScriptPubKey)
+            ///////////////////////////////
+            //new Script = Op.GetPushOp(RandomUtils.GetBytes(24) + 1 Op = 25 like real pub key
+            var orderedCoinGroups = coins.GroupBy(c => this.GroupByScriptPubKey ? c.TxOut.ScriptPubKey : new Script(Op.GetPushOp(RandomUtils.GetBytes(24))))
                                     .Select(scriptPubKeyCoins => new
                                     {
                                         Amount = scriptPubKeyCoins.Select(c => c.Amount).Sum(zero),
@@ -84,6 +87,8 @@ namespace Blockcore.Consensus.TransactionInfo
 
             var targetCoin = orderedCoinGroups
                             .FirstOrDefault(c => c.Amount.CompareTo(target) == 0);
+            //////////////////////////////
+            
             //If any of your UTXO² matches the Target¹ it will be used.
             if (targetCoin != null)
                 return targetCoin.Coins;
@@ -1558,7 +1563,7 @@ namespace Blockcore.Consensus.TransactionInfo
                 if (coin == null)
                     throw CoinNotFound(txin);
                 EstimateScriptSigSize(coin, ref witSize, ref baseSize);
-                baseSize += 41;
+                baseSize += 51;
             }
 
             return (virtualSize ? witSize / this.Network.Consensus.Options.WitnessScaleFactor + baseSize : witSize + baseSize);

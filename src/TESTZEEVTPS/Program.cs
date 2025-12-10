@@ -8,18 +8,18 @@ namespace TESTZEEVTPS
 {
     /// <summary>
     /// Program for running TPS tests and benchmarks - extended with real transactions
-    /// Includes blockchain constraints: 30-second blocks, 2.5MB block size
+    /// Includes blockchain constraints: 20-second blocks, 2MB block size
     /// </summary>
     class Program
     {
         // Blockchain parameters
-        public const int BLOCK_TIME_SECONDS = 30;
-        public const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+        public const int BLOCK_TIME_SECONDS = 20;
+        public const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
         public const double THEORETICAL_MAX_TPS = BLOCK_SIZE_BYTES / (1680.0 * BLOCK_TIME_SECONDS); // Assuming ~1680 bytes per tx
 
         public static async Task Main(string[] args)
         {
-            args = new string[] { "" };
+            args = new string[] { "real" };
 
             Console.WriteLine("=== Blockcore TPS Performance Tests ===");
             Console.WriteLine($"Blockchain Parameters: {BLOCK_TIME_SECONDS}s blocks, {BLOCK_SIZE_BYTES / 1_048_576.0:F1}MB block size");
@@ -133,7 +133,7 @@ namespace TESTZEEVTPS
                 Console.WriteLine($"• Best single-thread TPS: {result1.TPS:F2}");
                 Console.WriteLine($"• Best parallel TPS: {result2.TPS:F2}");
                 Console.WriteLine($"• Average transaction size: {result1.AverageTransactionSize} bytes");
-                Console.WriteLine($"• Average fees: {result1.FeesPerTransaction:F0} plancks/tx");
+                Console.WriteLine($"• Average fees: {result1.FeesPerTransaction:F0} planck/tx");
                 Console.WriteLine($"• Generation success rate: {result1.SuccessRate:P1}");
                 
                 // Block constraint analysis

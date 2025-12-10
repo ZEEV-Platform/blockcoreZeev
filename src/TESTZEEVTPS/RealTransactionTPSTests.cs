@@ -56,7 +56,7 @@ namespace TESTZEEVTPS
             output.WriteLine($"Average time per transaction: {result.AvgTimePerTransaction:F4} ms");
             output.WriteLine($"Successfully processed: {result.SuccessfulTransactions}/{result.TransactionCount}");
             output.WriteLine($"Average transaction size: {result.AverageTransactionSize} bytes");
-            output.WriteLine($"Total fees: {result.TotalFees} plancks");
+            output.WriteLine($"Total fees: {result.TotalFees} planck");
             
             Assert.True(result.TPS > 0, "TPS must be greater than 0");
             Assert.True(result.SuccessfulTransactions > numberOfTransactions * 0.8, "At least 80% of transactions must be successful");
@@ -230,8 +230,8 @@ namespace TESTZEEVTPS
         {
             output.WriteLine("=== Block Constraint Compliance Test ===");
 
-            const int BLOCK_TIME_SECONDS = 30;
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            const int BLOCK_TIME_SECONDS = 20;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
 
             output.WriteLine($"Blockchain Parameters:");
             output.WriteLine($"  Block time: {BLOCK_TIME_SECONDS} seconds");
@@ -246,7 +246,7 @@ namespace TESTZEEVTPS
             output.WriteLine($"  Block utilization: {blockResult.BlockUtilization:P1}");
             output.WriteLine($"  Total block size: {blockResult.TotalSize:N0} bytes");
             output.WriteLine($"  Average transaction size: {blockResult.AverageTransactionSize} bytes");
-            output.WriteLine($"  Total fees: {blockResult.TotalFees.Satoshi:N0} plancks");
+            output.WriteLine($"  Total fees: {blockResult.TotalFees.Satoshi:N0} planck");
             output.WriteLine($"  Generation TPS: {blockResult.TransactionsPerSecond:F2}");
             output.WriteLine($"  Block fill status: {(blockResult.BlockFull ? "FULL" : "Partial")}");
 
@@ -288,7 +288,7 @@ namespace TESTZEEVTPS
                     .ToList();
 
                 var totalSize = optimizedTransactions.Sum(t => t.Size);
-                var actualUtilization = totalSize / 2_621_440.0; // 2.5 MB
+                var actualUtilization = totalSize / 2_097_152; // 2 MB
                 var avgTxSize = optimizedTransactions.Count > 0 ? totalSize / optimizedTransactions.Count : 0;
                 var totalFees = optimizedTransactions.Sum(t => t.Fee.Satoshi);
 
@@ -296,7 +296,7 @@ namespace TESTZEEVTPS
                 output.WriteLine($"  Total size: {totalSize:N0} bytes");
                 output.WriteLine($"  Actual utilization: {actualUtilization:P1}");
                 output.WriteLine($"  Average transaction size: {avgTxSize} bytes");
-                output.WriteLine($"  Total fees: {totalFees:N0} plancks");
+                output.WriteLine($"  Total fees: {totalFees:N0} planck");
 
                 var targetUtilizationDecimal = target / 100.0;
                 var utilizationAccuracy = Math.Abs(actualUtilization - targetUtilizationDecimal) / targetUtilizationDecimal;
@@ -321,8 +321,8 @@ namespace TESTZEEVTPS
             output.WriteLine("=== Real Transaction TPS with Block Analysis ===");
 
             const int testTransactionCount = 500;
-            const int BLOCK_TIME_SECONDS = 30;
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            const int BLOCK_TIME_SECONDS = 20;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
 
             var result = await ProcessRealTransactionBatch(testTransactionCount, "BlockAnalysis", true);
 
@@ -395,7 +395,7 @@ namespace TESTZEEVTPS
 
             foreach (var (name, satoshis) in feeRates)
             {
-                output.WriteLine($"\nTesting {name} fee rate ({satoshis} plancks/tx):");
+                output.WriteLine($"\nTesting {name} fee rate ({satoshis} planck/tx):");
 
                 var options = new TransactionGenerationOptions
                 {
@@ -410,9 +410,9 @@ namespace TESTZEEVTPS
                 results[name] = result;
 
                 // Block analysis
-                var transactionsPerBlock = result.TPS * 30; // 30-second blocks
+                var transactionsPerBlock = result.TPS * 20; // 20-second blocks
                 var estimatedBlockSize = result.AverageTransactionSize * transactionsPerBlock;
-                var blockUtilization = Math.Min(1.0, estimatedBlockSize / 2_621_440.0); // 2.5 MB
+                var blockUtilization = Math.Min(1.0, estimatedBlockSize / 2_097_152); // 2MB
 
                 output.WriteLine($"  TPS: {result.TPS:F2}");
                 output.WriteLine($"  Success rate: {result.SuccessRate:P1}");
@@ -446,8 +446,8 @@ namespace TESTZEEVTPS
         {
             output.WriteLine("=== Network Congestion Simulation ===");
 
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
-            const int BLOCK_TIME_SECONDS = 30;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
+            const int BLOCK_TIME_SECONDS = 20;
 
             var congestionLevels = new[]
             {
@@ -470,7 +470,7 @@ namespace TESTZEEVTPS
                 output.WriteLine($"  Expected competition: {(multiplier - 1) * 100:F0}% more transactions than block capacity");
 
                 // Simulate higher fee pressure during congestion
-                var baseFee = 500; // plancks
+                var baseFee = 500; // planck
                 var congestionFee = (int)(baseFee * Math.Max(1.0, multiplier - 0.5));
 
                 var options = new TransactionGenerationOptions

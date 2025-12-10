@@ -310,6 +310,17 @@ namespace Blockcore.Features.Wallet.Database
             return trxs.Select(this.Convert);
         }
 
+        public IEnumerable<TransactionOutputData> GetForTransaction(string txId)
+        {
+            using var conn = this.GetDbConnection();
+            var trxs = conn.Query<TransactionData>(
+                "SELECT * FROM TransactionData " +
+                "WHERE Id = @txId OR SpendingDetailsTransactionId = @txId",
+                new { txId });
+
+            return trxs.Select(this.Convert);
+        }
+
         public IEnumerable<TransactionOutputData> GetUnspentForAddress(string address)
         {
             using var conn = this.GetDbConnection();

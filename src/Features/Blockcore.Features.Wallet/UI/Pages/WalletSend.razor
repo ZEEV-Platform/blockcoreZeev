@@ -226,7 +226,7 @@
 
     protected override void OnInitialized()
     {
-        this.Fee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV);
+        this.Fee = 0;
 
         AddressBookNotification.AddressBookChanged += AddressBookChanged;
     }
@@ -268,7 +268,7 @@
         {
             if (nef.Missing is Money money)
             {
-                var minFee = new Money(this.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV);
+                var minFee = new Money(this.Network.MinTxFeeRate).ToDecimal(MoneyUnit.ZEEV);
                 this.Fee = Math.Max(minFee, money.ToDecimal(MoneyUnit.ZEEV));
             }
             else
@@ -312,7 +312,7 @@
         if (string.IsNullOrEmpty(this.Password)) { this.Alert = "Please enter a password"; return; }
         if (string.IsNullOrEmpty(this.Address)) { this.Alert = "Please enter a valid address"; return; }
         if (this.Amount == 0) { this.Alert = "Please enter the number of coins you want to send"; return; }
-        if (this.Fee < Money.Satoshis(this.ConnectionManager.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV)) { this.Alert = $"The fee is lower than minimum ({ Money.Satoshis(this.ConnectionManager.Network.MinTxFee).ToDecimal(MoneyUnit.ZEEV)})"; return; }
+        if (this.Fee < Money.Satoshis(this.ConnectionManager.Network.MinTxFeeRate).ToDecimal(MoneyUnit.ZEEV)) { this.Alert = $"The fee is lower than minimum ({ Money.Satoshis(this.ConnectionManager.Network.MinTxFeeRate).ToDecimal(MoneyUnit.ZEEV)})"; return; }
 
         this.Alert = string.Empty;
 

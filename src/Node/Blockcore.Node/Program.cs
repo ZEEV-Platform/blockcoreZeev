@@ -31,23 +31,6 @@ namespace Blockcore.Node
     {
         public static async Task Main(string[] args)
         {
-            //var folderPath = "G:\\_ZEEV_Git\\blockcorefalcon\\src\\Node\\Blockcore.Node\\bin\\Debug\\net8.0\\nodedata\\ZEEV\\ZEEVMain";
-            //try
-            //{
-            //    File.Delete(folderPath + "\\txdb\\default.db");
-            //}
-            //catch (Exception)
-            //{
-            //}
-
-            //try
-            //{
-            //    File.Delete(folderPath + "\\default.wallet.json");
-            //}
-            //catch (Exception)
-            //{
-            //}
-
             try
             {
                 string chain = args

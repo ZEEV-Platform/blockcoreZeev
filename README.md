@@ -2,7 +2,7 @@
 
 ## Overview
 
-ZEEV is a blockchain network built on the Blockcore framework, implementing a proof-of-work consensus mechanism with specific parameters tailored for the ZEEV ecosystem. 
+ZEEV is a blockchain network built on the Blockcore framework, implementing a proof-of-work consensus mechanism with specific parameters tailored for the ZEEV ecosystem. This repository contains the core network implementation and comprehensive testing and benchmarking tools.
 
 ## Key Features
 
@@ -10,12 +10,13 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 
 - **Coin Ticker**: ZEEV
 - **Consensus Algorithm**: Proof of Work (PoW)
-- **Block Time**: 30 seconds
+- **Block Time**: 20 seconds
+- **Block Size**: 2 MB maximum
 - **Block Reward**: 20 ZEEV
-- **Maximum Supply**: 1,054,600,000 ZEEV
-- **Subsidy Decrease**: 0,05 ZEEV per subsidity decrease (every quarter)
+- **Maximum Supply**: 1,013,000,000 ZEEV
+- **Subsidy Decrease**: 0.05 ZEEV per subsidy decrease (every quarter)
 - **Subsidy Interval**: 262980 blocks
-- **Target Difficult Time**: 60 blocks
+- **Target Difficulty Time**: 48 minutes (144 blocks)
 
 ### Network Parameters
 
@@ -25,8 +26,8 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **API Port**: 30566
 - **Magic Bytes**: 0x7a656576 ("zeev")
 - **Bech32 Prefix**: "zv"
-- **Coinbase Maturity**: 1000
-- **Confirmation Window**: 40320
+- **Coinbase Maturity**: 3000
+- **Confirmation Window**: 131490
 
 #### Testnet (ZEEVTest)
 - **Default Port**: 4927
@@ -35,16 +36,18 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **Magic Bytes**: 0x7665657a ("veez")
 - **Bech32 Prefix**: "zv"
 - **Coinbase Maturity**: 1
-- **Confirmation Window**: 403
+- **Confirmation Window**: 13149
 
 ### Block and Transaction Specifications
 
-- **Maximum Block Size**: 2.5 MB base size
-- **Maximum Transaction Weight**: 1,000,000
-- **Minimum Transaction Fee**: 2,000 plancks
-- **Maximum Transaction Fee**: 100,000,000 plancks (1 ZEEV)
-- **Fallback Fee**: 20,000 plancks
-- **Minimum Relay Fee**: 1,000 plancks
+- **Maximum Block Size**: 2 MB
+- **Maximum Block Weigh**: 8 MB
+- **Maximum Transaction Weight**: 0.8 MB
+- **Minimum Transaction Fee Rate**: 200 planck
+- **Maximum Transaction Fee**: 100,000,000 planck (1 ZEEV)
+- **Minimum Relay Fee Rate**: 200 planck
+- **Minimum Block Fee Rate**: 200 planck
+- **Theoretical Max TPS**: ~62.5 TPS (based on 2MB blocks, 20s block time, ~1680 bytes per transaction)
 
 ### Address Formats
 
@@ -60,27 +63,95 @@ ZEEV is a blockchain network built on the Blockcore framework, implementing a pr
 - **Witness Public Key**: Supported
 - **Witness Script**: Supported
 
+### Money Unit
+- **ZEEV**: 100000000 (Full coin)
+- **Photon**: 100000 (0.001 ZEEV)
+- **Pulse**: 100 (0.000001 ZEEV)
+- **Planck**: 1 (0.00000001 ZEEV)
+
 ## Architecture
 
 ### Core Components
 
-#### 1. Consensus Layer
+#### 1. Network Implementation
+- **Blockcore.Networks.ZEEV**: ZEEV network configuration and consensus
+- **ZEEVMain**: Mainnet network configuration
+- **ZEEVTest**: Testnet network configuration
 - **ZEEVConsensus**: Custom consensus implementation
-- **ZEEVConsensusFactory**: Factory for creating consensus-specific objects
 - **ZEEVLWMA**: Linear Weighted Moving Average difficulty adjustment
 
-#### 2. Network Layer
-- **P2P Protocol**: Based on Blockcore's P2P implementation
-- **Connection Management**: Optimized for ZEEV network characteristics
-- **Peer Discovery**: DNS seeding support (currently empty)
-- **Message Protocol**: Custom magic bytes for network identification
-
-#### 3. Deployment Features
+#### 2. Consensus Features
 - **BIP34**: Height in coinbase (active from genesis)
 - **BIP65**: CHECKLOCKTIMEVERIFY (active from genesis)
 - **BIP66**: Strict DER signatures (active from genesis)
 - **CSV**: CHECKSEQUENCEVERIFY (always active)
 - **Segwit**: Segregated Witness (always active)
+
+## Testing and Benchmarking Suite
+
+The project includes comprehensive testing and benchmarking tools for performance analysis and network validation.
+
+### TPS Testing Suite (TESTZEEVTPS)
+
+The `TESTZEEVTPS` project provides advanced transaction throughput testing capabilities:
+
+#### Key Components
+
+1. **RealTransactionGenerator**
+   - Generates cryptographically valid signed transactions
+   - Supports batch transaction generation
+   - Provides transaction validation and analysis
+   - Simulates realistic blockchain constraints
+   - UTXO management and tracking
+
+2. **TPSBenchmark**
+   - Professional benchmarking using BenchmarkDotNet
+   - Sequential and parallel transaction processing tests
+   - Memory and hardware counter diagnostics
+   - Configurable batch sizes (100, 1000, 5000 transactions)
+
+3. **Performance Test Suite**
+   - `TPSPerformanceTests.cs`: Comprehensive performance testing
+   - `SimpleTpsTest.cs`: Basic TPS validation
+   - `RealTransactionTPSTests.cs`: Real transaction-based TPS testing
+
+#### Transaction Generation Features
+
+- **Multiple Transaction Types**: Simple, complex, and high-volume transaction patterns
+- **Configurable Parameters**: Input/output counts, fees, complexity levels
+- **Real Signatures**: Full cryptographic signature validation
+- **UTXO Management**: Automatic UTXO set updates and tracking
+- **Block Simulation**: Simulate block generation with real constraints
+
+#### Usage Examples
+
+Run TPS benchmarks:
+```bash
+cd src/TESTZEEVTPS
+dotnet run benchmark
+```
+
+Run quick TPS tests:
+```bash
+dotnet run quick
+```
+
+Run real transaction tests:
+```bash
+dotnet run real
+```
+
+Run comparison tests:
+```bash
+dotnet run compare
+```
+
+### Other Testing Tools
+
+- **TESTZEEV**: Basic ZEEV network testing
+- **TESTCompression**: Compression algorithm testing
+- **TESTFalcon**: Falcon signature testing
+- **TESTHandshake**: Network handshake testing
 
 ## Getting Started
 
@@ -100,191 +171,128 @@ cd blockcore-zeev
 
 2. Build the solution:
 ```bash
+cd src
 dotnet build Blockcore.sln
 ```
 
-3. Run the ZEEV node:
+3. Run TPS tests:
+```bash
+cd TESTZEEVTPS
+dotnet run
+```
+
+### Running a ZEEV Node
+
 ```bash
 cd Node/Blockcore.Node
 dotnet run --chain=ZEEV
 ```
 
-### Configuration
-
-The node uses a configuration file `zeev.conf` in the data directory. Key configuration options include:
-
-- **Network Selection**: `--chain=ZEEV` (mainnet) or `--chain=ZEEVTest` (testnet)
-- **Data Directory**: `ZEEV/ZEEVMain` or `ZEEV/ZEEVTest`
-- **Logging**: Configurable through standard logging frameworks
-
-### Running a Node
-
-#### Mainnet Node
-```bash
-dotnet run --chain=ZEEV
-```
-
-#### Testnet Node
+For testnet:
 ```bash
 dotnet run --chain=ZEEVTest
 ```
 
-## API and RPC
+## Performance Analysis
 
-### RESTful API
-The node exposes a RESTful API on port 30566 (default) providing:
-- Block information
-- Transaction details
-- Network statistics
-- Wallet operations (when wallet feature is enabled)
+The testing suite provides detailed performance metrics:
 
-### JSON-RPC Interface
-Traditional JSON-RPC interface available on port 31350:
-- Mining operations
-- Blockchain queries
-- Transaction broadcasting
-- Network information
+### Transaction Analysis
+- Transaction size and fee analysis
+- Script type distribution
+- Space efficiency calculations
+- Block constraint validation
 
-## Features
+### Block Generation Simulation
+- Real-time block filling simulation
+- Transaction throughput measurement
+- Success rate analysis
+- Performance bottleneck identification
 
-### Enabled Features
-
-The ZEEV network supports the following Blockcore features:
-
-1. **Consensus**: Core consensus validation and chain management
-2. **Memory Pool**: Transaction pool management
-3. **Miner**: Block creation and mining operations
-4. **Block Store**: Persistent block storage
-5. **RPC**: JSON-RPC interface
-6. **API**: RESTful web API
-7. **Wallet**: HD wallet functionality
-8. **Notifications**: Event-driven notifications
-
-### Mining
-
-The network uses a custom difficulty adjustment algorithm (ZEEVLWMA) that:
-- Adjusts difficulty based on recent block times
-- Maintains 30-second average block time
-- Prevents difficulty manipulation attacks
-- Ensures stable block production
-
-### Security Features
-
-- **Checkpoints**: Network checkpoints for additional security
-- **Peer Banning**: Automatic banning of misbehaving peers
-- **Transaction Validation**: Comprehensive transaction validation
-- **Script Validation**: Full script validation including witness scripts
-- **Replay Protection**: Built-in replay protection mechanisms
+### Benchmarking Results
+The BenchmarkDotNet integration provides:
+- Precise TPS measurements
+- Memory allocation analysis
+- Hardware counter metrics
+- Performance regression detection
 
 ## Development
 
 ### Project Structure
 
 ```
-Networks/Blockcore.Networks.ZEEV/
-├── ZEEVMain.cs                 # Mainnet configuration
-├── ZEEVTest.cs                 # Testnet configuration
-├── Networks.cs                 # Network selector
-├── Consensus/                  # Consensus-specific implementations
-├── Deployments/                # BIP deployment configurations
-├── Policies/                   # Network policies
-├── Rules/                      # Validation rules
-└── Components/                 # Additional components
+src/
+├── Blockcore.sln                    # Main solution file
+├── Blockcore/                       # Core blockchain implementation
+├── Networks/
+│   └── Blockcore.Networks.ZEEV/     # ZEEV network implementation
+├── TESTZEEVTPS/                     # TPS testing and benchmarking
+│   ├── RealTransactionGenerator.cs  # Real transaction generation
+│   ├── TPSBenchmark.cs             # BenchmarkDotNet tests
+│   ├── TPSPerformanceTests.cs      # Performance test suite
+│   └── Program.cs                  # Test runner
+├── TESTZEEV/                       # Basic ZEEV testing
+├── TESTCompression/                # Compression testing
+├── TESTFalcon/                     # Falcon signature testing
+└── TESTHandshake/                  # Handshake testing
 ```
 
 ### Key Classes
 
-- **ZEEVMain**: Mainnet network configuration
-- **ZEEVTest**: Testnet network configuration
-- **ZEEVConsensus**: Consensus parameters and rules
-- **ZEEVConsensusFactory**: Factory for consensus objects
-- **ZEEVLWMA**: Difficulty adjustment algorithm
+#### Network Implementation
+- **ZEEVMain**: Mainnet configuration
+- **ZEEVTest**: Testnet configuration
+- **ZEEVConsensus**: Consensus rules and parameters
 
-### Extending the Network
+#### Testing Framework
+- **RealTransactionGenerator**: Creates valid signed transactions
+- **TransactionGenerationOptions**: Configures transaction parameters
+- **SignedTransactionData**: Represents complete transaction data
+- **TransactionAnalysis**: Provides transaction analysis metrics
+- **BlockGenerationResult**: Block simulation results
 
-To add custom functionality:
+### Extending the Testing Suite
 
-1. Create custom rules in the `Rules/` directory
-2. Implement custom consensus logic in `Consensus/`
-3. Add network-specific components in `Components/`
-4. Register new features in the node builder
+To add new performance tests:
 
-### Testnet
-Use the testnet for development and testing:
-```bash
-dotnet run --chain=ZEEVTest
-```
+1. Create test classes in the `TESTZEEVTPS` project
+2. Implement benchmark methods using BenchmarkDotNet attributes
+3. Add test scenarios to the Program.cs runner
+4. Use RealTransactionGenerator for realistic transaction data
 
 ## Deployment
 
-### Production Deployment
+### Production Build
 
 1. Build in release mode:
 ```bash
 dotnet build -c Release
 ```
 
-2. Configure production settings in `zeev.conf`
-3. Set up monitoring and logging
-4. Deploy with proper security measures
+2. Configure production settings
+3. Deploy with monitoring and security measures
 
-### Docker Support
-The project can be containerized for easy deployment:
-```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
-COPY . /app
-WORKDIR /app
-ENTRYPOINT ["dotnet", "Blockcore.Node.dll", "--chain=ZEEV"]
-```
+### Performance Monitoring
 
-## Monitoring and Maintenance
-
-### Health Checks
-- Node synchronization status
-- Peer connection health
-- Memory pool status
-- Block validation performance
-
-### Logging
-Comprehensive logging covers:
-- Network events
-- Consensus validation
-- Transaction processing
-- Error handling
-
-### Performance Metrics
-- Block processing time
-- Transaction throughput
-- Network latency
-- Memory usage
-
-## Security Considerations
-
-### Network Security
-- Regular security updates
-- Peer validation
-- DoS protection
-- Network isolation options
-
-### Operational Security
-- Secure key management
-- Access control
-- Monitoring and alerting
-- Backup procedures
+The testing suite generates comprehensive reports including:
+- Transaction throughput metrics
+- Memory usage analysis
+- Hardware performance counters
+- Block constraint compliance
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Implement changes with tests
-4. Submit a pull request
-5. Follow code review process
+3. Implement changes with comprehensive tests
+4. Run the TPS test suite to validate performance
+5. Submit a pull request
 
 ### Code Standards
 - Follow C# coding conventions
-- Include comprehensive tests
-- Document public APIs
-- Use meaningful commit messages
+- Include performance tests for new features
+- Document public APIs thoroughly
+- Validate changes with the benchmarking suite
 
 ## License
 
@@ -293,10 +301,10 @@ This project is licensed under the MIT License. See the LICENSE file for details
 ## Support
 
 For support and questions:
-- GitHub Issues: Report bugs and feature requests
-- Documentation: Comprehensive API documentation
-- Community: Join the ZEEV community for discussions
+- **GitHub Issues**: Report bugs and feature requests
+- **Performance Issues**: Include TPS test results when reporting
+- **Testing**: Use the comprehensive test suite for validation
 
 ---
 
-*This documentation is for the ZEEV network implementation based on the Blockcore framework. For the latest updates and detailed technical specifications, refer to the source code and API documentation.*
+*This documentation reflects the current ZEEV network implementation with comprehensive TPS testing and benchmarking capabilities. For detailed performance metrics and technical specifications, run the test suite and refer to the generated reports.*

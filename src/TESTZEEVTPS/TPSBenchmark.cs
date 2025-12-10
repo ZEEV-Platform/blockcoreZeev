@@ -10,7 +10,7 @@ namespace TESTZEEVTPS
     /// <summary>
     /// Benchmark tests for precise TPS measurement using BenchmarkDotNet
     /// </summary>
-    [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net90)]
     [Orderer(SummaryOrderPolicy.FastestToSlowest)]
     [MemoryDiagnoser]
     [HardwareCounters]
@@ -111,9 +111,9 @@ namespace TESTZEEVTPS
         {
             var startTime = DateTime.UtcNow;
 
-            // Blockchain parameters: 30s blocks, 2.5MB block size
-            const int BLOCK_TIME_SECONDS = 30;
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            // Blockchain parameters: 20s blocks, 2MB block size
+            const int BLOCK_TIME_SECONDS = 20;
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2 MB
             const int AVERAGE_TX_SIZE = 500; // bytes
 
             var maxTransactionsPerBlock = BLOCK_SIZE_BYTES / AVERAGE_TX_SIZE;
@@ -146,7 +146,7 @@ namespace TESTZEEVTPS
             var startTime = DateTime.UtcNow;
 
             // Optimized for maximum throughput within blockchain constraints
-            const int BLOCK_SIZE_BYTES = 2_621_440; // 2.5 MB
+            const int BLOCK_SIZE_BYTES = 2_097_152; // 2MB
             const int MIN_TX_SIZE = 250; // Optimized transaction size
 
             var maxPossibleTransactions = BLOCK_SIZE_BYTES / MIN_TX_SIZE;
@@ -174,11 +174,11 @@ namespace TESTZEEVTPS
         {
             var startTime = DateTime.UtcNow;
 
-            const int BLOCK_TIME_SECONDS = 30;
+            const int BLOCK_TIME_SECONDS = 20;
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var processedCount = 0;
 
-            // Process as many transactions as possible in 30 seconds
+            // Process as many transactions as possible in 20 seconds
             var tasks = new List<Task<int>>();
             var parallelism = Environment.ProcessorCount;
 
@@ -199,7 +199,7 @@ namespace TESTZEEVTPS
         private async Task ProcessBlockConstrainedBatch(int start, int end)
         {
             const int AVERAGE_TX_SIZE = 500;
-            const int BLOCK_SIZE_BYTES = 2_621_440;
+            const int BLOCK_SIZE_BYTES = 2_097_152;
 
             var processedSize = 0;
 
