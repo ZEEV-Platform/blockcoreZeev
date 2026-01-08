@@ -15,6 +15,7 @@ namespace Blockcore.Features.Wallet.Database
         IEnumerable<TransactionOutputData> GetUnspentForAddress(string address);
 
         int CountForAddress(string address);
+        Dictionary<string, int> CountForAddresses(List<string> address);
 
         TransactionOutputData GetForOutput(OutPoint outPoint);
 

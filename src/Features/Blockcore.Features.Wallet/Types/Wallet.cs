@@ -13,6 +13,7 @@ using Blockcore.NBitcoin.BIP32;
 using Blockcore.Networks;
 using Blockcore.Utilities;
 using Blockcore.Utilities.JsonConverters;
+using Microsoft.Extensions.Caching.Memory;
 using Mono.Unix.Native;
 using Newtonsoft.Json;
 
@@ -792,6 +793,8 @@ namespace Blockcore.Features.Wallet.Types
             return unusedAddresses.Single(a => a.Index == index);
         }
 
+        private static readonly MemoryCache _addressCountCache = new MemoryCache(new MemoryCacheOptions());
+
         /// <summary>
         /// Gets the last address that contains transactions.
         /// </summary>
@@ -803,13 +806,48 @@ namespace Blockcore.Features.Wallet.Types
             if (addresses == null)
                 return null;
 
-            List<HdAddress> usedAddresses = addresses.Where(acc => walletStore.CountForAddress(acc.Address) > 0).ToList();
+            string cachePrefix = $"{this.Name}_{isChange}_";
+
+            var addressList = addresses.Select(a => a.Address).ToList();
+            var uncachedAddresses = new List<string>();
+            var cachedCounts = new Dictionary<string, int>();
+
+            foreach (var address in addressList)
+            {
+                string cacheKey = cachePrefix + address;
+                if (_addressCountCache.TryGetValue(cacheKey, out int count))
+                {
+                    cachedCounts[address] = count;
+                }
+                else
+                {
+                    uncachedAddresses.Add(address);
+                }
+            }
+
+            if (uncachedAddresses.Any())
+            {
+                var newCounts = walletStore.CountForAddresses(uncachedAddresses);
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
+
+                foreach (var kvp in newCounts)
+                {
+                    string cacheKey = cachePrefix + kvp.Key;
+                    _addressCountCache.Set(cacheKey, kvp.Value, cacheEntryOptions);
+                    cachedCounts[kvp.Key] = kvp.Value;
+                }
+            }
+
+            List<HdAddress> usedAddresses = addresses
+                .Where(acc => cachedCounts.ContainsKey(acc.Address) && cachedCounts[acc.Address] > 0)
+                .ToList();
+
             if (!usedAddresses.Any())
             {
                 return null;
             }
 
-            // gets the used address with the highest index
             int index = usedAddresses.Max(a => a.Index);
             return usedAddresses.Single(a => a.Index == index);
         }

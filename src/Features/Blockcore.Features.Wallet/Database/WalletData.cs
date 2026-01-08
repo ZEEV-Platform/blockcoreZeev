@@ -66,8 +66,10 @@ namespace Blockcore.Features.Wallet.Database
         }
 
         public OutPoint OutPoint { get; set; }
+        public long OutPointHash { get; set; }
 
         public string Address { get; set; }
+        public long AddressHash { get; set; }
 
         public int AccountIndex { get; set; }
 

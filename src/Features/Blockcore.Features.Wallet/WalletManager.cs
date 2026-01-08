@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security;
@@ -681,9 +682,12 @@ namespace Blockcore.Features.Wallet
                 if (account == null)
                     throw new WalletException($"No account with the name '{accountReference.AccountName}' could be found.");
 
-                List<HdAddress> unusedAddresses = isChange ?
-                    account.InternalAddresses.Where(acc => wallet.walletStore.CountForAddress(acc.Address) == 0).ToList() :
-                    account.ExternalAddresses.Where(acc => wallet.walletStore.CountForAddress(acc.Address) == 0).ToList();
+                List<HdAddress> targetAddresses = isChange ?
+                    account.InternalAddresses.ToList() :
+                    account.ExternalAddresses.ToList();
+
+                var countForAddress = wallet.walletStore.CountForAddresses(targetAddresses.Select(a => a.Address).ToList());
+                List<HdAddress> unusedAddresses = targetAddresses.Where(acc => countForAddress.ContainsKey(acc.Address) && countForAddress.GetValueOrDefault(acc.Address, 0) == 0).ToList();
 
                 int diff = alwaysnew ? -1 : unusedAddresses.Count - count;
 
@@ -1285,6 +1289,7 @@ namespace Blockcore.Features.Wallet
             int index = transaction.Outputs.IndexOf(utxo);
             Money amount = utxo.Value;
             var outPoint = new OutPoint(transactionHash, index);
+
             TransactionOutputData foundTransaction = wallet.walletStore.GetForOutput(outPoint);
             if (foundTransaction == null)
             {
@@ -1308,7 +1313,7 @@ namespace Blockcore.Features.Wallet
                     Hex = this.walletSettings.SaveTransactionHex ? transaction.ToHex() : null,
                     IsPropagated = isPropagated,
                 };
-
+;
                 // Add the Merkle proof to the (non-spending) transaction.
                 if (block != null)
                 {
